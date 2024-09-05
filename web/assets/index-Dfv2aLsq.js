@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./index-BD-Ia1C4.js","./index-DjWyclij.css","./userSelection-CyXKCVy3.js","./userSelection-BGzn1LuN.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./index-CrROdkG4.js","./index-BRhY6FpL.css","./userSelection-DSpF-zVD.js","./userSelection-CF-ymHZW.css"])))=>i.map(i=>d[i]);
 var __defProp2 = Object.defineProperty;
 var __name = (target, value3) => __defProp2(target, "name", { value: value3, configurable: true });
 (/* @__PURE__ */ __name(function polyfill() {
@@ -1249,8 +1249,8 @@ var Reflect$1;
     __name(MakeDictionary, "MakeDictionary");
   });
 })(Reflect$1 || (Reflect$1 = {}));
-window["__COMFYUI_FRONTEND_VERSION__"] = "1.2.40";
-console.log("ComfyUI Front-end version:", "1.2.40");
+window["__COMFYUI_FRONTEND_VERSION__"] = "1.2.47";
+console.log("ComfyUI Front-end version:", "1.2.47");
 /**
 * @vue/shared v3.4.31
 * (c) 2018-present Yuxi (Evan) You and Vue contributors
@@ -28984,7 +28984,7 @@ const zProperties = z.object({
   ["Node name for S&R"]: z.string().optional()
 }).passthrough();
 const zVector2 = z.union([
-  z.object({ 0: z.number(), 1: z.number() }).transform((v2) => [v2[0], v2[1]]),
+  z.object({ 0: z.number(), 1: z.number() }).passthrough().transform((v2) => [v2[0], v2[1]]),
   z.tuple([z.number(), z.number()])
 ]);
 const zWidgetValues = z.union([z.array(z.any()), z.record(z.any())]);
@@ -29106,6 +29106,7 @@ const litegraphBaseSchema = z.object({
 const comfyBaseSchema = z.object({
   ["fg-color"]: z.string(),
   ["bg-color"]: z.string(),
+  ["bg-img"]: z.string().optional(),
   ["comfy-menu-bg"]: z.string(),
   ["comfy-input-bg"]: z.string(),
   ["input-text"]: z.string(),
@@ -29131,6 +29132,18 @@ const paletteSchema = z.object({
   colors: colorsSchema
 });
 const colorPalettesSchema = z.record(paletteSchema);
+var LinkReleaseTriggerMode = /* @__PURE__ */ ((LinkReleaseTriggerMode2) => {
+  LinkReleaseTriggerMode2["ALWAYS"] = "always";
+  LinkReleaseTriggerMode2["HOLD_SHIFT"] = "hold shift";
+  LinkReleaseTriggerMode2["NOT_HOLD_SHIFT"] = "NOT hold shift";
+  return LinkReleaseTriggerMode2;
+})(LinkReleaseTriggerMode || {});
+var LinkReleaseTriggerAction = /* @__PURE__ */ ((LinkReleaseTriggerAction2) => {
+  LinkReleaseTriggerAction2["CONTEXT_MENU"] = "context menu";
+  LinkReleaseTriggerAction2["SEARCH_BOX"] = "search box";
+  LinkReleaseTriggerAction2["NO_ACTION"] = "no action";
+  return LinkReleaseTriggerAction2;
+})(LinkReleaseTriggerAction || {});
 const zNodeType = z.string();
 const zQueueIndex = z.number();
 const zPromptId = z.string();
@@ -29450,6 +29463,9 @@ const zBookmarkCustomization = z.object({
   icon: z.string().optional(),
   color: z.string().optional()
 });
+const zLinkReleaseTriggerAction = z.enum(
+  Object.values(LinkReleaseTriggerAction)
+);
 const zSettings = z.record(z.any()).and(
   z.object({
     "Comfy.ColorPalette": z.string(),
@@ -29465,10 +29481,15 @@ const zSettings = z.record(z.any()).and(
     "Comfy.EnableTooltips": z.boolean(),
     "Comfy.EnableWorkflowViewRestore": z.boolean(),
     "Comfy.FloatRoundingPrecision": z.number(),
+    "Comfy.Graph.CanvasInfo": z.boolean(),
     "Comfy.Graph.ZoomSpeed": z.number(),
+    "Comfy.Group.DoubleClickTitleToEdit": z.boolean(),
+    "Comfy.GroupSelectedNodes.Padding": z.number(),
     "Comfy.InvertMenuScrolling": z.boolean(),
+    "Comfy.Locale": z.string(),
     "Comfy.Logging.Enabled": z.boolean(),
     "Comfy.NodeLibrary.Bookmarks": z.array(z.string()),
+    "Comfy.NodeLibrary.Bookmarks.V2": z.array(z.string()),
     "Comfy.NodeLibrary.BookmarksCustomization": z.record(
       z.string(),
       zBookmarkCustomization
@@ -29479,9 +29500,12 @@ const zSettings = z.record(z.any()).and(
       "hold shift",
       "NOT hold shift"
     ]),
+    "Comfy.LinkRelease.Action": zLinkReleaseTriggerAction,
+    "Comfy.LinkRelease.ActionShift": zLinkReleaseTriggerAction,
     "Comfy.NodeSearchBoxImpl.NodePreview": z.boolean(),
     "Comfy.NodeSearchBoxImpl": z.enum(["default", "simple"]),
     "Comfy.NodeSearchBoxImpl.ShowCategory": z.boolean(),
+    "Comfy.NodeSearchBoxImpl.ShowIdName": z.boolean(),
     "Comfy.NodeSuggestions.number": z.number(),
     "Comfy.Node.ShowDeprecated": z.boolean(),
     "Comfy.Node.ShowExperimental": z.boolean(),
@@ -29493,13 +29517,15 @@ const zSettings = z.record(z.any()).and(
     "Comfy.SnapToGrid.GridSize": z.number(),
     "Comfy.TextareaWidget.FontSize": z.number(),
     "Comfy.TextareaWidget.Spellcheck": z.boolean(),
+    "Comfy.TreeExplorer.ItemPadding": z.number(),
     "Comfy.UseNewMenu": z.any(),
     "Comfy.Validation.Workflows": z.boolean(),
     "Comfy.Workflow.SortNodeIdOnSave": z.boolean(),
     "Comfy.Queue.ImageFit": z.enum(["contain", "cover"]),
     "Comfy.Workflow.ModelDownload.AllowedSources": z.array(z.string()),
     "Comfy.Workflow.ModelDownload.AllowedSuffixes": z.array(z.string()),
-    "Comfy.Node.DoubleClickTitleToEdit": z.boolean()
+    "Comfy.Node.DoubleClickTitleToEdit": z.boolean(),
+    "Comfy.Window.UnloadConfirmation": z.boolean()
   }).optional()
 );
 "use strict";
@@ -32263,6 +32289,18 @@ class ComfyApi extends EventTarget {
     return await res.json();
   }
   /**
+   * Gets the metadata for a model
+   * @param {string} folder The folder containing the model
+   * @param {string} model The model to get metadata for
+   * @returns The metadata for the model
+   */
+  async viewMetadata(folder, model) {
+    const res = await this.fetchApi(
+      `/view_metadata/${folder}?filename=${encodeURIComponent(model)}`
+    );
+    return await res.json();
+  }
+  /**
    * Tells the server to download a model from the specified URL to the specified directory and filename
    * @param {string} url The URL to download the model from
    * @param {string} model_directory The main directory (eg 'checkpoints') to save the model to
@@ -32610,12 +32648,6 @@ __name(toggleSwitch, "toggleSwitch");
 window.comfyAPI = window.comfyAPI || {};
 window.comfyAPI.toggleSwitch = window.comfyAPI.toggleSwitch || {};
 window.comfyAPI.toggleSwitch.toggleSwitch = toggleSwitch;
-var LinkReleaseTriggerMode = /* @__PURE__ */ ((LinkReleaseTriggerMode2) => {
-  LinkReleaseTriggerMode2["ALWAYS"] = "always";
-  LinkReleaseTriggerMode2["HOLD_SHIFT"] = "hold shift";
-  LinkReleaseTriggerMode2["NOT_HOLD_SHIFT"] = "NOT hold shift";
-  return LinkReleaseTriggerMode2;
-})(LinkReleaseTriggerMode || {});
 function buildTree(items2, key) {
   const root26 = {
     key: "root",
@@ -34450,10 +34482,24 @@ const useSettingStore = defineStore("setting", {
         id: "Comfy.NodeSearchBoxImpl.LinkReleaseTrigger",
         category: ["Comfy", "Node Search Box", "LinkReleaseTrigger"],
         name: "Trigger on link release",
-        tooltip: "Only applies to the default implementation",
-        type: "combo",
+        type: "hidden",
         options: Object.values(LinkReleaseTriggerMode),
-        defaultValue: LinkReleaseTriggerMode.ALWAYS
+        defaultValue: LinkReleaseTriggerMode.ALWAYS,
+        deprecated: true
+      });
+      app$1.ui.settings.addSetting({
+        id: "Comfy.LinkRelease.Action",
+        name: "Action on link release (No modifier)",
+        type: "combo",
+        options: Object.values(LinkReleaseTriggerAction),
+        defaultValue: LinkReleaseTriggerAction.CONTEXT_MENU
+      });
+      app$1.ui.settings.addSetting({
+        id: "Comfy.LinkRelease.ActionShift",
+        name: "Action on link release (Shift)",
+        type: "combo",
+        options: Object.values(LinkReleaseTriggerAction),
+        defaultValue: LinkReleaseTriggerAction.SEARCH_BOX
       });
       app$1.ui.settings.addSetting({
         id: "Comfy.NodeSearchBoxImpl.NodePreview",
@@ -34470,6 +34516,14 @@ const useSettingStore = defineStore("setting", {
         tooltip: "Only applies to the default implementation",
         type: "boolean",
         defaultValue: true
+      });
+      app$1.ui.settings.addSetting({
+        id: "Comfy.NodeSearchBoxImpl.ShowIdName",
+        category: ["Comfy", "Node Search Box", "ShowIdName"],
+        name: "Show node id name in search results",
+        tooltip: "Only applies to the default implementation",
+        type: "boolean",
+        defaultValue: false
       });
       app$1.ui.settings.addSetting({
         id: "Comfy.Sidebar.Location",
@@ -34557,7 +34611,14 @@ const useSettingStore = defineStore("setting", {
       });
       app$1.ui.settings.addSetting({
         id: "Comfy.NodeLibrary.Bookmarks",
-        name: "Node library bookmarks",
+        name: "Node library bookmarks with display name (deprecated)",
+        type: "hidden",
+        defaultValue: [],
+        deprecated: true
+      });
+      app$1.ui.settings.addSetting({
+        id: "Comfy.NodeLibrary.Bookmarks.V2",
+        name: "Node library bookmarks v2 with unique name",
         type: "hidden",
         defaultValue: []
       });
@@ -34600,6 +34661,36 @@ const useSettingStore = defineStore("setting", {
         name: "Double click node title to edit",
         type: "boolean",
         defaultValue: true
+      });
+      app$1.ui.settings.addSetting({
+        id: "Comfy.Group.DoubleClickTitleToEdit",
+        name: "Double click group title to edit",
+        type: "boolean",
+        defaultValue: true
+      });
+      app$1.ui.settings.addSetting({
+        id: "Comfy.Window.UnloadConfirmation",
+        name: "Show confirmation when closing window",
+        type: "boolean",
+        defaultValue: false
+      });
+      app$1.ui.settings.addSetting({
+        id: "Comfy.TreeExplorer.ItemPadding",
+        name: "Tree explorer item padding",
+        type: "slider",
+        defaultValue: 2,
+        attrs: {
+          min: 0,
+          max: 8,
+          step: 1
+        }
+      });
+      app$1.ui.settings.addSetting({
+        id: "Comfy.Locale",
+        name: "Locale",
+        type: "combo",
+        options: ["en", "zh"],
+        defaultValue: navigator.language.split("-")[0] || "en"
       });
     },
     set(key, value3) {
@@ -37243,7 +37334,7 @@ var script$L = {
 };
 var _hoisted_1$X = ["id"];
 var _hoisted_2$J = ["tabindex"];
-var _hoisted_3$l = ["id", "aria-multiselectable", "aria-label", "aria-labelledby", "aria-activedescendant", "aria-disabled"];
+var _hoisted_3$m = ["id", "aria-multiselectable", "aria-label", "aria-labelledby", "aria-activedescendant", "aria-disabled"];
 var _hoisted_4$f = ["id"];
 var _hoisted_5$a = ["id", "aria-label", "aria-selected", "aria-disabled", "aria-setsize", "aria-posinset", "onClick", "onMousedown", "onMousemove", "onDblclick", "data-p-selected", "data-p-focused", "data-p-disabled"];
 var _hoisted_6$9 = ["tabindex"];
@@ -37453,7 +37544,7 @@ function render$K(_ctx, _cache, $props, $setup, $data, $options) {
         role: "option"
       }, _ctx.ptm("emptyMessage")), [renderSlot(_ctx.$slots, "empty", {}, function() {
         return [createTextVNode(toDisplayString$1($options.emptyMessageText), 1)];
-      })], 16)) : createCommentVNode("", true)], 16, _hoisted_3$l)];
+      })], 16)) : createCommentVNode("", true)], 16, _hoisted_3$m)];
     }),
     _: 2
   }, [_ctx.$slots.loader ? {
@@ -37814,7 +37905,7 @@ script$J.render = render$I;
 const _withScopeId$m = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-0a88b934"), n = n(), popScopeId(), n), "_withScopeId$m");
 const _hoisted_1$W = { class: "comfy-missing-nodes" };
 const _hoisted_2$I = /* @__PURE__ */ _withScopeId$m(() => /* @__PURE__ */ createBaseVNode("h4", { class: "warning-title" }, "Warning: Missing Node Types", -1));
-const _hoisted_3$k = /* @__PURE__ */ _withScopeId$m(() => /* @__PURE__ */ createBaseVNode("p", { class: "warning-description" }, " When loading the graph, the following node types were not found: ", -1));
+const _hoisted_3$l = /* @__PURE__ */ _withScopeId$m(() => /* @__PURE__ */ createBaseVNode("p", { class: "warning-description" }, " When loading the graph, the following node types were not found: ", -1));
 const _hoisted_4$e = { class: "missing-node-item" };
 const _hoisted_5$9 = { class: "node-type" };
 const _hoisted_6$8 = {
@@ -37825,7 +37916,7 @@ const _hoisted_7$6 = {
   key: 0,
   class: "added-nodes-warning"
 };
-const _sfc_main$D = /* @__PURE__ */ defineComponent({
+const _sfc_main$H = /* @__PURE__ */ defineComponent({
   __name: "LoadWorkflowWarning",
   props: {
     missingNodeTypes: {},
@@ -37855,7 +37946,7 @@ const _sfc_main$D = /* @__PURE__ */ defineComponent({
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock("div", _hoisted_1$W, [
         _hoisted_2$I,
-        _hoisted_3$k,
+        _hoisted_3$l,
         createVNode(unref(script$L), {
           options: uniqueNodes.value,
           optionLabel: "label",
@@ -37891,11 +37982,11 @@ const _export_sfc = /* @__PURE__ */ __name((sfc, props) => {
   }
   return target;
 }, "_export_sfc");
-const LoadWorkflowWarning = /* @__PURE__ */ _export_sfc(_sfc_main$D, [["__scopeId", "data-v-0a88b934"]]);
+const LoadWorkflowWarning = /* @__PURE__ */ _export_sfc(_sfc_main$H, [["__scopeId", "data-v-0a88b934"]]);
 const _withScopeId$l = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-a71fe7ef"), n = n(), popScopeId(), n), "_withScopeId$l");
 const _hoisted_1$V = { class: "comfy-missing-models" };
 const _hoisted_2$H = /* @__PURE__ */ _withScopeId$l(() => /* @__PURE__ */ createBaseVNode("h4", { class: "warning-title" }, "Warning: Missing Models", -1));
-const _hoisted_3$j = /* @__PURE__ */ _withScopeId$l(() => /* @__PURE__ */ createBaseVNode("p", { class: "warning-description" }, " When loading the graph, the following models were not found: ", -1));
+const _hoisted_3$k = /* @__PURE__ */ _withScopeId$l(() => /* @__PURE__ */ createBaseVNode("p", { class: "warning-description" }, " When loading the graph, the following models were not found: ", -1));
 const _hoisted_4$d = { class: "model-info" };
 const _hoisted_5$8 = { class: "model-details" };
 const _hoisted_6$7 = ["title"];
@@ -37908,8 +37999,8 @@ const _hoisted_9$3 = {
   key: 1,
   class: "download-progress"
 };
-const _hoisted_10$2 = { class: "progress-text" };
-const _hoisted_11$2 = {
+const _hoisted_10$3 = { class: "progress-text" };
+const _hoisted_11$3 = {
   key: 2,
   class: "download-complete"
 };
@@ -37931,7 +38022,7 @@ const _hoisted_15$1 = /* @__PURE__ */ _withScopeId$l(() => /* @__PURE__ */ creat
 const _hoisted_16$1 = [
   _hoisted_15$1
 ];
-const _sfc_main$C = /* @__PURE__ */ defineComponent({
+const _sfc_main$G = /* @__PURE__ */ defineComponent({
   __name: "MissingModelsWarning",
   props: {
     missingModels: {},
@@ -38039,7 +38130,7 @@ const _sfc_main$C = /* @__PURE__ */ defineComponent({
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock("div", _hoisted_1$V, [
         _hoisted_2$H,
-        _hoisted_3$j,
+        _hoisted_3$k,
         createVNode(unref(script$L), {
           options: missingModels.value,
           optionLabel: "label",
@@ -38071,9 +38162,9 @@ const _sfc_main$C = /* @__PURE__ */ defineComponent({
                   class: "p-button-sm p-button-outlined model-action-button"
                 }, null, 8, ["onClick", "label"])) : createCommentVNode("", true),
                 slotProps.option.downloading ? (openBlock(), createElementBlock("div", _hoisted_9$3, [
-                  createBaseVNode("span", _hoisted_10$2, toDisplayString$1(slotProps.option.progress.toFixed(2)) + "%", 1)
+                  createBaseVNode("span", _hoisted_10$3, toDisplayString$1(slotProps.option.progress.toFixed(2)) + "%", 1)
                 ])) : createCommentVNode("", true),
-                slotProps.option.completed ? (openBlock(), createElementBlock("div", _hoisted_11$2, _hoisted_13$1)) : createCommentVNode("", true),
+                slotProps.option.completed ? (openBlock(), createElementBlock("div", _hoisted_11$3, _hoisted_13$1)) : createCommentVNode("", true),
                 slotProps.option.error ? (openBlock(), createElementBlock("div", _hoisted_14$1, _hoisted_16$1)) : createCommentVNode("", true)
               ])
             ], 4)
@@ -38084,7 +38175,7 @@ const _sfc_main$C = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const MissingModelsWarning = /* @__PURE__ */ _export_sfc(_sfc_main$C, [["__scopeId", "data-v-a71fe7ef"]]);
+const MissingModelsWarning = /* @__PURE__ */ _export_sfc(_sfc_main$G, [["__scopeId", "data-v-a71fe7ef"]]);
 var theme$o = /* @__PURE__ */ __name(function theme13(_ref) {
   var dt3 = _ref.dt;
   return "\n.p-tabs {\n    display: flex;\n    flex-direction: column;\n}\n\n.p-tablist {\n    position: relative;\n}\n\n.p-tabs-scrollable > .p-tablist {\n    overflow: hidden;\n}\n\n.p-tablist-viewport {\n    overflow-x: auto;\n    overflow-y: hidden;\n    scroll-behavior: smooth;\n    scrollbar-width: none;\n    overscroll-behavior: contain auto;\n}\n\n.p-tablist-viewport::-webkit-scrollbar {\n    display: none;\n}\n\n.p-tablist-tab-list {\n    position: relative;\n    display: flex;\n    background: ".concat(dt3("tabs.tablist.background"), ";\n    border-style: solid;\n    border-color: ").concat(dt3("tabs.tablist.border.color"), ";\n    border-width: ").concat(dt3("tabs.tablist.border.width"), ";\n}\n\n.p-tablist-nav-button {\n    all: unset;\n    position: absolute;\n    top: 0;\n    z-index: 2;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    background: ").concat(dt3("tabs.nav.button.background"), ";\n    color: ").concat(dt3("tabs.nav.button.color"), ";\n    width: ").concat(dt3("tabs.nav.button.width"), ";\n    transition: color ").concat(dt3("tabs.transition.duration"), ", outline-color ").concat(dt3("tabs.transition.duration"), ", box-shadow ").concat(dt3("tabs.transition.duration"), ";\n    box-shadow: ").concat(dt3("tabs.nav.button.shadow"), ";\n    outline-color: transparent;\n    cursor: pointer;\n}\n\n.p-tablist-nav-button:focus-visible {\n    z-index: 1;\n    box-shadow: ").concat(dt3("tabs.nav.button.focus.ring.shadow"), ";\n    outline: ").concat(dt3("tabs.nav.button.focus.ring.width"), " ").concat(dt3("tabs.nav.button.focus.ring.style"), " ").concat(dt3("tabs.nav.button.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("tabs.nav.button.focus.ring.offset"), ";\n}\n\n.p-tablist-nav-button:hover {\n    color: ").concat(dt3("tabs.nav.button.hover.color"), ";\n}\n\n.p-tablist-prev-button {\n    left: 0;\n}\n\n.p-tablist-next-button {\n    right: 0;\n}\n\n.p-tab {\n    cursor: pointer;\n    user-select: none;\n    position: relative;\n    border-style: solid;\n    white-space: nowrap;\n    background: ").concat(dt3("tabs.tab.background"), ";\n    border-width: ").concat(dt3("tabs.tab.border.width"), ";\n    border-color: ").concat(dt3("tabs.tab.border.color"), ";\n    color: ").concat(dt3("tabs.tab.color"), ";\n    padding: ").concat(dt3("tabs.tab.padding"), ";\n    font-weight: ").concat(dt3("tabs.tab.font.weight"), ";\n    transition: background ").concat(dt3("tabs.transition.duration"), ", border-color ").concat(dt3("tabs.transition.duration"), ", color ").concat(dt3("tabs.transition.duration"), ", outline-color ").concat(dt3("tabs.transition.duration"), ", box-shadow ").concat(dt3("tabs.transition.duration"), ";\n    margin: ").concat(dt3("tabs.tab.margin"), ";\n    outline-color: transparent;\n}\n\n.p-tab:not(.p-disabled):focus-visible {\n    z-index: 1;\n    box-shadow: ").concat(dt3("tabs.tab.focus.ring.shadow"), ";\n    outline: ").concat(dt3("tabs.tab.focus.ring.width"), " ").concat(dt3("tabs.tab.focus.ring.style"), " ").concat(dt3("tabs.tab.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("tabs.tab.focus.ring.offset"), ";\n}\n\n.p-tab:not(.p-tab-active):not(.p-disabled):hover {\n    background: ").concat(dt3("tabs.tab.hover.background"), ";\n    border-color: ").concat(dt3("tabs.tab.hover.border.color"), ";\n    color: ").concat(dt3("tabs.tab.hover.color"), ";\n}\n\n.p-tab-active {\n    background: ").concat(dt3("tabs.tab.active.background"), ";\n    border-color: ").concat(dt3("tabs.tab.active.border.color"), ";\n    color: ").concat(dt3("tabs.tab.active.color"), ";\n}\n\n.p-tabpanels {\n    background: ").concat(dt3("tabs.tabpanel.background"), ";\n    color: ").concat(dt3("tabs.tabpanel.color"), ";\n    padding: ").concat(dt3("tabs.tabpanel.padding"), ";\n    outline: 0 none;\n}\n\n.p-tabpanel:focus-visible {\n    box-shadow: ").concat(dt3("tabs.tabpanel.focus.ring.shadow"), ";\n    outline: ").concat(dt3("tabs.tabpanel.focus.ring.width"), " ").concat(dt3("tabs.tabpanel.focus.ring.style"), " ").concat(dt3("tabs.tabpanel.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("tabs.tabpanel.focus.ring.offset"), ";\n}\n\n.p-tablist-active-bar {\n    z-index: 1;\n    display: block;\n    position: absolute;\n    bottom: ").concat(dt3("tabs.active.bar.bottom"), ";\n    height: ").concat(dt3("tabs.active.bar.height"), ";\n    background: ").concat(dt3("tabs.active.bar.background"), ";\n    transition: 250ms cubic-bezier(0.35, 0, 0.25, 1);\n}\n");
@@ -39557,7 +39648,7 @@ var script$C = {
 };
 var _hoisted_1$R = ["disabled"];
 var _hoisted_2$E = ["disabled"];
-var _hoisted_3$i = ["disabled"];
+var _hoisted_3$j = ["disabled"];
 var _hoisted_4$c = ["disabled"];
 function render$B(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_InputText = resolveComponent("InputText");
@@ -39644,7 +39735,7 @@ function render$B(_ctx, _cache, $props, $setup, $data, $options) {
       }, _ctx.ptm("incrementIcon"), {
         "data-pc-section": "incrementicon"
       }), null, 16, ["class"]))];
-    })], 16, _hoisted_3$i)) : createCommentVNode("", true)];
+    })], 16, _hoisted_3$j)) : createCommentVNode("", true)];
   }), renderSlot(_ctx.$slots, "decrementbutton", {
     listeners: $options.downButtonListeners
   }, function() {
@@ -40838,7 +40929,7 @@ var script$y = {
 };
 var _hoisted_1$O = ["id"];
 var _hoisted_2$B = ["id", "value", "placeholder", "tabindex", "disabled", "aria-label", "aria-labelledby", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-invalid"];
-var _hoisted_3$h = ["id", "tabindex", "aria-label", "aria-labelledby", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-disabled"];
+var _hoisted_3$i = ["id", "tabindex", "aria-label", "aria-labelledby", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-disabled"];
 var _hoisted_4$b = ["id"];
 var _hoisted_5$7 = ["id"];
 var _hoisted_6$6 = ["id", "aria-label", "aria-selected", "aria-disabled", "aria-setsize", "aria-posinset", "onClick", "onMousemove", "data-p-selected", "data-p-focused", "data-p-disabled"];
@@ -40921,7 +41012,7 @@ function render$x(_ctx, _cache, $props, $setup, $data, $options) {
     placeholder: _ctx.placeholder
   }, function() {
     return [createTextVNode(toDisplayString$1($options.label === "p-emptylabel" ? " " : $options.label || "empty"), 1)];
-  })], 16, _hoisted_3$h)), _ctx.showClear && _ctx.modelValue != null ? renderSlot(_ctx.$slots, "clearicon", {
+  })], 16, _hoisted_3$i)), _ctx.showClear && _ctx.modelValue != null ? renderSlot(_ctx.$slots, "clearicon", {
     key: 2,
     "class": normalizeClass(_ctx.cx("clearIcon")),
     clearCallback: $options.onClearClick
@@ -41428,7 +41519,7 @@ function render$v(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render$v, "render$v");
 script$w.render = render$v;
-const _sfc_main$B = /* @__PURE__ */ defineComponent({
+const _sfc_main$F = /* @__PURE__ */ defineComponent({
   __name: "CustomSettingValue",
   props: {
     renderFunction: { type: Function }
@@ -41828,7 +41919,7 @@ var script$v = {
 };
 var _hoisted_1$M = ["tabindex", "aria-valuemin", "aria-valuenow", "aria-valuemax", "aria-labelledby", "aria-label", "aria-orientation"];
 var _hoisted_2$z = ["tabindex", "aria-valuemin", "aria-valuenow", "aria-valuemax", "aria-labelledby", "aria-label", "aria-orientation"];
-var _hoisted_3$g = ["tabindex", "aria-valuemin", "aria-valuenow", "aria-valuemax", "aria-labelledby", "aria-label", "aria-orientation"];
+var _hoisted_3$h = ["tabindex", "aria-valuemin", "aria-valuenow", "aria-valuemax", "aria-labelledby", "aria-label", "aria-orientation"];
 function render$u(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", mergeProps({
     "class": _ctx.cx("root"),
@@ -41921,13 +42012,13 @@ function render$u(_ctx, _cache, $props, $setup, $data, $options) {
     "aria-labelledby": _ctx.ariaLabelledby,
     "aria-label": _ctx.ariaLabel,
     "aria-orientation": _ctx.orientation
-  }, _ctx.ptm("endHandler")), null, 16, _hoisted_3$g)) : createCommentVNode("", true)], 16);
+  }, _ctx.ptm("endHandler")), null, 16, _hoisted_3$h)) : createCommentVNode("", true)], 16);
 }
 __name(render$u, "render$u");
 script$v.render = render$u;
 const _withScopeId$k = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-0937e20d"), n = n(), popScopeId(), n), "_withScopeId$k");
 const _hoisted_1$L = { class: "input-slider" };
-const _sfc_main$A = /* @__PURE__ */ defineComponent({
+const _sfc_main$E = /* @__PURE__ */ defineComponent({
   __name: "InputSlider",
   props: {
     modelValue: {},
@@ -41982,7 +42073,7 @@ const _sfc_main$A = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const InputSlider = /* @__PURE__ */ _export_sfc(_sfc_main$A, [["__scopeId", "data-v-0937e20d"]]);
+const InputSlider = /* @__PURE__ */ _export_sfc(_sfc_main$E, [["__scopeId", "data-v-0937e20d"]]);
 function formatCamelCase(str) {
   const isCamelCase = /^([A-Z][a-z]*)+$/.test(str);
   if (!isCamelCase) {
@@ -41998,15 +42089,15 @@ function formatCamelCase(str) {
   return processedWords.join(" ");
 }
 __name(formatCamelCase, "formatCamelCase");
-const _withScopeId$j = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-25bd5f50"), n = n(), popScopeId(), n), "_withScopeId$j");
+const _withScopeId$j = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-ffbfdf57"), n = n(), popScopeId(), n), "_withScopeId$j");
 const _hoisted_1$K = { class: "setting-group" };
 const _hoisted_2$y = { class: "setting-label" };
-const _hoisted_3$f = {
-  key: 1,
+const _hoisted_3$g = {
+  key: 2,
   class: "pi pi-info-circle info-chip"
 };
 const _hoisted_4$a = { class: "setting-input" };
-const _sfc_main$z = /* @__PURE__ */ defineComponent({
+const _sfc_main$D = /* @__PURE__ */ defineComponent({
   __name: "SettingGroup",
   props: {
     group: {},
@@ -42043,7 +42134,7 @@ const _sfc_main$z = /* @__PURE__ */ defineComponent({
     }, "updateSetting");
     function getSettingComponent(setting) {
       if (typeof setting.type === "function") {
-        return _sfc_main$B;
+        return _sfc_main$F;
       }
       switch (setting.type) {
         case "boolean":
@@ -42075,8 +42166,13 @@ const _sfc_main$z = /* @__PURE__ */ defineComponent({
                   key: 0,
                   value: _ctx.$t("experimental")
                 }, null, 8, ["value"])) : createCommentVNode("", true),
+                setting.deprecated ? (openBlock(), createBlock(unref(script$w), {
+                  key: 1,
+                  value: _ctx.$t("deprecated"),
+                  severity: "danger"
+                }, null, 8, ["value"])) : createCommentVNode("", true),
                 createTextVNode(" " + toDisplayString$1(setting.name) + " ", 1),
-                setting.tooltip ? withDirectives((openBlock(), createElementBlock("i", _hoisted_3$f, null, 512)), [
+                setting.tooltip ? withDirectives((openBlock(), createElementBlock("i", _hoisted_3$g, null, 512)), [
                   [_directive_tooltip, setting.tooltip]
                 ]) : createCommentVNode("", true)
               ])
@@ -42095,7 +42191,7 @@ const _sfc_main$z = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const SettingGroup = /* @__PURE__ */ _export_sfc(_sfc_main$z, [["__scopeId", "data-v-25bd5f50"]]);
+const SettingGroup = /* @__PURE__ */ _export_sfc(_sfc_main$D, [["__scopeId", "data-v-ffbfdf57"]]);
 var lodash$1 = { exports: {} };
 /**
  * @license
@@ -48209,7 +48305,7 @@ function render$s(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render$s, "render$s");
 script$t.render = render$s;
-const _sfc_main$y = /* @__PURE__ */ defineComponent({
+const _sfc_main$C = /* @__PURE__ */ defineComponent({
   __name: "SearchFilterChip",
   props: {
     text: {},
@@ -48240,13 +48336,13 @@ const _sfc_main$y = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const SearchFilterChip = /* @__PURE__ */ _export_sfc(_sfc_main$y, [["__scopeId", "data-v-a4c03005"]]);
+const SearchFilterChip = /* @__PURE__ */ _export_sfc(_sfc_main$C, [["__scopeId", "data-v-a4c03005"]]);
 const _withScopeId$i = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-73e04275"), n = n(), popScopeId(), n), "_withScopeId$i");
 const _hoisted_1$H = {
   key: 0,
   class: "search-filters"
 };
-const _sfc_main$x = /* @__PURE__ */ defineComponent({
+const _sfc_main$B = /* @__PURE__ */ defineComponent({
   __name: "SearchBox",
   props: {
     class: {},
@@ -48316,7 +48412,7 @@ const _sfc_main$x = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const SearchBox = /* @__PURE__ */ _export_sfc(_sfc_main$x, [["__scopeId", "data-v-73e04275"]]);
+const SearchBox = /* @__PURE__ */ _export_sfc(_sfc_main$B, [["__scopeId", "data-v-73e04275"]]);
 var theme$g = /* @__PURE__ */ __name(function theme21(_ref) {
   var dt3 = _ref.dt;
   return "\n.p-card {\n    background: ".concat(dt3("card.background"), ";\n    color: ").concat(dt3("card.color"), ";\n    box-shadow: ").concat(dt3("card.shadow"), ";\n    border-radius: ").concat(dt3("card.border.radius"), ";\n    display: flex;\n    flex-direction: column;\n}\n\n.p-card-caption {\n    display: flex;\n    flex-direction: column;\n    gap: ").concat(dt3("card.caption.gap"), ";\n}\n\n.p-card-body {\n    padding: ").concat(dt3("card.body.padding"), ";\n    display: flex;\n    flex-direction: column;\n    gap: ").concat(dt3("card.body.gap"), ";\n}\n\n.p-card-title {\n    font-size: ").concat(dt3("card.title.font.size"), ";\n    font-weight: ").concat(dt3("card.title.font.weight"), ";\n}\n\n.p-card-subtitle {\n    color: ").concat(dt3("card.subtitle.color"), ";\n}\n");
@@ -48381,7 +48477,7 @@ script$s.render = render$r;
 const _withScopeId$h = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-b87655d7"), n = n(), popScopeId(), n), "_withScopeId$h");
 const _hoisted_1$G = { class: "no-results-placeholder" };
 const _hoisted_2$v = { class: "flex flex-column align-items-center" };
-const _sfc_main$w = /* @__PURE__ */ defineComponent({
+const _sfc_main$A = /* @__PURE__ */ defineComponent({
   __name: "NoResultsPlaceholder",
   props: {
     icon: {},
@@ -48416,13 +48512,13 @@ const _sfc_main$w = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const NoResultsPlaceholder = /* @__PURE__ */ _export_sfc(_sfc_main$w, [["__scopeId", "data-v-b87655d7"]]);
+const NoResultsPlaceholder = /* @__PURE__ */ _export_sfc(_sfc_main$A, [["__scopeId", "data-v-b87655d7"]]);
 const _withScopeId$g = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-593b49af"), n = n(), popScopeId(), n), "_withScopeId$g");
 const _hoisted_1$F = { class: "settings-container" };
 const _hoisted_2$u = { class: "settings-sidebar" };
-const _hoisted_3$e = { class: "settings-content" };
+const _hoisted_3$f = { class: "settings-content" };
 const _hoisted_4$9 = { key: 0 };
-const _sfc_main$v = /* @__PURE__ */ defineComponent({
+const _sfc_main$z = /* @__PURE__ */ defineComponent({
   __name: "SettingDialogContent",
   setup(__props) {
     const settingStore = useSettingStore();
@@ -48500,7 +48596,7 @@ const _sfc_main$v = /* @__PURE__ */ defineComponent({
           }, null, 8, ["modelValue", "options", "disabled"])
         ]),
         createVNode(unref(script$F), { layout: "vertical" }),
-        createBaseVNode("div", _hoisted_3$e, [
+        createBaseVNode("div", _hoisted_3$f, [
           createVNode(unref(script$I), { value: tabValue.value }, {
             default: withCtx(() => [
               createVNode(unref(script$H), { class: "settings-tab-panels" }, {
@@ -48558,10 +48654,10 @@ const _sfc_main$v = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const SettingDialogContent = /* @__PURE__ */ _export_sfc(_sfc_main$v, [["__scopeId", "data-v-593b49af"]]);
+const SettingDialogContent = /* @__PURE__ */ _export_sfc(_sfc_main$z, [["__scopeId", "data-v-593b49af"]]);
 const _withScopeId$f = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-494412ee"), n = n(), popScopeId(), n), "_withScopeId$f");
 const _hoisted_1$E = /* @__PURE__ */ _withScopeId$f(() => /* @__PURE__ */ createBaseVNode("i", { class: "pi pi-cog" }, null, -1));
-const _sfc_main$u = /* @__PURE__ */ defineComponent({
+const _sfc_main$y = /* @__PURE__ */ defineComponent({
   __name: "SettingDialogHeader",
   setup(__props) {
     const frontendVersion = "v" + window["__COMFYUI_FRONTEND_VERSION__"];
@@ -48580,7 +48676,7 @@ const _sfc_main$u = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const SettingDialogHeader = /* @__PURE__ */ _export_sfc(_sfc_main$u, [["__scopeId", "data-v-494412ee"]]);
+const SettingDialogHeader = /* @__PURE__ */ _export_sfc(_sfc_main$y, [["__scopeId", "data-v-494412ee"]]);
 var isVue2$1 = false;
 var isVue3$1 = true;
 var Vue2$1 = void 0;
@@ -58320,7 +58416,7 @@ var script$r = {
 };
 var _hoisted_1$D = ["id"];
 var _hoisted_2$t = ["aria-controls", "aria-valuenow"];
-var _hoisted_3$d = ["aria-controls", "aria-valuenow"];
+var _hoisted_3$e = ["aria-controls", "aria-valuenow"];
 function render$q(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", mergeProps({
     "class": _ctx.cx("root")
@@ -58383,6039 +58479,11 @@ function render$q(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, _ctx.ptm("bary"), {
     "data-pc-group-section": "bar"
-  }), null, 16, _hoisted_3$d)], 16);
+  }), null, 16, _hoisted_3$e)], 16);
 }
 __name(render$q, "render$q");
 script$r.render = render$q;
-/*!
-  * shared v9.13.1
-  * (c) 2024 kazuya kawaguchi
-  * Released under the MIT License.
-  */
-const inBrowser = typeof window !== "undefined";
-let mark;
-let measure;
-if (false) {
-  const perf2 = inBrowser && window.performance;
-  if (perf2 && perf2.mark && perf2.measure && perf2.clearMarks && // @ts-ignore browser compat
-  perf2.clearMeasures) {
-    mark = /* @__PURE__ */ __name((tag) => {
-      perf2.mark(tag);
-    }, "mark");
-    measure = /* @__PURE__ */ __name((name, startTag, endTag) => {
-      perf2.measure(name, startTag, endTag);
-      perf2.clearMarks(startTag);
-      perf2.clearMarks(endTag);
-    }, "measure");
-  }
-}
-const RE_ARGS$1 = /\{([0-9a-zA-Z]+)\}/g;
-function format$4(message3, ...args) {
-  if (args.length === 1 && isObject$2(args[0])) {
-    args = args[0];
-  }
-  if (!args || !args.hasOwnProperty) {
-    args = {};
-  }
-  return message3.replace(RE_ARGS$1, (match, identifier) => {
-    return args.hasOwnProperty(identifier) ? args[identifier] : "";
-  });
-}
-__name(format$4, "format$4");
-const makeSymbol = /* @__PURE__ */ __name((name, shareable = false) => !shareable ? Symbol(name) : Symbol.for(name), "makeSymbol");
-const generateFormatCacheKey = /* @__PURE__ */ __name((locale2, key, source) => friendlyJSONstringify({ l: locale2, k: key, s: source }), "generateFormatCacheKey");
-const friendlyJSONstringify = /* @__PURE__ */ __name((json) => JSON.stringify(json).replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029").replace(/\u0027/g, "\\u0027"), "friendlyJSONstringify");
-const isNumber$1 = /* @__PURE__ */ __name((val) => typeof val === "number" && isFinite(val), "isNumber$1");
-const isDate = /* @__PURE__ */ __name((val) => toTypeString(val) === "[object Date]", "isDate");
-const isRegExp = /* @__PURE__ */ __name((val) => toTypeString(val) === "[object RegExp]", "isRegExp");
-const isEmptyObject = /* @__PURE__ */ __name((val) => isPlainObject(val) && Object.keys(val).length === 0, "isEmptyObject");
-const assign$1 = Object.assign;
-let _globalThis;
-const getGlobalThis = /* @__PURE__ */ __name(() => {
-  return _globalThis || (_globalThis = typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {});
-}, "getGlobalThis");
-function escapeHtml(rawText) {
-  return rawText.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
-}
-__name(escapeHtml, "escapeHtml");
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-function hasOwn$1(obj, key) {
-  return hasOwnProperty.call(obj, key);
-}
-__name(hasOwn$1, "hasOwn$1");
-const isArray$1 = Array.isArray;
-const isFunction$1 = /* @__PURE__ */ __name((val) => typeof val === "function", "isFunction$1");
-const isString$2 = /* @__PURE__ */ __name((val) => typeof val === "string", "isString$2");
-const isBoolean$1 = /* @__PURE__ */ __name((val) => typeof val === "boolean", "isBoolean$1");
-const isSymbol = /* @__PURE__ */ __name((val) => typeof val === "symbol", "isSymbol");
-const isObject$2 = /* @__PURE__ */ __name((val) => val !== null && typeof val === "object", "isObject$2");
-const isPromise$1 = /* @__PURE__ */ __name((val) => {
-  return isObject$2(val) && isFunction$1(val.then) && isFunction$1(val.catch);
-}, "isPromise$1");
-const objectToString = Object.prototype.toString;
-const toTypeString = /* @__PURE__ */ __name((value3) => objectToString.call(value3), "toTypeString");
-const isPlainObject = /* @__PURE__ */ __name((val) => {
-  if (!isObject$2(val))
-    return false;
-  const proto = Object.getPrototypeOf(val);
-  return proto === null || proto.constructor === Object;
-}, "isPlainObject");
-const toDisplayString = /* @__PURE__ */ __name((val) => {
-  return val == null ? "" : isArray$1(val) || isPlainObject(val) && val.toString === objectToString ? JSON.stringify(val, null, 2) : String(val);
-}, "toDisplayString");
-function join$1(items2, separator = "") {
-  return items2.reduce((str, item2, index2) => index2 === 0 ? str + item2 : str + separator + item2, "");
-}
-__name(join$1, "join$1");
-const RANGE = 2;
-function generateCodeFrame(source, start2 = 0, end = source.length) {
-  const lines = source.split(/\r?\n/);
-  let count = 0;
-  const res = [];
-  for (let i2 = 0; i2 < lines.length; i2++) {
-    count += lines[i2].length + 1;
-    if (count >= start2) {
-      for (let j = i2 - RANGE; j <= i2 + RANGE || end > count; j++) {
-        if (j < 0 || j >= lines.length)
-          continue;
-        const line = j + 1;
-        res.push(`${line}${" ".repeat(3 - String(line).length)}|  ${lines[j]}`);
-        const lineLength = lines[j].length;
-        if (j === i2) {
-          const pad = start2 - (count - lineLength) + 1;
-          const length = Math.max(1, end > count ? lineLength - pad : end - start2);
-          res.push(`   |  ` + " ".repeat(pad) + "^".repeat(length));
-        } else if (j > i2) {
-          if (end > count) {
-            const length = Math.max(Math.min(end - count, lineLength), 1);
-            res.push(`   |  ` + "^".repeat(length));
-          }
-          count += lineLength + 1;
-        }
-      }
-      break;
-    }
-  }
-  return res.join("\n");
-}
-__name(generateCodeFrame, "generateCodeFrame");
-function incrementer(code2) {
-  let current = code2;
-  return () => ++current;
-}
-__name(incrementer, "incrementer");
-function warn(msg, err) {
-  if (typeof console !== "undefined") {
-    console.warn(`[intlify] ` + msg);
-    if (err) {
-      console.warn(err.stack);
-    }
-  }
-}
-__name(warn, "warn");
-const hasWarned = {};
-function warnOnce(msg) {
-  if (!hasWarned[msg]) {
-    hasWarned[msg] = true;
-    warn(msg);
-  }
-}
-__name(warnOnce, "warnOnce");
-function createEmitter() {
-  const events2 = /* @__PURE__ */ new Map();
-  const emitter = {
-    events: events2,
-    on(event2, handler6) {
-      const handlers2 = events2.get(event2);
-      const added = handlers2 && handlers2.push(handler6);
-      if (!added) {
-        events2.set(event2, [handler6]);
-      }
-    },
-    off(event2, handler6) {
-      const handlers2 = events2.get(event2);
-      if (handlers2) {
-        handlers2.splice(handlers2.indexOf(handler6) >>> 0, 1);
-      }
-    },
-    emit(event2, payload) {
-      (events2.get(event2) || []).slice().map((handler6) => handler6(payload));
-      (events2.get("*") || []).slice().map((handler6) => handler6(event2, payload));
-    }
-  };
-  return emitter;
-}
-__name(createEmitter, "createEmitter");
-const isNotObjectOrIsArray = /* @__PURE__ */ __name((val) => !isObject$2(val) || isArray$1(val), "isNotObjectOrIsArray");
-function deepCopy(src, des) {
-  if (isNotObjectOrIsArray(src) || isNotObjectOrIsArray(des)) {
-    throw new Error("Invalid value");
-  }
-  const stack2 = [{ src, des }];
-  while (stack2.length) {
-    const { src: src2, des: des2 } = stack2.pop();
-    Object.keys(src2).forEach((key) => {
-      if (isNotObjectOrIsArray(src2[key]) || isNotObjectOrIsArray(des2[key])) {
-        des2[key] = src2[key];
-      } else {
-        stack2.push({ src: src2[key], des: des2[key] });
-      }
-    });
-  }
-}
-__name(deepCopy, "deepCopy");
-/*!
-  * message-compiler v9.13.1
-  * (c) 2024 kazuya kawaguchi
-  * Released under the MIT License.
-  */
-const LOCATION_STUB = {
-  start: { line: 1, column: 1, offset: 0 },
-  end: { line: 1, column: 1, offset: 0 }
-};
-function createPosition(line, column, offset) {
-  return { line, column, offset };
-}
-__name(createPosition, "createPosition");
-function createLocation(start2, end, source) {
-  const loc = { start: start2, end };
-  if (source != null) {
-    loc.source = source;
-  }
-  return loc;
-}
-__name(createLocation, "createLocation");
-const RE_ARGS = /\{([0-9a-zA-Z]+)\}/g;
-function format$3(message3, ...args) {
-  if (args.length === 1 && isObject$1(args[0])) {
-    args = args[0];
-  }
-  if (!args || !args.hasOwnProperty) {
-    args = {};
-  }
-  return message3.replace(RE_ARGS, (match, identifier) => {
-    return args.hasOwnProperty(identifier) ? args[identifier] : "";
-  });
-}
-__name(format$3, "format$3");
-const assign = Object.assign;
-const isString$1 = /* @__PURE__ */ __name((val) => typeof val === "string", "isString$1");
-const isObject$1 = /* @__PURE__ */ __name((val) => val !== null && typeof val === "object", "isObject$1");
-function join(items2, separator = "") {
-  return items2.reduce((str, item2, index2) => index2 === 0 ? str + item2 : str + separator + item2, "");
-}
-__name(join, "join");
-const CompileWarnCodes = {
-  USE_MODULO_SYNTAX: 1,
-  __EXTEND_POINT__: 2
-};
-const warnMessages$2 = {
-  [CompileWarnCodes.USE_MODULO_SYNTAX]: `Use modulo before '{{0}}'.`
-};
-function createCompileWarn(code2, loc, ...args) {
-  const msg = format$3(warnMessages$2[code2] || "", ...args || []);
-  const message3 = { message: String(msg), code: code2 };
-  if (loc) {
-    message3.location = loc;
-  }
-  return message3;
-}
-__name(createCompileWarn, "createCompileWarn");
-const CompileErrorCodes = {
-  // tokenizer error codes
-  EXPECTED_TOKEN: 1,
-  INVALID_TOKEN_IN_PLACEHOLDER: 2,
-  UNTERMINATED_SINGLE_QUOTE_IN_PLACEHOLDER: 3,
-  UNKNOWN_ESCAPE_SEQUENCE: 4,
-  INVALID_UNICODE_ESCAPE_SEQUENCE: 5,
-  UNBALANCED_CLOSING_BRACE: 6,
-  UNTERMINATED_CLOSING_BRACE: 7,
-  EMPTY_PLACEHOLDER: 8,
-  NOT_ALLOW_NEST_PLACEHOLDER: 9,
-  INVALID_LINKED_FORMAT: 10,
-  // parser error codes
-  MUST_HAVE_MESSAGES_IN_PLURAL: 11,
-  UNEXPECTED_EMPTY_LINKED_MODIFIER: 12,
-  UNEXPECTED_EMPTY_LINKED_KEY: 13,
-  UNEXPECTED_LEXICAL_ANALYSIS: 14,
-  // generator error codes
-  UNHANDLED_CODEGEN_NODE_TYPE: 15,
-  // minifier error codes
-  UNHANDLED_MINIFIER_NODE_TYPE: 16,
-  // Special value for higher-order compilers to pick up the last code
-  // to avoid collision of error codes. This should always be kept as the last
-  // item.
-  __EXTEND_POINT__: 17
-};
-const errorMessages$2 = {
-  // tokenizer error messages
-  [CompileErrorCodes.EXPECTED_TOKEN]: `Expected token: '{0}'`,
-  [CompileErrorCodes.INVALID_TOKEN_IN_PLACEHOLDER]: `Invalid token in placeholder: '{0}'`,
-  [CompileErrorCodes.UNTERMINATED_SINGLE_QUOTE_IN_PLACEHOLDER]: `Unterminated single quote in placeholder`,
-  [CompileErrorCodes.UNKNOWN_ESCAPE_SEQUENCE]: `Unknown escape sequence: \\{0}`,
-  [CompileErrorCodes.INVALID_UNICODE_ESCAPE_SEQUENCE]: `Invalid unicode escape sequence: {0}`,
-  [CompileErrorCodes.UNBALANCED_CLOSING_BRACE]: `Unbalanced closing brace`,
-  [CompileErrorCodes.UNTERMINATED_CLOSING_BRACE]: `Unterminated closing brace`,
-  [CompileErrorCodes.EMPTY_PLACEHOLDER]: `Empty placeholder`,
-  [CompileErrorCodes.NOT_ALLOW_NEST_PLACEHOLDER]: `Not allowed nest placeholder`,
-  [CompileErrorCodes.INVALID_LINKED_FORMAT]: `Invalid linked format`,
-  // parser error messages
-  [CompileErrorCodes.MUST_HAVE_MESSAGES_IN_PLURAL]: `Plural must have messages`,
-  [CompileErrorCodes.UNEXPECTED_EMPTY_LINKED_MODIFIER]: `Unexpected empty linked modifier`,
-  [CompileErrorCodes.UNEXPECTED_EMPTY_LINKED_KEY]: `Unexpected empty linked key`,
-  [CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS]: `Unexpected lexical analysis in token: '{0}'`,
-  // generator error messages
-  [CompileErrorCodes.UNHANDLED_CODEGEN_NODE_TYPE]: `unhandled codegen node type: '{0}'`,
-  // minimizer error messages
-  [CompileErrorCodes.UNHANDLED_MINIFIER_NODE_TYPE]: `unhandled mimifier node type: '{0}'`
-};
-function createCompileError(code2, loc, options3 = {}) {
-  const { domain, messages: messages2, args } = options3;
-  const msg = format$3((messages2 || errorMessages$2)[code2] || "", ...args || []);
-  const error = new SyntaxError(String(msg));
-  error.code = code2;
-  if (loc) {
-    error.location = loc;
-  }
-  error.domain = domain;
-  return error;
-}
-__name(createCompileError, "createCompileError");
-function defaultOnError(error) {
-  throw error;
-}
-__name(defaultOnError, "defaultOnError");
-const RE_HTML_TAG = /<\/?[\w\s="/.':;#-\/]+>/;
-const detectHtmlTag = /* @__PURE__ */ __name((source) => RE_HTML_TAG.test(source), "detectHtmlTag");
-const CHAR_SP = " ";
-const CHAR_CR = "\r";
-const CHAR_LF = "\n";
-const CHAR_LS = String.fromCharCode(8232);
-const CHAR_PS = String.fromCharCode(8233);
-function createScanner(str) {
-  const _buf = str;
-  let _index = 0;
-  let _line = 1;
-  let _column = 1;
-  let _peekOffset = 0;
-  const isCRLF = /* @__PURE__ */ __name((index3) => _buf[index3] === CHAR_CR && _buf[index3 + 1] === CHAR_LF, "isCRLF");
-  const isLF = /* @__PURE__ */ __name((index3) => _buf[index3] === CHAR_LF, "isLF");
-  const isPS = /* @__PURE__ */ __name((index3) => _buf[index3] === CHAR_PS, "isPS");
-  const isLS = /* @__PURE__ */ __name((index3) => _buf[index3] === CHAR_LS, "isLS");
-  const isLineEnd = /* @__PURE__ */ __name((index3) => isCRLF(index3) || isLF(index3) || isPS(index3) || isLS(index3), "isLineEnd");
-  const index2 = /* @__PURE__ */ __name(() => _index, "index");
-  const line = /* @__PURE__ */ __name(() => _line, "line");
-  const column = /* @__PURE__ */ __name(() => _column, "column");
-  const peekOffset = /* @__PURE__ */ __name(() => _peekOffset, "peekOffset");
-  const charAt = /* @__PURE__ */ __name((offset) => isCRLF(offset) || isPS(offset) || isLS(offset) ? CHAR_LF : _buf[offset], "charAt");
-  const currentChar = /* @__PURE__ */ __name(() => charAt(_index), "currentChar");
-  const currentPeek = /* @__PURE__ */ __name(() => charAt(_index + _peekOffset), "currentPeek");
-  function next2() {
-    _peekOffset = 0;
-    if (isLineEnd(_index)) {
-      _line++;
-      _column = 0;
-    }
-    if (isCRLF(_index)) {
-      _index++;
-    }
-    _index++;
-    _column++;
-    return _buf[_index];
-  }
-  __name(next2, "next");
-  function peek() {
-    if (isCRLF(_index + _peekOffset)) {
-      _peekOffset++;
-    }
-    _peekOffset++;
-    return _buf[_index + _peekOffset];
-  }
-  __name(peek, "peek");
-  function reset() {
-    _index = 0;
-    _line = 1;
-    _column = 1;
-    _peekOffset = 0;
-  }
-  __name(reset, "reset");
-  function resetPeek(offset = 0) {
-    _peekOffset = offset;
-  }
-  __name(resetPeek, "resetPeek");
-  function skipToPeek() {
-    const target = _index + _peekOffset;
-    while (target !== _index) {
-      next2();
-    }
-    _peekOffset = 0;
-  }
-  __name(skipToPeek, "skipToPeek");
-  return {
-    index: index2,
-    line,
-    column,
-    peekOffset,
-    charAt,
-    currentChar,
-    currentPeek,
-    next: next2,
-    peek,
-    reset,
-    resetPeek,
-    skipToPeek
-  };
-}
-__name(createScanner, "createScanner");
-const EOF = void 0;
-const DOT = ".";
-const LITERAL_DELIMITER = "'";
-const ERROR_DOMAIN$3 = "tokenizer";
-function createTokenizer(source, options3 = {}) {
-  const location2 = options3.location !== false;
-  const _scnr = createScanner(source);
-  const currentOffset = /* @__PURE__ */ __name(() => _scnr.index(), "currentOffset");
-  const currentPosition = /* @__PURE__ */ __name(() => createPosition(_scnr.line(), _scnr.column(), _scnr.index()), "currentPosition");
-  const _initLoc = currentPosition();
-  const _initOffset = currentOffset();
-  const _context = {
-    currentType: 14,
-    offset: _initOffset,
-    startLoc: _initLoc,
-    endLoc: _initLoc,
-    lastType: 14,
-    lastOffset: _initOffset,
-    lastStartLoc: _initLoc,
-    lastEndLoc: _initLoc,
-    braceNest: 0,
-    inLinked: false,
-    text: ""
-  };
-  const context = /* @__PURE__ */ __name(() => _context, "context");
-  const { onError } = options3;
-  function emitError(code2, pos2, offset, ...args) {
-    const ctx = context();
-    pos2.column += offset;
-    pos2.offset += offset;
-    if (onError) {
-      const loc = location2 ? createLocation(ctx.startLoc, pos2) : null;
-      const err = createCompileError(code2, loc, {
-        domain: ERROR_DOMAIN$3,
-        args
-      });
-      onError(err);
-    }
-  }
-  __name(emitError, "emitError");
-  function getToken(context2, type, value3) {
-    context2.endLoc = currentPosition();
-    context2.currentType = type;
-    const token = { type };
-    if (location2) {
-      token.loc = createLocation(context2.startLoc, context2.endLoc);
-    }
-    if (value3 != null) {
-      token.value = value3;
-    }
-    return token;
-  }
-  __name(getToken, "getToken");
-  const getEndToken = /* @__PURE__ */ __name((context2) => getToken(
-    context2,
-    14
-    /* TokenTypes.EOF */
-  ), "getEndToken");
-  function eat(scnr, ch) {
-    if (scnr.currentChar() === ch) {
-      scnr.next();
-      return ch;
-    } else {
-      emitError(CompileErrorCodes.EXPECTED_TOKEN, currentPosition(), 0, ch);
-      return "";
-    }
-  }
-  __name(eat, "eat");
-  function peekSpaces(scnr) {
-    let buf = "";
-    while (scnr.currentPeek() === CHAR_SP || scnr.currentPeek() === CHAR_LF) {
-      buf += scnr.currentPeek();
-      scnr.peek();
-    }
-    return buf;
-  }
-  __name(peekSpaces, "peekSpaces");
-  function skipSpaces(scnr) {
-    const buf = peekSpaces(scnr);
-    scnr.skipToPeek();
-    return buf;
-  }
-  __name(skipSpaces, "skipSpaces");
-  function isIdentifierStart(ch) {
-    if (ch === EOF) {
-      return false;
-    }
-    const cc = ch.charCodeAt(0);
-    return cc >= 97 && cc <= 122 || // a-z
-    cc >= 65 && cc <= 90 || // A-Z
-    cc === 95;
-  }
-  __name(isIdentifierStart, "isIdentifierStart");
-  function isNumberStart(ch) {
-    if (ch === EOF) {
-      return false;
-    }
-    const cc = ch.charCodeAt(0);
-    return cc >= 48 && cc <= 57;
-  }
-  __name(isNumberStart, "isNumberStart");
-  function isNamedIdentifierStart(scnr, context2) {
-    const { currentType } = context2;
-    if (currentType !== 2) {
-      return false;
-    }
-    peekSpaces(scnr);
-    const ret = isIdentifierStart(scnr.currentPeek());
-    scnr.resetPeek();
-    return ret;
-  }
-  __name(isNamedIdentifierStart, "isNamedIdentifierStart");
-  function isListIdentifierStart(scnr, context2) {
-    const { currentType } = context2;
-    if (currentType !== 2) {
-      return false;
-    }
-    peekSpaces(scnr);
-    const ch = scnr.currentPeek() === "-" ? scnr.peek() : scnr.currentPeek();
-    const ret = isNumberStart(ch);
-    scnr.resetPeek();
-    return ret;
-  }
-  __name(isListIdentifierStart, "isListIdentifierStart");
-  function isLiteralStart(scnr, context2) {
-    const { currentType } = context2;
-    if (currentType !== 2) {
-      return false;
-    }
-    peekSpaces(scnr);
-    const ret = scnr.currentPeek() === LITERAL_DELIMITER;
-    scnr.resetPeek();
-    return ret;
-  }
-  __name(isLiteralStart, "isLiteralStart");
-  function isLinkedDotStart(scnr, context2) {
-    const { currentType } = context2;
-    if (currentType !== 8) {
-      return false;
-    }
-    peekSpaces(scnr);
-    const ret = scnr.currentPeek() === ".";
-    scnr.resetPeek();
-    return ret;
-  }
-  __name(isLinkedDotStart, "isLinkedDotStart");
-  function isLinkedModifierStart(scnr, context2) {
-    const { currentType } = context2;
-    if (currentType !== 9) {
-      return false;
-    }
-    peekSpaces(scnr);
-    const ret = isIdentifierStart(scnr.currentPeek());
-    scnr.resetPeek();
-    return ret;
-  }
-  __name(isLinkedModifierStart, "isLinkedModifierStart");
-  function isLinkedDelimiterStart(scnr, context2) {
-    const { currentType } = context2;
-    if (!(currentType === 8 || currentType === 12)) {
-      return false;
-    }
-    peekSpaces(scnr);
-    const ret = scnr.currentPeek() === ":";
-    scnr.resetPeek();
-    return ret;
-  }
-  __name(isLinkedDelimiterStart, "isLinkedDelimiterStart");
-  function isLinkedReferStart(scnr, context2) {
-    const { currentType } = context2;
-    if (currentType !== 10) {
-      return false;
-    }
-    const fn = /* @__PURE__ */ __name(() => {
-      const ch = scnr.currentPeek();
-      if (ch === "{") {
-        return isIdentifierStart(scnr.peek());
-      } else if (ch === "@" || ch === "%" || ch === "|" || ch === ":" || ch === "." || ch === CHAR_SP || !ch) {
-        return false;
-      } else if (ch === CHAR_LF) {
-        scnr.peek();
-        return fn();
-      } else {
-        return isTextStart(scnr, false);
-      }
-    }, "fn");
-    const ret = fn();
-    scnr.resetPeek();
-    return ret;
-  }
-  __name(isLinkedReferStart, "isLinkedReferStart");
-  function isPluralStart(scnr) {
-    peekSpaces(scnr);
-    const ret = scnr.currentPeek() === "|";
-    scnr.resetPeek();
-    return ret;
-  }
-  __name(isPluralStart, "isPluralStart");
-  function detectModuloStart(scnr) {
-    const spaces = peekSpaces(scnr);
-    const ret = scnr.currentPeek() === "%" && scnr.peek() === "{";
-    scnr.resetPeek();
-    return {
-      isModulo: ret,
-      hasSpace: spaces.length > 0
-    };
-  }
-  __name(detectModuloStart, "detectModuloStart");
-  function isTextStart(scnr, reset = true) {
-    const fn = /* @__PURE__ */ __name((hasSpace = false, prev2 = "", detectModulo = false) => {
-      const ch = scnr.currentPeek();
-      if (ch === "{") {
-        return prev2 === "%" ? false : hasSpace;
-      } else if (ch === "@" || !ch) {
-        return prev2 === "%" ? true : hasSpace;
-      } else if (ch === "%") {
-        scnr.peek();
-        return fn(hasSpace, "%", true);
-      } else if (ch === "|") {
-        return prev2 === "%" || detectModulo ? true : !(prev2 === CHAR_SP || prev2 === CHAR_LF);
-      } else if (ch === CHAR_SP) {
-        scnr.peek();
-        return fn(true, CHAR_SP, detectModulo);
-      } else if (ch === CHAR_LF) {
-        scnr.peek();
-        return fn(true, CHAR_LF, detectModulo);
-      } else {
-        return true;
-      }
-    }, "fn");
-    const ret = fn();
-    reset && scnr.resetPeek();
-    return ret;
-  }
-  __name(isTextStart, "isTextStart");
-  function takeChar(scnr, fn) {
-    const ch = scnr.currentChar();
-    if (ch === EOF) {
-      return EOF;
-    }
-    if (fn(ch)) {
-      scnr.next();
-      return ch;
-    }
-    return null;
-  }
-  __name(takeChar, "takeChar");
-  function isIdentifier(ch) {
-    const cc = ch.charCodeAt(0);
-    return cc >= 97 && cc <= 122 || // a-z
-    cc >= 65 && cc <= 90 || // A-Z
-    cc >= 48 && cc <= 57 || // 0-9
-    cc === 95 || // _
-    cc === 36;
-  }
-  __name(isIdentifier, "isIdentifier");
-  function takeIdentifierChar(scnr) {
-    return takeChar(scnr, isIdentifier);
-  }
-  __name(takeIdentifierChar, "takeIdentifierChar");
-  function isNamedIdentifier(ch) {
-    const cc = ch.charCodeAt(0);
-    return cc >= 97 && cc <= 122 || // a-z
-    cc >= 65 && cc <= 90 || // A-Z
-    cc >= 48 && cc <= 57 || // 0-9
-    cc === 95 || // _
-    cc === 36 || // $
-    cc === 45;
-  }
-  __name(isNamedIdentifier, "isNamedIdentifier");
-  function takeNamedIdentifierChar(scnr) {
-    return takeChar(scnr, isNamedIdentifier);
-  }
-  __name(takeNamedIdentifierChar, "takeNamedIdentifierChar");
-  function isDigit(ch) {
-    const cc = ch.charCodeAt(0);
-    return cc >= 48 && cc <= 57;
-  }
-  __name(isDigit, "isDigit");
-  function takeDigit(scnr) {
-    return takeChar(scnr, isDigit);
-  }
-  __name(takeDigit, "takeDigit");
-  function isHexDigit(ch) {
-    const cc = ch.charCodeAt(0);
-    return cc >= 48 && cc <= 57 || // 0-9
-    cc >= 65 && cc <= 70 || // A-F
-    cc >= 97 && cc <= 102;
-  }
-  __name(isHexDigit, "isHexDigit");
-  function takeHexDigit(scnr) {
-    return takeChar(scnr, isHexDigit);
-  }
-  __name(takeHexDigit, "takeHexDigit");
-  function getDigits(scnr) {
-    let ch = "";
-    let num = "";
-    while (ch = takeDigit(scnr)) {
-      num += ch;
-    }
-    return num;
-  }
-  __name(getDigits, "getDigits");
-  function readModulo(scnr) {
-    skipSpaces(scnr);
-    const ch = scnr.currentChar();
-    if (ch !== "%") {
-      emitError(CompileErrorCodes.EXPECTED_TOKEN, currentPosition(), 0, ch);
-    }
-    scnr.next();
-    return "%";
-  }
-  __name(readModulo, "readModulo");
-  function readText(scnr) {
-    let buf = "";
-    while (true) {
-      const ch = scnr.currentChar();
-      if (ch === "{" || ch === "}" || ch === "@" || ch === "|" || !ch) {
-        break;
-      } else if (ch === "%") {
-        if (isTextStart(scnr)) {
-          buf += ch;
-          scnr.next();
-        } else {
-          break;
-        }
-      } else if (ch === CHAR_SP || ch === CHAR_LF) {
-        if (isTextStart(scnr)) {
-          buf += ch;
-          scnr.next();
-        } else if (isPluralStart(scnr)) {
-          break;
-        } else {
-          buf += ch;
-          scnr.next();
-        }
-      } else {
-        buf += ch;
-        scnr.next();
-      }
-    }
-    return buf;
-  }
-  __name(readText, "readText");
-  function readNamedIdentifier(scnr) {
-    skipSpaces(scnr);
-    let ch = "";
-    let name = "";
-    while (ch = takeNamedIdentifierChar(scnr)) {
-      name += ch;
-    }
-    if (scnr.currentChar() === EOF) {
-      emitError(CompileErrorCodes.UNTERMINATED_CLOSING_BRACE, currentPosition(), 0);
-    }
-    return name;
-  }
-  __name(readNamedIdentifier, "readNamedIdentifier");
-  function readListIdentifier(scnr) {
-    skipSpaces(scnr);
-    let value3 = "";
-    if (scnr.currentChar() === "-") {
-      scnr.next();
-      value3 += `-${getDigits(scnr)}`;
-    } else {
-      value3 += getDigits(scnr);
-    }
-    if (scnr.currentChar() === EOF) {
-      emitError(CompileErrorCodes.UNTERMINATED_CLOSING_BRACE, currentPosition(), 0);
-    }
-    return value3;
-  }
-  __name(readListIdentifier, "readListIdentifier");
-  function isLiteral2(ch) {
-    return ch !== LITERAL_DELIMITER && ch !== CHAR_LF;
-  }
-  __name(isLiteral2, "isLiteral");
-  function readLiteral(scnr) {
-    skipSpaces(scnr);
-    eat(scnr, `'`);
-    let ch = "";
-    let literal = "";
-    while (ch = takeChar(scnr, isLiteral2)) {
-      if (ch === "\\") {
-        literal += readEscapeSequence(scnr);
-      } else {
-        literal += ch;
-      }
-    }
-    const current = scnr.currentChar();
-    if (current === CHAR_LF || current === EOF) {
-      emitError(CompileErrorCodes.UNTERMINATED_SINGLE_QUOTE_IN_PLACEHOLDER, currentPosition(), 0);
-      if (current === CHAR_LF) {
-        scnr.next();
-        eat(scnr, `'`);
-      }
-      return literal;
-    }
-    eat(scnr, `'`);
-    return literal;
-  }
-  __name(readLiteral, "readLiteral");
-  function readEscapeSequence(scnr) {
-    const ch = scnr.currentChar();
-    switch (ch) {
-      case "\\":
-      case `'`:
-        scnr.next();
-        return `\\${ch}`;
-      case "u":
-        return readUnicodeEscapeSequence(scnr, ch, 4);
-      case "U":
-        return readUnicodeEscapeSequence(scnr, ch, 6);
-      default:
-        emitError(CompileErrorCodes.UNKNOWN_ESCAPE_SEQUENCE, currentPosition(), 0, ch);
-        return "";
-    }
-  }
-  __name(readEscapeSequence, "readEscapeSequence");
-  function readUnicodeEscapeSequence(scnr, unicode, digits) {
-    eat(scnr, unicode);
-    let sequence = "";
-    for (let i2 = 0; i2 < digits; i2++) {
-      const ch = takeHexDigit(scnr);
-      if (!ch) {
-        emitError(CompileErrorCodes.INVALID_UNICODE_ESCAPE_SEQUENCE, currentPosition(), 0, `\\${unicode}${sequence}${scnr.currentChar()}`);
-        break;
-      }
-      sequence += ch;
-    }
-    return `\\${unicode}${sequence}`;
-  }
-  __name(readUnicodeEscapeSequence, "readUnicodeEscapeSequence");
-  function isInvalidIdentifier(ch) {
-    return ch !== "{" && ch !== "}" && ch !== CHAR_SP && ch !== CHAR_LF;
-  }
-  __name(isInvalidIdentifier, "isInvalidIdentifier");
-  function readInvalidIdentifier(scnr) {
-    skipSpaces(scnr);
-    let ch = "";
-    let identifiers = "";
-    while (ch = takeChar(scnr, isInvalidIdentifier)) {
-      identifiers += ch;
-    }
-    return identifiers;
-  }
-  __name(readInvalidIdentifier, "readInvalidIdentifier");
-  function readLinkedModifier(scnr) {
-    let ch = "";
-    let name = "";
-    while (ch = takeIdentifierChar(scnr)) {
-      name += ch;
-    }
-    return name;
-  }
-  __name(readLinkedModifier, "readLinkedModifier");
-  function readLinkedRefer(scnr) {
-    const fn = /* @__PURE__ */ __name((buf) => {
-      const ch = scnr.currentChar();
-      if (ch === "{" || ch === "%" || ch === "@" || ch === "|" || ch === "(" || ch === ")" || !ch) {
-        return buf;
-      } else if (ch === CHAR_SP) {
-        return buf;
-      } else if (ch === CHAR_LF || ch === DOT) {
-        buf += ch;
-        scnr.next();
-        return fn(buf);
-      } else {
-        buf += ch;
-        scnr.next();
-        return fn(buf);
-      }
-    }, "fn");
-    return fn("");
-  }
-  __name(readLinkedRefer, "readLinkedRefer");
-  function readPlural(scnr) {
-    skipSpaces(scnr);
-    const plural = eat(
-      scnr,
-      "|"
-      /* TokenChars.Pipe */
-    );
-    skipSpaces(scnr);
-    return plural;
-  }
-  __name(readPlural, "readPlural");
-  function readTokenInPlaceholder(scnr, context2) {
-    let token = null;
-    const ch = scnr.currentChar();
-    switch (ch) {
-      case "{":
-        if (context2.braceNest >= 1) {
-          emitError(CompileErrorCodes.NOT_ALLOW_NEST_PLACEHOLDER, currentPosition(), 0);
-        }
-        scnr.next();
-        token = getToken(
-          context2,
-          2,
-          "{"
-          /* TokenChars.BraceLeft */
-        );
-        skipSpaces(scnr);
-        context2.braceNest++;
-        return token;
-      case "}":
-        if (context2.braceNest > 0 && context2.currentType === 2) {
-          emitError(CompileErrorCodes.EMPTY_PLACEHOLDER, currentPosition(), 0);
-        }
-        scnr.next();
-        token = getToken(
-          context2,
-          3,
-          "}"
-          /* TokenChars.BraceRight */
-        );
-        context2.braceNest--;
-        context2.braceNest > 0 && skipSpaces(scnr);
-        if (context2.inLinked && context2.braceNest === 0) {
-          context2.inLinked = false;
-        }
-        return token;
-      case "@":
-        if (context2.braceNest > 0) {
-          emitError(CompileErrorCodes.UNTERMINATED_CLOSING_BRACE, currentPosition(), 0);
-        }
-        token = readTokenInLinked(scnr, context2) || getEndToken(context2);
-        context2.braceNest = 0;
-        return token;
-      default: {
-        let validNamedIdentifier = true;
-        let validListIdentifier = true;
-        let validLiteral = true;
-        if (isPluralStart(scnr)) {
-          if (context2.braceNest > 0) {
-            emitError(CompileErrorCodes.UNTERMINATED_CLOSING_BRACE, currentPosition(), 0);
-          }
-          token = getToken(context2, 1, readPlural(scnr));
-          context2.braceNest = 0;
-          context2.inLinked = false;
-          return token;
-        }
-        if (context2.braceNest > 0 && (context2.currentType === 5 || context2.currentType === 6 || context2.currentType === 7)) {
-          emitError(CompileErrorCodes.UNTERMINATED_CLOSING_BRACE, currentPosition(), 0);
-          context2.braceNest = 0;
-          return readToken(scnr, context2);
-        }
-        if (validNamedIdentifier = isNamedIdentifierStart(scnr, context2)) {
-          token = getToken(context2, 5, readNamedIdentifier(scnr));
-          skipSpaces(scnr);
-          return token;
-        }
-        if (validListIdentifier = isListIdentifierStart(scnr, context2)) {
-          token = getToken(context2, 6, readListIdentifier(scnr));
-          skipSpaces(scnr);
-          return token;
-        }
-        if (validLiteral = isLiteralStart(scnr, context2)) {
-          token = getToken(context2, 7, readLiteral(scnr));
-          skipSpaces(scnr);
-          return token;
-        }
-        if (!validNamedIdentifier && !validListIdentifier && !validLiteral) {
-          token = getToken(context2, 13, readInvalidIdentifier(scnr));
-          emitError(CompileErrorCodes.INVALID_TOKEN_IN_PLACEHOLDER, currentPosition(), 0, token.value);
-          skipSpaces(scnr);
-          return token;
-        }
-        break;
-      }
-    }
-    return token;
-  }
-  __name(readTokenInPlaceholder, "readTokenInPlaceholder");
-  function readTokenInLinked(scnr, context2) {
-    const { currentType } = context2;
-    let token = null;
-    const ch = scnr.currentChar();
-    if ((currentType === 8 || currentType === 9 || currentType === 12 || currentType === 10) && (ch === CHAR_LF || ch === CHAR_SP)) {
-      emitError(CompileErrorCodes.INVALID_LINKED_FORMAT, currentPosition(), 0);
-    }
-    switch (ch) {
-      case "@":
-        scnr.next();
-        token = getToken(
-          context2,
-          8,
-          "@"
-          /* TokenChars.LinkedAlias */
-        );
-        context2.inLinked = true;
-        return token;
-      case ".":
-        skipSpaces(scnr);
-        scnr.next();
-        return getToken(
-          context2,
-          9,
-          "."
-          /* TokenChars.LinkedDot */
-        );
-      case ":":
-        skipSpaces(scnr);
-        scnr.next();
-        return getToken(
-          context2,
-          10,
-          ":"
-          /* TokenChars.LinkedDelimiter */
-        );
-      default:
-        if (isPluralStart(scnr)) {
-          token = getToken(context2, 1, readPlural(scnr));
-          context2.braceNest = 0;
-          context2.inLinked = false;
-          return token;
-        }
-        if (isLinkedDotStart(scnr, context2) || isLinkedDelimiterStart(scnr, context2)) {
-          skipSpaces(scnr);
-          return readTokenInLinked(scnr, context2);
-        }
-        if (isLinkedModifierStart(scnr, context2)) {
-          skipSpaces(scnr);
-          return getToken(context2, 12, readLinkedModifier(scnr));
-        }
-        if (isLinkedReferStart(scnr, context2)) {
-          skipSpaces(scnr);
-          if (ch === "{") {
-            return readTokenInPlaceholder(scnr, context2) || token;
-          } else {
-            return getToken(context2, 11, readLinkedRefer(scnr));
-          }
-        }
-        if (currentType === 8) {
-          emitError(CompileErrorCodes.INVALID_LINKED_FORMAT, currentPosition(), 0);
-        }
-        context2.braceNest = 0;
-        context2.inLinked = false;
-        return readToken(scnr, context2);
-    }
-  }
-  __name(readTokenInLinked, "readTokenInLinked");
-  function readToken(scnr, context2) {
-    let token = {
-      type: 14
-      /* TokenTypes.EOF */
-    };
-    if (context2.braceNest > 0) {
-      return readTokenInPlaceholder(scnr, context2) || getEndToken(context2);
-    }
-    if (context2.inLinked) {
-      return readTokenInLinked(scnr, context2) || getEndToken(context2);
-    }
-    const ch = scnr.currentChar();
-    switch (ch) {
-      case "{":
-        return readTokenInPlaceholder(scnr, context2) || getEndToken(context2);
-      case "}":
-        emitError(CompileErrorCodes.UNBALANCED_CLOSING_BRACE, currentPosition(), 0);
-        scnr.next();
-        return getToken(
-          context2,
-          3,
-          "}"
-          /* TokenChars.BraceRight */
-        );
-      case "@":
-        return readTokenInLinked(scnr, context2) || getEndToken(context2);
-      default: {
-        if (isPluralStart(scnr)) {
-          token = getToken(context2, 1, readPlural(scnr));
-          context2.braceNest = 0;
-          context2.inLinked = false;
-          return token;
-        }
-        const { isModulo, hasSpace } = detectModuloStart(scnr);
-        if (isModulo) {
-          return hasSpace ? getToken(context2, 0, readText(scnr)) : getToken(context2, 4, readModulo(scnr));
-        }
-        if (isTextStart(scnr)) {
-          return getToken(context2, 0, readText(scnr));
-        }
-        break;
-      }
-    }
-    return token;
-  }
-  __name(readToken, "readToken");
-  function nextToken() {
-    const { currentType, offset, startLoc, endLoc } = _context;
-    _context.lastType = currentType;
-    _context.lastOffset = offset;
-    _context.lastStartLoc = startLoc;
-    _context.lastEndLoc = endLoc;
-    _context.offset = currentOffset();
-    _context.startLoc = currentPosition();
-    if (_scnr.currentChar() === EOF) {
-      return getToken(
-        _context,
-        14
-        /* TokenTypes.EOF */
-      );
-    }
-    return readToken(_scnr, _context);
-  }
-  __name(nextToken, "nextToken");
-  return {
-    nextToken,
-    currentOffset,
-    currentPosition,
-    context
-  };
-}
-__name(createTokenizer, "createTokenizer");
-const ERROR_DOMAIN$2 = "parser";
-const KNOWN_ESCAPES = /(?:\\\\|\\'|\\u([0-9a-fA-F]{4})|\\U([0-9a-fA-F]{6}))/g;
-function fromEscapeSequence(match, codePoint4, codePoint6) {
-  switch (match) {
-    case `\\\\`:
-      return `\\`;
-    case `\\'`:
-      return `'`;
-    default: {
-      const codePoint = parseInt(codePoint4 || codePoint6, 16);
-      if (codePoint <= 55295 || codePoint >= 57344) {
-        return String.fromCodePoint(codePoint);
-      }
-      return "�";
-    }
-  }
-}
-__name(fromEscapeSequence, "fromEscapeSequence");
-function createParser(options3 = {}) {
-  const location2 = options3.location !== false;
-  const { onError, onWarn } = options3;
-  function emitError(tokenzer, code2, start2, offset, ...args) {
-    const end = tokenzer.currentPosition();
-    end.offset += offset;
-    end.column += offset;
-    if (onError) {
-      const loc = location2 ? createLocation(start2, end) : null;
-      const err = createCompileError(code2, loc, {
-        domain: ERROR_DOMAIN$2,
-        args
-      });
-      onError(err);
-    }
-  }
-  __name(emitError, "emitError");
-  function emitWarn(tokenzer, code2, start2, offset, ...args) {
-    const end = tokenzer.currentPosition();
-    end.offset += offset;
-    end.column += offset;
-    if (onWarn) {
-      const loc = location2 ? createLocation(start2, end) : null;
-      onWarn(createCompileWarn(code2, loc, args));
-    }
-  }
-  __name(emitWarn, "emitWarn");
-  function startNode(type, offset, loc) {
-    const node3 = { type };
-    if (location2) {
-      node3.start = offset;
-      node3.end = offset;
-      node3.loc = { start: loc, end: loc };
-    }
-    return node3;
-  }
-  __name(startNode, "startNode");
-  function endNode(node3, offset, pos2, type) {
-    if (type) {
-      node3.type = type;
-    }
-    if (location2) {
-      node3.end = offset;
-      if (node3.loc) {
-        node3.loc.end = pos2;
-      }
-    }
-  }
-  __name(endNode, "endNode");
-  function parseText(tokenizer, value3) {
-    const context = tokenizer.context();
-    const node3 = startNode(3, context.offset, context.startLoc);
-    node3.value = value3;
-    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
-    return node3;
-  }
-  __name(parseText, "parseText");
-  function parseList(tokenizer, index2) {
-    const context = tokenizer.context();
-    const { lastOffset: offset, lastStartLoc: loc } = context;
-    const node3 = startNode(5, offset, loc);
-    node3.index = parseInt(index2, 10);
-    tokenizer.nextToken();
-    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
-    return node3;
-  }
-  __name(parseList, "parseList");
-  function parseNamed(tokenizer, key, modulo) {
-    const context = tokenizer.context();
-    const { lastOffset: offset, lastStartLoc: loc } = context;
-    const node3 = startNode(4, offset, loc);
-    node3.key = key;
-    if (modulo === true) {
-      node3.modulo = true;
-    }
-    tokenizer.nextToken();
-    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
-    return node3;
-  }
-  __name(parseNamed, "parseNamed");
-  function parseLiteral(tokenizer, value3) {
-    const context = tokenizer.context();
-    const { lastOffset: offset, lastStartLoc: loc } = context;
-    const node3 = startNode(9, offset, loc);
-    node3.value = value3.replace(KNOWN_ESCAPES, fromEscapeSequence);
-    tokenizer.nextToken();
-    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
-    return node3;
-  }
-  __name(parseLiteral, "parseLiteral");
-  function parseLinkedModifier(tokenizer) {
-    const token = tokenizer.nextToken();
-    const context = tokenizer.context();
-    const { lastOffset: offset, lastStartLoc: loc } = context;
-    const node3 = startNode(8, offset, loc);
-    if (token.type !== 12) {
-      emitError(tokenizer, CompileErrorCodes.UNEXPECTED_EMPTY_LINKED_MODIFIER, context.lastStartLoc, 0);
-      node3.value = "";
-      endNode(node3, offset, loc);
-      return {
-        nextConsumeToken: token,
-        node: node3
-      };
-    }
-    if (token.value == null) {
-      emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
-    }
-    node3.value = token.value || "";
-    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
-    return {
-      node: node3
-    };
-  }
-  __name(parseLinkedModifier, "parseLinkedModifier");
-  function parseLinkedKey(tokenizer, value3) {
-    const context = tokenizer.context();
-    const node3 = startNode(7, context.offset, context.startLoc);
-    node3.value = value3;
-    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
-    return node3;
-  }
-  __name(parseLinkedKey, "parseLinkedKey");
-  function parseLinked(tokenizer) {
-    const context = tokenizer.context();
-    const linkedNode = startNode(6, context.offset, context.startLoc);
-    let token = tokenizer.nextToken();
-    if (token.type === 9) {
-      const parsed = parseLinkedModifier(tokenizer);
-      linkedNode.modifier = parsed.node;
-      token = parsed.nextConsumeToken || tokenizer.nextToken();
-    }
-    if (token.type !== 10) {
-      emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
-    }
-    token = tokenizer.nextToken();
-    if (token.type === 2) {
-      token = tokenizer.nextToken();
-    }
-    switch (token.type) {
-      case 11:
-        if (token.value == null) {
-          emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
-        }
-        linkedNode.key = parseLinkedKey(tokenizer, token.value || "");
-        break;
-      case 5:
-        if (token.value == null) {
-          emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
-        }
-        linkedNode.key = parseNamed(tokenizer, token.value || "");
-        break;
-      case 6:
-        if (token.value == null) {
-          emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
-        }
-        linkedNode.key = parseList(tokenizer, token.value || "");
-        break;
-      case 7:
-        if (token.value == null) {
-          emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
-        }
-        linkedNode.key = parseLiteral(tokenizer, token.value || "");
-        break;
-      default: {
-        emitError(tokenizer, CompileErrorCodes.UNEXPECTED_EMPTY_LINKED_KEY, context.lastStartLoc, 0);
-        const nextContext = tokenizer.context();
-        const emptyLinkedKeyNode = startNode(7, nextContext.offset, nextContext.startLoc);
-        emptyLinkedKeyNode.value = "";
-        endNode(emptyLinkedKeyNode, nextContext.offset, nextContext.startLoc);
-        linkedNode.key = emptyLinkedKeyNode;
-        endNode(linkedNode, nextContext.offset, nextContext.startLoc);
-        return {
-          nextConsumeToken: token,
-          node: linkedNode
-        };
-      }
-    }
-    endNode(linkedNode, tokenizer.currentOffset(), tokenizer.currentPosition());
-    return {
-      node: linkedNode
-    };
-  }
-  __name(parseLinked, "parseLinked");
-  function parseMessage(tokenizer) {
-    const context = tokenizer.context();
-    const startOffset = context.currentType === 1 ? tokenizer.currentOffset() : context.offset;
-    const startLoc = context.currentType === 1 ? context.endLoc : context.startLoc;
-    const node3 = startNode(2, startOffset, startLoc);
-    node3.items = [];
-    let nextToken = null;
-    let modulo = null;
-    do {
-      const token = nextToken || tokenizer.nextToken();
-      nextToken = null;
-      switch (token.type) {
-        case 0:
-          if (token.value == null) {
-            emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
-          }
-          node3.items.push(parseText(tokenizer, token.value || ""));
-          break;
-        case 6:
-          if (token.value == null) {
-            emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
-          }
-          node3.items.push(parseList(tokenizer, token.value || ""));
-          break;
-        case 4:
-          modulo = true;
-          break;
-        case 5:
-          if (token.value == null) {
-            emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
-          }
-          node3.items.push(parseNamed(tokenizer, token.value || "", !!modulo));
-          if (modulo) {
-            emitWarn(tokenizer, CompileWarnCodes.USE_MODULO_SYNTAX, context.lastStartLoc, 0, getTokenCaption(token));
-            modulo = null;
-          }
-          break;
-        case 7:
-          if (token.value == null) {
-            emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
-          }
-          node3.items.push(parseLiteral(tokenizer, token.value || ""));
-          break;
-        case 8: {
-          const parsed = parseLinked(tokenizer);
-          node3.items.push(parsed.node);
-          nextToken = parsed.nextConsumeToken || null;
-          break;
-        }
-      }
-    } while (context.currentType !== 14 && context.currentType !== 1);
-    const endOffset = context.currentType === 1 ? context.lastOffset : tokenizer.currentOffset();
-    const endLoc = context.currentType === 1 ? context.lastEndLoc : tokenizer.currentPosition();
-    endNode(node3, endOffset, endLoc);
-    return node3;
-  }
-  __name(parseMessage, "parseMessage");
-  function parsePlural(tokenizer, offset, loc, msgNode) {
-    const context = tokenizer.context();
-    let hasEmptyMessage = msgNode.items.length === 0;
-    const node3 = startNode(1, offset, loc);
-    node3.cases = [];
-    node3.cases.push(msgNode);
-    do {
-      const msg = parseMessage(tokenizer);
-      if (!hasEmptyMessage) {
-        hasEmptyMessage = msg.items.length === 0;
-      }
-      node3.cases.push(msg);
-    } while (context.currentType !== 14);
-    if (hasEmptyMessage) {
-      emitError(tokenizer, CompileErrorCodes.MUST_HAVE_MESSAGES_IN_PLURAL, loc, 0);
-    }
-    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
-    return node3;
-  }
-  __name(parsePlural, "parsePlural");
-  function parseResource(tokenizer) {
-    const context = tokenizer.context();
-    const { offset, startLoc } = context;
-    const msgNode = parseMessage(tokenizer);
-    if (context.currentType === 14) {
-      return msgNode;
-    } else {
-      return parsePlural(tokenizer, offset, startLoc, msgNode);
-    }
-  }
-  __name(parseResource, "parseResource");
-  function parse2(source) {
-    const tokenizer = createTokenizer(source, assign({}, options3));
-    const context = tokenizer.context();
-    const node3 = startNode(0, context.offset, context.startLoc);
-    if (location2 && node3.loc) {
-      node3.loc.source = source;
-    }
-    node3.body = parseResource(tokenizer);
-    if (options3.onCacheKey) {
-      node3.cacheKey = options3.onCacheKey(source);
-    }
-    if (context.currentType !== 14) {
-      emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, source[context.offset] || "");
-    }
-    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
-    return node3;
-  }
-  __name(parse2, "parse");
-  return { parse: parse2 };
-}
-__name(createParser, "createParser");
-function getTokenCaption(token) {
-  if (token.type === 14) {
-    return "EOF";
-  }
-  const name = (token.value || "").replace(/\r?\n/gu, "\\n");
-  return name.length > 10 ? name.slice(0, 9) + "…" : name;
-}
-__name(getTokenCaption, "getTokenCaption");
-function createTransformer(ast, options3 = {}) {
-  const _context = {
-    ast,
-    helpers: /* @__PURE__ */ new Set()
-  };
-  const context = /* @__PURE__ */ __name(() => _context, "context");
-  const helper = /* @__PURE__ */ __name((name) => {
-    _context.helpers.add(name);
-    return name;
-  }, "helper");
-  return { context, helper };
-}
-__name(createTransformer, "createTransformer");
-function traverseNodes(nodes, transformer) {
-  for (let i2 = 0; i2 < nodes.length; i2++) {
-    traverseNode(nodes[i2], transformer);
-  }
-}
-__name(traverseNodes, "traverseNodes");
-function traverseNode(node3, transformer) {
-  switch (node3.type) {
-    case 1:
-      traverseNodes(node3.cases, transformer);
-      transformer.helper(
-        "plural"
-        /* HelperNameMap.PLURAL */
-      );
-      break;
-    case 2:
-      traverseNodes(node3.items, transformer);
-      break;
-    case 6: {
-      const linked = node3;
-      traverseNode(linked.key, transformer);
-      transformer.helper(
-        "linked"
-        /* HelperNameMap.LINKED */
-      );
-      transformer.helper(
-        "type"
-        /* HelperNameMap.TYPE */
-      );
-      break;
-    }
-    case 5:
-      transformer.helper(
-        "interpolate"
-        /* HelperNameMap.INTERPOLATE */
-      );
-      transformer.helper(
-        "list"
-        /* HelperNameMap.LIST */
-      );
-      break;
-    case 4:
-      transformer.helper(
-        "interpolate"
-        /* HelperNameMap.INTERPOLATE */
-      );
-      transformer.helper(
-        "named"
-        /* HelperNameMap.NAMED */
-      );
-      break;
-  }
-}
-__name(traverseNode, "traverseNode");
-function transform(ast, options3 = {}) {
-  const transformer = createTransformer(ast);
-  transformer.helper(
-    "normalize"
-    /* HelperNameMap.NORMALIZE */
-  );
-  ast.body && traverseNode(ast.body, transformer);
-  const context = transformer.context();
-  ast.helpers = Array.from(context.helpers);
-}
-__name(transform, "transform");
-function optimize(ast) {
-  const body = ast.body;
-  if (body.type === 2) {
-    optimizeMessageNode(body);
-  } else {
-    body.cases.forEach((c) => optimizeMessageNode(c));
-  }
-  return ast;
-}
-__name(optimize, "optimize");
-function optimizeMessageNode(message3) {
-  if (message3.items.length === 1) {
-    const item2 = message3.items[0];
-    if (item2.type === 3 || item2.type === 9) {
-      message3.static = item2.value;
-      delete item2.value;
-    }
-  } else {
-    const values2 = [];
-    for (let i2 = 0; i2 < message3.items.length; i2++) {
-      const item2 = message3.items[i2];
-      if (!(item2.type === 3 || item2.type === 9)) {
-        break;
-      }
-      if (item2.value == null) {
-        break;
-      }
-      values2.push(item2.value);
-    }
-    if (values2.length === message3.items.length) {
-      message3.static = join(values2);
-      for (let i2 = 0; i2 < message3.items.length; i2++) {
-        const item2 = message3.items[i2];
-        if (item2.type === 3 || item2.type === 9) {
-          delete item2.value;
-        }
-      }
-    }
-  }
-}
-__name(optimizeMessageNode, "optimizeMessageNode");
-const ERROR_DOMAIN$1 = "minifier";
-function minify(node3) {
-  node3.t = node3.type;
-  switch (node3.type) {
-    case 0: {
-      const resource = node3;
-      minify(resource.body);
-      resource.b = resource.body;
-      delete resource.body;
-      break;
-    }
-    case 1: {
-      const plural = node3;
-      const cases = plural.cases;
-      for (let i2 = 0; i2 < cases.length; i2++) {
-        minify(cases[i2]);
-      }
-      plural.c = cases;
-      delete plural.cases;
-      break;
-    }
-    case 2: {
-      const message3 = node3;
-      const items2 = message3.items;
-      for (let i2 = 0; i2 < items2.length; i2++) {
-        minify(items2[i2]);
-      }
-      message3.i = items2;
-      delete message3.items;
-      if (message3.static) {
-        message3.s = message3.static;
-        delete message3.static;
-      }
-      break;
-    }
-    case 3:
-    case 9:
-    case 8:
-    case 7: {
-      const valueNode = node3;
-      if (valueNode.value) {
-        valueNode.v = valueNode.value;
-        delete valueNode.value;
-      }
-      break;
-    }
-    case 6: {
-      const linked = node3;
-      minify(linked.key);
-      linked.k = linked.key;
-      delete linked.key;
-      if (linked.modifier) {
-        minify(linked.modifier);
-        linked.m = linked.modifier;
-        delete linked.modifier;
-      }
-      break;
-    }
-    case 5: {
-      const list = node3;
-      list.i = list.index;
-      delete list.index;
-      break;
-    }
-    case 4: {
-      const named = node3;
-      named.k = named.key;
-      delete named.key;
-      break;
-    }
-    default: {
-      throw createCompileError(CompileErrorCodes.UNHANDLED_MINIFIER_NODE_TYPE, null, {
-        domain: ERROR_DOMAIN$1,
-        args: [node3.type]
-      });
-    }
-  }
-  delete node3.type;
-}
-__name(minify, "minify");
-const ERROR_DOMAIN = "parser";
-function createCodeGenerator(ast, options3) {
-  const { sourceMap, filename, breakLineCode, needIndent: _needIndent } = options3;
-  const location2 = options3.location !== false;
-  const _context = {
-    filename,
-    code: "",
-    column: 1,
-    line: 1,
-    offset: 0,
-    map: void 0,
-    breakLineCode,
-    needIndent: _needIndent,
-    indentLevel: 0
-  };
-  if (location2 && ast.loc) {
-    _context.source = ast.loc.source;
-  }
-  const context = /* @__PURE__ */ __name(() => _context, "context");
-  function push(code2, node3) {
-    _context.code += code2;
-  }
-  __name(push, "push");
-  function _newline(n, withBreakLine = true) {
-    const _breakLineCode = withBreakLine ? breakLineCode : "";
-    push(_needIndent ? _breakLineCode + `  `.repeat(n) : _breakLineCode);
-  }
-  __name(_newline, "_newline");
-  function indent(withNewLine = true) {
-    const level = ++_context.indentLevel;
-    withNewLine && _newline(level);
-  }
-  __name(indent, "indent");
-  function deindent(withNewLine = true) {
-    const level = --_context.indentLevel;
-    withNewLine && _newline(level);
-  }
-  __name(deindent, "deindent");
-  function newline() {
-    _newline(_context.indentLevel);
-  }
-  __name(newline, "newline");
-  const helper = /* @__PURE__ */ __name((key) => `_${key}`, "helper");
-  const needIndent = /* @__PURE__ */ __name(() => _context.needIndent, "needIndent");
-  return {
-    context,
-    push,
-    indent,
-    deindent,
-    newline,
-    helper,
-    needIndent
-  };
-}
-__name(createCodeGenerator, "createCodeGenerator");
-function generateLinkedNode(generator, node3) {
-  const { helper } = generator;
-  generator.push(`${helper(
-    "linked"
-    /* HelperNameMap.LINKED */
-  )}(`);
-  generateNode(generator, node3.key);
-  if (node3.modifier) {
-    generator.push(`, `);
-    generateNode(generator, node3.modifier);
-    generator.push(`, _type`);
-  } else {
-    generator.push(`, undefined, _type`);
-  }
-  generator.push(`)`);
-}
-__name(generateLinkedNode, "generateLinkedNode");
-function generateMessageNode(generator, node3) {
-  const { helper, needIndent } = generator;
-  generator.push(`${helper(
-    "normalize"
-    /* HelperNameMap.NORMALIZE */
-  )}([`);
-  generator.indent(needIndent());
-  const length = node3.items.length;
-  for (let i2 = 0; i2 < length; i2++) {
-    generateNode(generator, node3.items[i2]);
-    if (i2 === length - 1) {
-      break;
-    }
-    generator.push(", ");
-  }
-  generator.deindent(needIndent());
-  generator.push("])");
-}
-__name(generateMessageNode, "generateMessageNode");
-function generatePluralNode(generator, node3) {
-  const { helper, needIndent } = generator;
-  if (node3.cases.length > 1) {
-    generator.push(`${helper(
-      "plural"
-      /* HelperNameMap.PLURAL */
-    )}([`);
-    generator.indent(needIndent());
-    const length = node3.cases.length;
-    for (let i2 = 0; i2 < length; i2++) {
-      generateNode(generator, node3.cases[i2]);
-      if (i2 === length - 1) {
-        break;
-      }
-      generator.push(", ");
-    }
-    generator.deindent(needIndent());
-    generator.push(`])`);
-  }
-}
-__name(generatePluralNode, "generatePluralNode");
-function generateResource(generator, node3) {
-  if (node3.body) {
-    generateNode(generator, node3.body);
-  } else {
-    generator.push("null");
-  }
-}
-__name(generateResource, "generateResource");
-function generateNode(generator, node3) {
-  const { helper } = generator;
-  switch (node3.type) {
-    case 0:
-      generateResource(generator, node3);
-      break;
-    case 1:
-      generatePluralNode(generator, node3);
-      break;
-    case 2:
-      generateMessageNode(generator, node3);
-      break;
-    case 6:
-      generateLinkedNode(generator, node3);
-      break;
-    case 8:
-      generator.push(JSON.stringify(node3.value), node3);
-      break;
-    case 7:
-      generator.push(JSON.stringify(node3.value), node3);
-      break;
-    case 5:
-      generator.push(`${helper(
-        "interpolate"
-        /* HelperNameMap.INTERPOLATE */
-      )}(${helper(
-        "list"
-        /* HelperNameMap.LIST */
-      )}(${node3.index}))`, node3);
-      break;
-    case 4:
-      generator.push(`${helper(
-        "interpolate"
-        /* HelperNameMap.INTERPOLATE */
-      )}(${helper(
-        "named"
-        /* HelperNameMap.NAMED */
-      )}(${JSON.stringify(node3.key)}))`, node3);
-      break;
-    case 9:
-      generator.push(JSON.stringify(node3.value), node3);
-      break;
-    case 3:
-      generator.push(JSON.stringify(node3.value), node3);
-      break;
-    default: {
-      throw createCompileError(CompileErrorCodes.UNHANDLED_CODEGEN_NODE_TYPE, null, {
-        domain: ERROR_DOMAIN,
-        args: [node3.type]
-      });
-    }
-  }
-}
-__name(generateNode, "generateNode");
-const generate = /* @__PURE__ */ __name((ast, options3 = {}) => {
-  const mode2 = isString$1(options3.mode) ? options3.mode : "normal";
-  const filename = isString$1(options3.filename) ? options3.filename : "message.intl";
-  const sourceMap = !!options3.sourceMap;
-  const breakLineCode = options3.breakLineCode != null ? options3.breakLineCode : mode2 === "arrow" ? ";" : "\n";
-  const needIndent = options3.needIndent ? options3.needIndent : mode2 !== "arrow";
-  const helpers = ast.helpers || [];
-  const generator = createCodeGenerator(ast, {
-    mode: mode2,
-    filename,
-    sourceMap,
-    breakLineCode,
-    needIndent
-  });
-  generator.push(mode2 === "normal" ? `function __msg__ (ctx) {` : `(ctx) => {`);
-  generator.indent(needIndent);
-  if (helpers.length > 0) {
-    generator.push(`const { ${join(helpers.map((s) => `${s}: _${s}`), ", ")} } = ctx`);
-    generator.newline();
-  }
-  generator.push(`return `);
-  generateNode(generator, ast);
-  generator.deindent(needIndent);
-  generator.push(`}`);
-  delete ast.helpers;
-  const { code: code2, map: map2 } = generator.context();
-  return {
-    ast,
-    code: code2,
-    map: map2 ? map2.toJSON() : void 0
-    // eslint-disable-line @typescript-eslint/no-explicit-any
-  };
-}, "generate");
-function baseCompile$1(source, options3 = {}) {
-  const assignedOptions = assign({}, options3);
-  const jit = !!assignedOptions.jit;
-  const enalbeMinify = !!assignedOptions.minify;
-  const enambeOptimize = assignedOptions.optimize == null ? true : assignedOptions.optimize;
-  const parser = createParser(assignedOptions);
-  const ast = parser.parse(source);
-  if (!jit) {
-    transform(ast, assignedOptions);
-    return generate(ast, assignedOptions);
-  } else {
-    enambeOptimize && optimize(ast);
-    enalbeMinify && minify(ast);
-    return { ast, code: "" };
-  }
-}
-__name(baseCompile$1, "baseCompile$1");
-/*!
-  * core-base v9.13.1
-  * (c) 2024 kazuya kawaguchi
-  * Released under the MIT License.
-  */
-function initFeatureFlags$1() {
-  if (typeof __INTLIFY_PROD_DEVTOOLS__ !== "boolean") {
-    getGlobalThis().__INTLIFY_PROD_DEVTOOLS__ = false;
-  }
-  if (typeof __INTLIFY_JIT_COMPILATION__ !== "boolean") {
-    getGlobalThis().__INTLIFY_JIT_COMPILATION__ = false;
-  }
-  if (typeof __INTLIFY_DROP_MESSAGE_COMPILER__ !== "boolean") {
-    getGlobalThis().__INTLIFY_DROP_MESSAGE_COMPILER__ = false;
-  }
-}
-__name(initFeatureFlags$1, "initFeatureFlags$1");
-const pathStateMachine = [];
-pathStateMachine[
-  0
-  /* States.BEFORE_PATH */
-] = {
-  [
-    "w"
-    /* PathCharTypes.WORKSPACE */
-  ]: [
-    0
-    /* States.BEFORE_PATH */
-  ],
-  [
-    "i"
-    /* PathCharTypes.IDENT */
-  ]: [
-    3,
-    0
-    /* Actions.APPEND */
-  ],
-  [
-    "["
-    /* PathCharTypes.LEFT_BRACKET */
-  ]: [
-    4
-    /* States.IN_SUB_PATH */
-  ],
-  [
-    "o"
-    /* PathCharTypes.END_OF_FAIL */
-  ]: [
-    7
-    /* States.AFTER_PATH */
-  ]
-};
-pathStateMachine[
-  1
-  /* States.IN_PATH */
-] = {
-  [
-    "w"
-    /* PathCharTypes.WORKSPACE */
-  ]: [
-    1
-    /* States.IN_PATH */
-  ],
-  [
-    "."
-    /* PathCharTypes.DOT */
-  ]: [
-    2
-    /* States.BEFORE_IDENT */
-  ],
-  [
-    "["
-    /* PathCharTypes.LEFT_BRACKET */
-  ]: [
-    4
-    /* States.IN_SUB_PATH */
-  ],
-  [
-    "o"
-    /* PathCharTypes.END_OF_FAIL */
-  ]: [
-    7
-    /* States.AFTER_PATH */
-  ]
-};
-pathStateMachine[
-  2
-  /* States.BEFORE_IDENT */
-] = {
-  [
-    "w"
-    /* PathCharTypes.WORKSPACE */
-  ]: [
-    2
-    /* States.BEFORE_IDENT */
-  ],
-  [
-    "i"
-    /* PathCharTypes.IDENT */
-  ]: [
-    3,
-    0
-    /* Actions.APPEND */
-  ],
-  [
-    "0"
-    /* PathCharTypes.ZERO */
-  ]: [
-    3,
-    0
-    /* Actions.APPEND */
-  ]
-};
-pathStateMachine[
-  3
-  /* States.IN_IDENT */
-] = {
-  [
-    "i"
-    /* PathCharTypes.IDENT */
-  ]: [
-    3,
-    0
-    /* Actions.APPEND */
-  ],
-  [
-    "0"
-    /* PathCharTypes.ZERO */
-  ]: [
-    3,
-    0
-    /* Actions.APPEND */
-  ],
-  [
-    "w"
-    /* PathCharTypes.WORKSPACE */
-  ]: [
-    1,
-    1
-    /* Actions.PUSH */
-  ],
-  [
-    "."
-    /* PathCharTypes.DOT */
-  ]: [
-    2,
-    1
-    /* Actions.PUSH */
-  ],
-  [
-    "["
-    /* PathCharTypes.LEFT_BRACKET */
-  ]: [
-    4,
-    1
-    /* Actions.PUSH */
-  ],
-  [
-    "o"
-    /* PathCharTypes.END_OF_FAIL */
-  ]: [
-    7,
-    1
-    /* Actions.PUSH */
-  ]
-};
-pathStateMachine[
-  4
-  /* States.IN_SUB_PATH */
-] = {
-  [
-    "'"
-    /* PathCharTypes.SINGLE_QUOTE */
-  ]: [
-    5,
-    0
-    /* Actions.APPEND */
-  ],
-  [
-    '"'
-    /* PathCharTypes.DOUBLE_QUOTE */
-  ]: [
-    6,
-    0
-    /* Actions.APPEND */
-  ],
-  [
-    "["
-    /* PathCharTypes.LEFT_BRACKET */
-  ]: [
-    4,
-    2
-    /* Actions.INC_SUB_PATH_DEPTH */
-  ],
-  [
-    "]"
-    /* PathCharTypes.RIGHT_BRACKET */
-  ]: [
-    1,
-    3
-    /* Actions.PUSH_SUB_PATH */
-  ],
-  [
-    "o"
-    /* PathCharTypes.END_OF_FAIL */
-  ]: 8,
-  [
-    "l"
-    /* PathCharTypes.ELSE */
-  ]: [
-    4,
-    0
-    /* Actions.APPEND */
-  ]
-};
-pathStateMachine[
-  5
-  /* States.IN_SINGLE_QUOTE */
-] = {
-  [
-    "'"
-    /* PathCharTypes.SINGLE_QUOTE */
-  ]: [
-    4,
-    0
-    /* Actions.APPEND */
-  ],
-  [
-    "o"
-    /* PathCharTypes.END_OF_FAIL */
-  ]: 8,
-  [
-    "l"
-    /* PathCharTypes.ELSE */
-  ]: [
-    5,
-    0
-    /* Actions.APPEND */
-  ]
-};
-pathStateMachine[
-  6
-  /* States.IN_DOUBLE_QUOTE */
-] = {
-  [
-    '"'
-    /* PathCharTypes.DOUBLE_QUOTE */
-  ]: [
-    4,
-    0
-    /* Actions.APPEND */
-  ],
-  [
-    "o"
-    /* PathCharTypes.END_OF_FAIL */
-  ]: 8,
-  [
-    "l"
-    /* PathCharTypes.ELSE */
-  ]: [
-    6,
-    0
-    /* Actions.APPEND */
-  ]
-};
-const literalValueRE = /^\s?(?:true|false|-?[\d.]+|'[^']*'|"[^"]*")\s?$/;
-function isLiteral(exp) {
-  return literalValueRE.test(exp);
-}
-__name(isLiteral, "isLiteral");
-function stripQuotes(str) {
-  const a = str.charCodeAt(0);
-  const b = str.charCodeAt(str.length - 1);
-  return a === b && (a === 34 || a === 39) ? str.slice(1, -1) : str;
-}
-__name(stripQuotes, "stripQuotes");
-function getPathCharType(ch) {
-  if (ch === void 0 || ch === null) {
-    return "o";
-  }
-  const code2 = ch.charCodeAt(0);
-  switch (code2) {
-    case 91:
-    case 93:
-    case 46:
-    case 34:
-    case 39:
-      return ch;
-    case 95:
-    case 36:
-    case 45:
-      return "i";
-    case 9:
-    case 10:
-    case 13:
-    case 160:
-    case 65279:
-    case 8232:
-    case 8233:
-      return "w";
-  }
-  return "i";
-}
-__name(getPathCharType, "getPathCharType");
-function formatSubPath(path) {
-  const trimmed = path.trim();
-  if (path.charAt(0) === "0" && isNaN(parseInt(path))) {
-    return false;
-  }
-  return isLiteral(trimmed) ? stripQuotes(trimmed) : "*" + trimmed;
-}
-__name(formatSubPath, "formatSubPath");
-function parse$1(path) {
-  const keys2 = [];
-  let index2 = -1;
-  let mode2 = 0;
-  let subPathDepth = 0;
-  let c;
-  let key;
-  let newChar;
-  let type;
-  let transition;
-  let action;
-  let typeMap;
-  const actions = [];
-  actions[
-    0
-    /* Actions.APPEND */
-  ] = () => {
-    if (key === void 0) {
-      key = newChar;
-    } else {
-      key += newChar;
-    }
-  };
-  actions[
-    1
-    /* Actions.PUSH */
-  ] = () => {
-    if (key !== void 0) {
-      keys2.push(key);
-      key = void 0;
-    }
-  };
-  actions[
-    2
-    /* Actions.INC_SUB_PATH_DEPTH */
-  ] = () => {
-    actions[
-      0
-      /* Actions.APPEND */
-    ]();
-    subPathDepth++;
-  };
-  actions[
-    3
-    /* Actions.PUSH_SUB_PATH */
-  ] = () => {
-    if (subPathDepth > 0) {
-      subPathDepth--;
-      mode2 = 4;
-      actions[
-        0
-        /* Actions.APPEND */
-      ]();
-    } else {
-      subPathDepth = 0;
-      if (key === void 0) {
-        return false;
-      }
-      key = formatSubPath(key);
-      if (key === false) {
-        return false;
-      } else {
-        actions[
-          1
-          /* Actions.PUSH */
-        ]();
-      }
-    }
-  };
-  function maybeUnescapeQuote() {
-    const nextChar = path[index2 + 1];
-    if (mode2 === 5 && nextChar === "'" || mode2 === 6 && nextChar === '"') {
-      index2++;
-      newChar = "\\" + nextChar;
-      actions[
-        0
-        /* Actions.APPEND */
-      ]();
-      return true;
-    }
-  }
-  __name(maybeUnescapeQuote, "maybeUnescapeQuote");
-  while (mode2 !== null) {
-    index2++;
-    c = path[index2];
-    if (c === "\\" && maybeUnescapeQuote()) {
-      continue;
-    }
-    type = getPathCharType(c);
-    typeMap = pathStateMachine[mode2];
-    transition = typeMap[type] || typeMap[
-      "l"
-      /* PathCharTypes.ELSE */
-    ] || 8;
-    if (transition === 8) {
-      return;
-    }
-    mode2 = transition[0];
-    if (transition[1] !== void 0) {
-      action = actions[transition[1]];
-      if (action) {
-        newChar = c;
-        if (action() === false) {
-          return;
-        }
-      }
-    }
-    if (mode2 === 7) {
-      return keys2;
-    }
-  }
-}
-__name(parse$1, "parse$1");
-const cache = /* @__PURE__ */ new Map();
-function resolveWithKeyValue(obj, path) {
-  return isObject$2(obj) ? obj[path] : null;
-}
-__name(resolveWithKeyValue, "resolveWithKeyValue");
-function resolveValue(obj, path) {
-  if (!isObject$2(obj)) {
-    return null;
-  }
-  let hit = cache.get(path);
-  if (!hit) {
-    hit = parse$1(path);
-    if (hit) {
-      cache.set(path, hit);
-    }
-  }
-  if (!hit) {
-    return null;
-  }
-  const len = hit.length;
-  let last = obj;
-  let i2 = 0;
-  while (i2 < len) {
-    const val = last[hit[i2]];
-    if (val === void 0) {
-      return null;
-    }
-    if (isFunction$1(last)) {
-      return null;
-    }
-    last = val;
-    i2++;
-  }
-  return last;
-}
-__name(resolveValue, "resolveValue");
-const DEFAULT_MODIFIER = /* @__PURE__ */ __name((str) => str, "DEFAULT_MODIFIER");
-const DEFAULT_MESSAGE = /* @__PURE__ */ __name((ctx) => "", "DEFAULT_MESSAGE");
-const DEFAULT_MESSAGE_DATA_TYPE = "text";
-const DEFAULT_NORMALIZE = /* @__PURE__ */ __name((values2) => values2.length === 0 ? "" : join$1(values2), "DEFAULT_NORMALIZE");
-const DEFAULT_INTERPOLATE = toDisplayString;
-function pluralDefault(choice, choicesLength) {
-  choice = Math.abs(choice);
-  if (choicesLength === 2) {
-    return choice ? choice > 1 ? 1 : 0 : 1;
-  }
-  return choice ? Math.min(choice, 2) : 0;
-}
-__name(pluralDefault, "pluralDefault");
-function getPluralIndex(options3) {
-  const index2 = isNumber$1(options3.pluralIndex) ? options3.pluralIndex : -1;
-  return options3.named && (isNumber$1(options3.named.count) || isNumber$1(options3.named.n)) ? isNumber$1(options3.named.count) ? options3.named.count : isNumber$1(options3.named.n) ? options3.named.n : index2 : index2;
-}
-__name(getPluralIndex, "getPluralIndex");
-function normalizeNamed(pluralIndex, props) {
-  if (!props.count) {
-    props.count = pluralIndex;
-  }
-  if (!props.n) {
-    props.n = pluralIndex;
-  }
-}
-__name(normalizeNamed, "normalizeNamed");
-function createMessageContext(options3 = {}) {
-  const locale2 = options3.locale;
-  const pluralIndex = getPluralIndex(options3);
-  const pluralRule = isObject$2(options3.pluralRules) && isString$2(locale2) && isFunction$1(options3.pluralRules[locale2]) ? options3.pluralRules[locale2] : pluralDefault;
-  const orgPluralRule = isObject$2(options3.pluralRules) && isString$2(locale2) && isFunction$1(options3.pluralRules[locale2]) ? pluralDefault : void 0;
-  const plural = /* @__PURE__ */ __name((messages2) => {
-    return messages2[pluralRule(pluralIndex, messages2.length, orgPluralRule)];
-  }, "plural");
-  const _list = options3.list || [];
-  const list = /* @__PURE__ */ __name((index2) => _list[index2], "list");
-  const _named = options3.named || {};
-  isNumber$1(options3.pluralIndex) && normalizeNamed(pluralIndex, _named);
-  const named = /* @__PURE__ */ __name((key) => _named[key], "named");
-  function message3(key) {
-    const msg = isFunction$1(options3.messages) ? options3.messages(key) : isObject$2(options3.messages) ? options3.messages[key] : false;
-    return !msg ? options3.parent ? options3.parent.message(key) : DEFAULT_MESSAGE : msg;
-  }
-  __name(message3, "message");
-  const _modifier = /* @__PURE__ */ __name((name) => options3.modifiers ? options3.modifiers[name] : DEFAULT_MODIFIER, "_modifier");
-  const normalize = isPlainObject(options3.processor) && isFunction$1(options3.processor.normalize) ? options3.processor.normalize : DEFAULT_NORMALIZE;
-  const interpolate = isPlainObject(options3.processor) && isFunction$1(options3.processor.interpolate) ? options3.processor.interpolate : DEFAULT_INTERPOLATE;
-  const type = isPlainObject(options3.processor) && isString$2(options3.processor.type) ? options3.processor.type : DEFAULT_MESSAGE_DATA_TYPE;
-  const linked = /* @__PURE__ */ __name((key, ...args) => {
-    const [arg1, arg2] = args;
-    let type2 = "text";
-    let modifier = "";
-    if (args.length === 1) {
-      if (isObject$2(arg1)) {
-        modifier = arg1.modifier || modifier;
-        type2 = arg1.type || type2;
-      } else if (isString$2(arg1)) {
-        modifier = arg1 || modifier;
-      }
-    } else if (args.length === 2) {
-      if (isString$2(arg1)) {
-        modifier = arg1 || modifier;
-      }
-      if (isString$2(arg2)) {
-        type2 = arg2 || type2;
-      }
-    }
-    const ret = message3(key)(ctx);
-    const msg = (
-      // The message in vnode resolved with linked are returned as an array by processor.nomalize
-      type2 === "vnode" && isArray$1(ret) && modifier ? ret[0] : ret
-    );
-    return modifier ? _modifier(modifier)(msg, type2) : msg;
-  }, "linked");
-  const ctx = {
-    [
-      "list"
-      /* HelperNameMap.LIST */
-    ]: list,
-    [
-      "named"
-      /* HelperNameMap.NAMED */
-    ]: named,
-    [
-      "plural"
-      /* HelperNameMap.PLURAL */
-    ]: plural,
-    [
-      "linked"
-      /* HelperNameMap.LINKED */
-    ]: linked,
-    [
-      "message"
-      /* HelperNameMap.MESSAGE */
-    ]: message3,
-    [
-      "type"
-      /* HelperNameMap.TYPE */
-    ]: type,
-    [
-      "interpolate"
-      /* HelperNameMap.INTERPOLATE */
-    ]: interpolate,
-    [
-      "normalize"
-      /* HelperNameMap.NORMALIZE */
-    ]: normalize,
-    [
-      "values"
-      /* HelperNameMap.VALUES */
-    ]: assign$1({}, _list, _named)
-  };
-  return ctx;
-}
-__name(createMessageContext, "createMessageContext");
-let devtools = null;
-function setDevToolsHook(hook) {
-  devtools = hook;
-}
-__name(setDevToolsHook, "setDevToolsHook");
-function getDevToolsHook() {
-  return devtools;
-}
-__name(getDevToolsHook, "getDevToolsHook");
-function initI18nDevTools(i18n2, version2, meta) {
-  devtools && devtools.emit("i18n:init", {
-    timestamp: Date.now(),
-    i18n: i18n2,
-    version: version2,
-    meta
-  });
-}
-__name(initI18nDevTools, "initI18nDevTools");
-const translateDevTools = /* @__PURE__ */ createDevToolsHook(
-  "function:translate"
-  /* IntlifyDevToolsHooks.FunctionTranslate */
-);
-function createDevToolsHook(hook) {
-  return (payloads) => devtools && devtools.emit(hook, payloads);
-}
-__name(createDevToolsHook, "createDevToolsHook");
-const code$1$1 = CompileWarnCodes.__EXTEND_POINT__;
-const inc$1$1 = incrementer(code$1$1);
-const CoreWarnCodes = {
-  NOT_FOUND_KEY: code$1$1,
-  // 2
-  FALLBACK_TO_TRANSLATE: inc$1$1(),
-  // 3
-  CANNOT_FORMAT_NUMBER: inc$1$1(),
-  // 4
-  FALLBACK_TO_NUMBER_FORMAT: inc$1$1(),
-  // 5
-  CANNOT_FORMAT_DATE: inc$1$1(),
-  // 6
-  FALLBACK_TO_DATE_FORMAT: inc$1$1(),
-  // 7
-  EXPERIMENTAL_CUSTOM_MESSAGE_COMPILER: inc$1$1(),
-  // 8
-  __EXTEND_POINT__: inc$1$1()
-  // 9
-};
-const warnMessages$1 = {
-  [CoreWarnCodes.NOT_FOUND_KEY]: `Not found '{key}' key in '{locale}' locale messages.`,
-  [CoreWarnCodes.FALLBACK_TO_TRANSLATE]: `Fall back to translate '{key}' key with '{target}' locale.`,
-  [CoreWarnCodes.CANNOT_FORMAT_NUMBER]: `Cannot format a number value due to not supported Intl.NumberFormat.`,
-  [CoreWarnCodes.FALLBACK_TO_NUMBER_FORMAT]: `Fall back to number format '{key}' key with '{target}' locale.`,
-  [CoreWarnCodes.CANNOT_FORMAT_DATE]: `Cannot format a date value due to not supported Intl.DateTimeFormat.`,
-  [CoreWarnCodes.FALLBACK_TO_DATE_FORMAT]: `Fall back to datetime format '{key}' key with '{target}' locale.`,
-  [CoreWarnCodes.EXPERIMENTAL_CUSTOM_MESSAGE_COMPILER]: `This project is using Custom Message Compiler, which is an experimental feature. It may receive breaking changes or be removed in the future.`
-};
-function getWarnMessage$1(code2, ...args) {
-  return format$4(warnMessages$1[code2], ...args);
-}
-__name(getWarnMessage$1, "getWarnMessage$1");
-const code$2 = CompileErrorCodes.__EXTEND_POINT__;
-const inc$2 = incrementer(code$2);
-const CoreErrorCodes = {
-  INVALID_ARGUMENT: code$2,
-  // 17
-  INVALID_DATE_ARGUMENT: inc$2(),
-  // 18
-  INVALID_ISO_DATE_ARGUMENT: inc$2(),
-  // 19
-  NOT_SUPPORT_NON_STRING_MESSAGE: inc$2(),
-  // 20
-  NOT_SUPPORT_LOCALE_PROMISE_VALUE: inc$2(),
-  // 21
-  NOT_SUPPORT_LOCALE_ASYNC_FUNCTION: inc$2(),
-  // 22
-  NOT_SUPPORT_LOCALE_TYPE: inc$2(),
-  // 23
-  __EXTEND_POINT__: inc$2()
-  // 24
-};
-function createCoreError(code2) {
-  return createCompileError(code2, null, false ? { messages: errorMessages$1 } : void 0);
-}
-__name(createCoreError, "createCoreError");
-const errorMessages$1 = {
-  [CoreErrorCodes.INVALID_ARGUMENT]: "Invalid arguments",
-  [CoreErrorCodes.INVALID_DATE_ARGUMENT]: "The date provided is an invalid Date object.Make sure your Date represents a valid date.",
-  [CoreErrorCodes.INVALID_ISO_DATE_ARGUMENT]: "The argument provided is not a valid ISO date string",
-  [CoreErrorCodes.NOT_SUPPORT_NON_STRING_MESSAGE]: "Not support non-string message",
-  [CoreErrorCodes.NOT_SUPPORT_LOCALE_PROMISE_VALUE]: "cannot support promise value",
-  [CoreErrorCodes.NOT_SUPPORT_LOCALE_ASYNC_FUNCTION]: "cannot support async function",
-  [CoreErrorCodes.NOT_SUPPORT_LOCALE_TYPE]: "cannot support locale type"
-};
-function getLocale(context, options3) {
-  return options3.locale != null ? resolveLocale(options3.locale) : resolveLocale(context.locale);
-}
-__name(getLocale, "getLocale");
-let _resolveLocale;
-function resolveLocale(locale2) {
-  if (isString$2(locale2)) {
-    return locale2;
-  } else {
-    if (isFunction$1(locale2)) {
-      if (locale2.resolvedOnce && _resolveLocale != null) {
-        return _resolveLocale;
-      } else if (locale2.constructor.name === "Function") {
-        const resolve8 = locale2();
-        if (isPromise$1(resolve8)) {
-          throw createCoreError(CoreErrorCodes.NOT_SUPPORT_LOCALE_PROMISE_VALUE);
-        }
-        return _resolveLocale = resolve8;
-      } else {
-        throw createCoreError(CoreErrorCodes.NOT_SUPPORT_LOCALE_ASYNC_FUNCTION);
-      }
-    } else {
-      throw createCoreError(CoreErrorCodes.NOT_SUPPORT_LOCALE_TYPE);
-    }
-  }
-}
-__name(resolveLocale, "resolveLocale");
-function fallbackWithSimple(ctx, fallback, start2) {
-  return [.../* @__PURE__ */ new Set([
-    start2,
-    ...isArray$1(fallback) ? fallback : isObject$2(fallback) ? Object.keys(fallback) : isString$2(fallback) ? [fallback] : [start2]
-  ])];
-}
-__name(fallbackWithSimple, "fallbackWithSimple");
-function fallbackWithLocaleChain(ctx, fallback, start2) {
-  const startLocale = isString$2(start2) ? start2 : DEFAULT_LOCALE;
-  const context = ctx;
-  if (!context.__localeChainCache) {
-    context.__localeChainCache = /* @__PURE__ */ new Map();
-  }
-  let chain = context.__localeChainCache.get(startLocale);
-  if (!chain) {
-    chain = [];
-    let block2 = [start2];
-    while (isArray$1(block2)) {
-      block2 = appendBlockToChain(chain, block2, fallback);
-    }
-    const defaults2 = isArray$1(fallback) || !isPlainObject(fallback) ? fallback : fallback["default"] ? fallback["default"] : null;
-    block2 = isString$2(defaults2) ? [defaults2] : defaults2;
-    if (isArray$1(block2)) {
-      appendBlockToChain(chain, block2, false);
-    }
-    context.__localeChainCache.set(startLocale, chain);
-  }
-  return chain;
-}
-__name(fallbackWithLocaleChain, "fallbackWithLocaleChain");
-function appendBlockToChain(chain, block2, blocks) {
-  let follow = true;
-  for (let i2 = 0; i2 < block2.length && isBoolean$1(follow); i2++) {
-    const locale2 = block2[i2];
-    if (isString$2(locale2)) {
-      follow = appendLocaleToChain(chain, block2[i2], blocks);
-    }
-  }
-  return follow;
-}
-__name(appendBlockToChain, "appendBlockToChain");
-function appendLocaleToChain(chain, locale2, blocks) {
-  let follow;
-  const tokens = locale2.split("-");
-  do {
-    const target = tokens.join("-");
-    follow = appendItemToChain(chain, target, blocks);
-    tokens.splice(-1, 1);
-  } while (tokens.length && follow === true);
-  return follow;
-}
-__name(appendLocaleToChain, "appendLocaleToChain");
-function appendItemToChain(chain, target, blocks) {
-  let follow = false;
-  if (!chain.includes(target)) {
-    follow = true;
-    if (target) {
-      follow = target[target.length - 1] !== "!";
-      const locale2 = target.replace(/!/g, "");
-      chain.push(locale2);
-      if ((isArray$1(blocks) || isPlainObject(blocks)) && blocks[locale2]) {
-        follow = blocks[locale2];
-      }
-    }
-  }
-  return follow;
-}
-__name(appendItemToChain, "appendItemToChain");
-const VERSION$1 = "9.13.1";
-const NOT_REOSLVED = -1;
-const DEFAULT_LOCALE = "en-US";
-const MISSING_RESOLVE_VALUE = "";
-const capitalize = /* @__PURE__ */ __name((str) => `${str.charAt(0).toLocaleUpperCase()}${str.substr(1)}`, "capitalize");
-function getDefaultLinkedModifiers() {
-  return {
-    upper: /* @__PURE__ */ __name((val, type) => {
-      return type === "text" && isString$2(val) ? val.toUpperCase() : type === "vnode" && isObject$2(val) && "__v_isVNode" in val ? val.children.toUpperCase() : val;
-    }, "upper"),
-    lower: /* @__PURE__ */ __name((val, type) => {
-      return type === "text" && isString$2(val) ? val.toLowerCase() : type === "vnode" && isObject$2(val) && "__v_isVNode" in val ? val.children.toLowerCase() : val;
-    }, "lower"),
-    capitalize: /* @__PURE__ */ __name((val, type) => {
-      return type === "text" && isString$2(val) ? capitalize(val) : type === "vnode" && isObject$2(val) && "__v_isVNode" in val ? capitalize(val.children) : val;
-    }, "capitalize")
-  };
-}
-__name(getDefaultLinkedModifiers, "getDefaultLinkedModifiers");
-let _compiler;
-function registerMessageCompiler(compiler) {
-  _compiler = compiler;
-}
-__name(registerMessageCompiler, "registerMessageCompiler");
-let _resolver;
-function registerMessageResolver(resolver) {
-  _resolver = resolver;
-}
-__name(registerMessageResolver, "registerMessageResolver");
-let _fallbacker;
-function registerLocaleFallbacker(fallbacker) {
-  _fallbacker = fallbacker;
-}
-__name(registerLocaleFallbacker, "registerLocaleFallbacker");
-let _additionalMeta = null;
-const setAdditionalMeta = /* @__PURE__ */ __name(/* @__NO_SIDE_EFFECTS__ */ (meta) => {
-  _additionalMeta = meta;
-}, "setAdditionalMeta");
-const getAdditionalMeta = /* @__PURE__ */ __name(/* @__NO_SIDE_EFFECTS__ */ () => _additionalMeta, "getAdditionalMeta");
-let _fallbackContext = null;
-const setFallbackContext = /* @__PURE__ */ __name((context) => {
-  _fallbackContext = context;
-}, "setFallbackContext");
-const getFallbackContext = /* @__PURE__ */ __name(() => _fallbackContext, "getFallbackContext");
-let _cid = 0;
-function createCoreContext(options3 = {}) {
-  const onWarn = isFunction$1(options3.onWarn) ? options3.onWarn : warn;
-  const version2 = isString$2(options3.version) ? options3.version : VERSION$1;
-  const locale2 = isString$2(options3.locale) || isFunction$1(options3.locale) ? options3.locale : DEFAULT_LOCALE;
-  const _locale = isFunction$1(locale2) ? DEFAULT_LOCALE : locale2;
-  const fallbackLocale = isArray$1(options3.fallbackLocale) || isPlainObject(options3.fallbackLocale) || isString$2(options3.fallbackLocale) || options3.fallbackLocale === false ? options3.fallbackLocale : _locale;
-  const messages2 = isPlainObject(options3.messages) ? options3.messages : { [_locale]: {} };
-  const datetimeFormats = isPlainObject(options3.datetimeFormats) ? options3.datetimeFormats : { [_locale]: {} };
-  const numberFormats = isPlainObject(options3.numberFormats) ? options3.numberFormats : { [_locale]: {} };
-  const modifiers = assign$1({}, options3.modifiers || {}, getDefaultLinkedModifiers());
-  const pluralRules = options3.pluralRules || {};
-  const missing = isFunction$1(options3.missing) ? options3.missing : null;
-  const missingWarn = isBoolean$1(options3.missingWarn) || isRegExp(options3.missingWarn) ? options3.missingWarn : true;
-  const fallbackWarn = isBoolean$1(options3.fallbackWarn) || isRegExp(options3.fallbackWarn) ? options3.fallbackWarn : true;
-  const fallbackFormat = !!options3.fallbackFormat;
-  const unresolving = !!options3.unresolving;
-  const postTranslation = isFunction$1(options3.postTranslation) ? options3.postTranslation : null;
-  const processor = isPlainObject(options3.processor) ? options3.processor : null;
-  const warnHtmlMessage = isBoolean$1(options3.warnHtmlMessage) ? options3.warnHtmlMessage : true;
-  const escapeParameter = !!options3.escapeParameter;
-  const messageCompiler = isFunction$1(options3.messageCompiler) ? options3.messageCompiler : _compiler;
-  if (false) {
-    warnOnce(getWarnMessage$1(CoreWarnCodes.EXPERIMENTAL_CUSTOM_MESSAGE_COMPILER));
-  }
-  const messageResolver = isFunction$1(options3.messageResolver) ? options3.messageResolver : _resolver || resolveWithKeyValue;
-  const localeFallbacker = isFunction$1(options3.localeFallbacker) ? options3.localeFallbacker : _fallbacker || fallbackWithSimple;
-  const fallbackContext = isObject$2(options3.fallbackContext) ? options3.fallbackContext : void 0;
-  const internalOptions = options3;
-  const __datetimeFormatters = isObject$2(internalOptions.__datetimeFormatters) ? internalOptions.__datetimeFormatters : /* @__PURE__ */ new Map();
-  const __numberFormatters = isObject$2(internalOptions.__numberFormatters) ? internalOptions.__numberFormatters : /* @__PURE__ */ new Map();
-  const __meta = isObject$2(internalOptions.__meta) ? internalOptions.__meta : {};
-  _cid++;
-  const context = {
-    version: version2,
-    cid: _cid,
-    locale: locale2,
-    fallbackLocale,
-    messages: messages2,
-    modifiers,
-    pluralRules,
-    missing,
-    missingWarn,
-    fallbackWarn,
-    fallbackFormat,
-    unresolving,
-    postTranslation,
-    processor,
-    warnHtmlMessage,
-    escapeParameter,
-    messageCompiler,
-    messageResolver,
-    localeFallbacker,
-    fallbackContext,
-    onWarn,
-    __meta
-  };
-  {
-    context.datetimeFormats = datetimeFormats;
-    context.numberFormats = numberFormats;
-    context.__datetimeFormatters = __datetimeFormatters;
-    context.__numberFormatters = __numberFormatters;
-  }
-  if (false) {
-    context.__v_emitter = internalOptions.__v_emitter != null ? internalOptions.__v_emitter : void 0;
-  }
-  if (__INTLIFY_PROD_DEVTOOLS__) {
-    initI18nDevTools(context, version2, __meta);
-  }
-  return context;
-}
-__name(createCoreContext, "createCoreContext");
-function isTranslateFallbackWarn(fallback, key) {
-  return fallback instanceof RegExp ? fallback.test(key) : fallback;
-}
-__name(isTranslateFallbackWarn, "isTranslateFallbackWarn");
-function isTranslateMissingWarn(missing, key) {
-  return missing instanceof RegExp ? missing.test(key) : missing;
-}
-__name(isTranslateMissingWarn, "isTranslateMissingWarn");
-function handleMissing(context, key, locale2, missingWarn, type) {
-  const { missing, onWarn } = context;
-  if (false) {
-    const emitter = context.__v_emitter;
-    if (emitter) {
-      emitter.emit("missing", {
-        locale: locale2,
-        key,
-        type,
-        groupId: `${type}:${key}`
-      });
-    }
-  }
-  if (missing !== null) {
-    const ret = missing(context, locale2, key, type);
-    return isString$2(ret) ? ret : key;
-  } else {
-    if (false) {
-      onWarn(getWarnMessage$1(CoreWarnCodes.NOT_FOUND_KEY, { key, locale: locale2 }));
-    }
-    return key;
-  }
-}
-__name(handleMissing, "handleMissing");
-function updateFallbackLocale(ctx, locale2, fallback) {
-  const context = ctx;
-  context.__localeChainCache = /* @__PURE__ */ new Map();
-  ctx.localeFallbacker(ctx, fallback, locale2);
-}
-__name(updateFallbackLocale, "updateFallbackLocale");
-function isAlmostSameLocale(locale2, compareLocale) {
-  if (locale2 === compareLocale)
-    return false;
-  return locale2.split("-")[0] === compareLocale.split("-")[0];
-}
-__name(isAlmostSameLocale, "isAlmostSameLocale");
-function isImplicitFallback(targetLocale, locales) {
-  const index2 = locales.indexOf(targetLocale);
-  if (index2 === -1) {
-    return false;
-  }
-  for (let i2 = index2 + 1; i2 < locales.length; i2++) {
-    if (isAlmostSameLocale(targetLocale, locales[i2])) {
-      return true;
-    }
-  }
-  return false;
-}
-__name(isImplicitFallback, "isImplicitFallback");
-function format$2(ast) {
-  const msg = /* @__PURE__ */ __name((ctx) => formatParts(ctx, ast), "msg");
-  return msg;
-}
-__name(format$2, "format$2");
-function formatParts(ctx, ast) {
-  const body = ast.b || ast.body;
-  if ((body.t || body.type) === 1) {
-    const plural = body;
-    const cases = plural.c || plural.cases;
-    return ctx.plural(cases.reduce((messages2, c) => [
-      ...messages2,
-      formatMessageParts(ctx, c)
-    ], []));
-  } else {
-    return formatMessageParts(ctx, body);
-  }
-}
-__name(formatParts, "formatParts");
-function formatMessageParts(ctx, node3) {
-  const _static = node3.s || node3.static;
-  if (_static) {
-    return ctx.type === "text" ? _static : ctx.normalize([_static]);
-  } else {
-    const messages2 = (node3.i || node3.items).reduce((acm, c) => [...acm, formatMessagePart(ctx, c)], []);
-    return ctx.normalize(messages2);
-  }
-}
-__name(formatMessageParts, "formatMessageParts");
-function formatMessagePart(ctx, node3) {
-  const type = node3.t || node3.type;
-  switch (type) {
-    case 3: {
-      const text = node3;
-      return text.v || text.value;
-    }
-    case 9: {
-      const literal = node3;
-      return literal.v || literal.value;
-    }
-    case 4: {
-      const named = node3;
-      return ctx.interpolate(ctx.named(named.k || named.key));
-    }
-    case 5: {
-      const list = node3;
-      return ctx.interpolate(ctx.list(list.i != null ? list.i : list.index));
-    }
-    case 6: {
-      const linked = node3;
-      const modifier = linked.m || linked.modifier;
-      return ctx.linked(formatMessagePart(ctx, linked.k || linked.key), modifier ? formatMessagePart(ctx, modifier) : void 0, ctx.type);
-    }
-    case 7: {
-      const linkedKey = node3;
-      return linkedKey.v || linkedKey.value;
-    }
-    case 8: {
-      const linkedModifier = node3;
-      return linkedModifier.v || linkedModifier.value;
-    }
-    default:
-      throw new Error(`unhandled node type on format message part: ${type}`);
-  }
-}
-__name(formatMessagePart, "formatMessagePart");
-const WARN_MESSAGE = `Detected HTML in '{source}' message. Recommend not using HTML messages to avoid XSS.`;
-function checkHtmlMessage(source, warnHtmlMessage) {
-  if (warnHtmlMessage && detectHtmlTag(source)) {
-    warn(format$4(WARN_MESSAGE, { source }));
-  }
-}
-__name(checkHtmlMessage, "checkHtmlMessage");
-const defaultOnCacheKey = /* @__PURE__ */ __name((message3) => message3, "defaultOnCacheKey");
-let compileCache = /* @__PURE__ */ Object.create(null);
-function onCompileWarn(_warn) {
-  if (_warn.code === CompileWarnCodes.USE_MODULO_SYNTAX) {
-    warn(`The use of named interpolation with modulo syntax is deprecated. It will be removed in v10.
-reference: https://vue-i18n.intlify.dev/guide/essentials/syntax#rails-i18n-format 
-(message compiler warning message: ${_warn.message})`);
-  }
-}
-__name(onCompileWarn, "onCompileWarn");
-function clearCompileCache() {
-  compileCache = /* @__PURE__ */ Object.create(null);
-}
-__name(clearCompileCache, "clearCompileCache");
-const isMessageAST = /* @__PURE__ */ __name((val) => isObject$2(val) && (val.t === 0 || val.type === 0) && ("b" in val || "body" in val), "isMessageAST");
-function baseCompile(message3, options3 = {}) {
-  let detectError = false;
-  const onError = options3.onError || defaultOnError;
-  options3.onError = (err) => {
-    detectError = true;
-    onError(err);
-  };
-  return { ...baseCompile$1(message3, options3), detectError };
-}
-__name(baseCompile, "baseCompile");
-const compileToFunction = /* @__PURE__ */ __name(/* @__NO_SIDE_EFFECTS__ */ (message3, context) => {
-  if (!isString$2(message3)) {
-    throw createCoreError(CoreErrorCodes.NOT_SUPPORT_NON_STRING_MESSAGE);
-  }
-  if (false) {
-    context.onWarn = onCompileWarn;
-  }
-  {
-    const warnHtmlMessage = isBoolean$1(context.warnHtmlMessage) ? context.warnHtmlMessage : true;
-    const onCacheKey = context.onCacheKey || defaultOnCacheKey;
-    const cacheKey = onCacheKey(message3);
-    const cached = compileCache[cacheKey];
-    if (cached) {
-      return cached;
-    }
-    const { code: code2, detectError } = baseCompile(message3, context);
-    const msg = new Function(`return ${code2}`)();
-    return !detectError ? compileCache[cacheKey] = msg : msg;
-  }
-}, "compileToFunction");
-function compile(message3, context) {
-  if (false) {
-    context.onWarn = onCompileWarn;
-  }
-  if (__INTLIFY_JIT_COMPILATION__ && !__INTLIFY_DROP_MESSAGE_COMPILER__ && isString$2(message3)) {
-    const warnHtmlMessage = isBoolean$1(context.warnHtmlMessage) ? context.warnHtmlMessage : true;
-    const onCacheKey = context.onCacheKey || defaultOnCacheKey;
-    const cacheKey = onCacheKey(message3);
-    const cached = compileCache[cacheKey];
-    if (cached) {
-      return cached;
-    }
-    const { ast, detectError } = baseCompile(message3, {
-      ...context,
-      location: false,
-      jit: true
-    });
-    const msg = format$2(ast);
-    return !detectError ? compileCache[cacheKey] = msg : msg;
-  } else {
-    if (false) {
-      warn(`the message that is resolve with key '${context.key}' is not supported for jit compilation`);
-      return () => message3;
-    }
-    const cacheKey = message3.cacheKey;
-    if (cacheKey) {
-      const cached = compileCache[cacheKey];
-      if (cached) {
-        return cached;
-      }
-      return compileCache[cacheKey] = format$2(message3);
-    } else {
-      return format$2(message3);
-    }
-  }
-}
-__name(compile, "compile");
-const NOOP_MESSAGE_FUNCTION = /* @__PURE__ */ __name(() => "", "NOOP_MESSAGE_FUNCTION");
-const isMessageFunction = /* @__PURE__ */ __name((val) => isFunction$1(val), "isMessageFunction");
-function translate(context, ...args) {
-  const { fallbackFormat, postTranslation, unresolving, messageCompiler, fallbackLocale, messages: messages2 } = context;
-  const [key, options3] = parseTranslateArgs(...args);
-  const missingWarn = isBoolean$1(options3.missingWarn) ? options3.missingWarn : context.missingWarn;
-  const fallbackWarn = isBoolean$1(options3.fallbackWarn) ? options3.fallbackWarn : context.fallbackWarn;
-  const escapeParameter = isBoolean$1(options3.escapeParameter) ? options3.escapeParameter : context.escapeParameter;
-  const resolvedMessage = !!options3.resolvedMessage;
-  const defaultMsgOrKey = isString$2(options3.default) || isBoolean$1(options3.default) ? !isBoolean$1(options3.default) ? options3.default : !messageCompiler ? () => key : key : fallbackFormat ? !messageCompiler ? () => key : key : "";
-  const enableDefaultMsg = fallbackFormat || defaultMsgOrKey !== "";
-  const locale2 = getLocale(context, options3);
-  escapeParameter && escapeParams(options3);
-  let [formatScope, targetLocale, message3] = !resolvedMessage ? resolveMessageFormat(context, key, locale2, fallbackLocale, fallbackWarn, missingWarn) : [
-    key,
-    locale2,
-    messages2[locale2] || {}
-  ];
-  let format2 = formatScope;
-  let cacheBaseKey = key;
-  if (!resolvedMessage && !(isString$2(format2) || isMessageAST(format2) || isMessageFunction(format2))) {
-    if (enableDefaultMsg) {
-      format2 = defaultMsgOrKey;
-      cacheBaseKey = format2;
-    }
-  }
-  if (!resolvedMessage && (!(isString$2(format2) || isMessageAST(format2) || isMessageFunction(format2)) || !isString$2(targetLocale))) {
-    return unresolving ? NOT_REOSLVED : key;
-  }
-  if (false) {
-    warn(`The message format compilation is not supported in this build. Because message compiler isn't included. You need to pre-compilation all message format. So translate function return '${key}'.`);
-    return key;
-  }
-  let occurred = false;
-  const onError = /* @__PURE__ */ __name(() => {
-    occurred = true;
-  }, "onError");
-  const msg = !isMessageFunction(format2) ? compileMessageFormat(context, key, targetLocale, format2, cacheBaseKey, onError) : format2;
-  if (occurred) {
-    return format2;
-  }
-  const ctxOptions = getMessageContextOptions(context, targetLocale, message3, options3);
-  const msgContext = createMessageContext(ctxOptions);
-  const messaged = evaluateMessage(context, msg, msgContext);
-  const ret = postTranslation ? postTranslation(messaged, key) : messaged;
-  if (__INTLIFY_PROD_DEVTOOLS__) {
-    const payloads = {
-      timestamp: Date.now(),
-      key: isString$2(key) ? key : isMessageFunction(format2) ? format2.key : "",
-      locale: targetLocale || (isMessageFunction(format2) ? format2.locale : ""),
-      format: isString$2(format2) ? format2 : isMessageFunction(format2) ? format2.source : "",
-      message: ret
-    };
-    payloads.meta = assign$1({}, context.__meta, /* @__PURE__ */ getAdditionalMeta() || {});
-    translateDevTools(payloads);
-  }
-  return ret;
-}
-__name(translate, "translate");
-function escapeParams(options3) {
-  if (isArray$1(options3.list)) {
-    options3.list = options3.list.map((item2) => isString$2(item2) ? escapeHtml(item2) : item2);
-  } else if (isObject$2(options3.named)) {
-    Object.keys(options3.named).forEach((key) => {
-      if (isString$2(options3.named[key])) {
-        options3.named[key] = escapeHtml(options3.named[key]);
-      }
-    });
-  }
-}
-__name(escapeParams, "escapeParams");
-function resolveMessageFormat(context, key, locale2, fallbackLocale, fallbackWarn, missingWarn) {
-  const { messages: messages2, onWarn, messageResolver: resolveValue2, localeFallbacker } = context;
-  const locales = localeFallbacker(context, fallbackLocale, locale2);
-  let message3 = {};
-  let targetLocale;
-  let format2 = null;
-  let from = locale2;
-  let to = null;
-  const type = "translate";
-  for (let i2 = 0; i2 < locales.length; i2++) {
-    targetLocale = to = locales[i2];
-    if (false) {
-      onWarn(getWarnMessage$1(CoreWarnCodes.FALLBACK_TO_TRANSLATE, {
-        key,
-        target: targetLocale
-      }));
-    }
-    if (false) {
-      const emitter = context.__v_emitter;
-      if (emitter) {
-        emitter.emit("fallback", {
-          type,
-          key,
-          from,
-          to,
-          groupId: `${type}:${key}`
-        });
-      }
-    }
-    message3 = messages2[targetLocale] || {};
-    let start2 = null;
-    let startTag;
-    let endTag;
-    if (false) {
-      start2 = window.performance.now();
-      startTag = "intlify-message-resolve-start";
-      endTag = "intlify-message-resolve-end";
-      mark && mark(startTag);
-    }
-    if ((format2 = resolveValue2(message3, key)) === null) {
-      format2 = message3[key];
-    }
-    if (false) {
-      const end = window.performance.now();
-      const emitter = context.__v_emitter;
-      if (emitter && start2 && format2) {
-        emitter.emit("message-resolve", {
-          type: "message-resolve",
-          key,
-          message: format2,
-          time: end - start2,
-          groupId: `${type}:${key}`
-        });
-      }
-      if (startTag && endTag && mark && measure) {
-        mark(endTag);
-        measure("intlify message resolve", startTag, endTag);
-      }
-    }
-    if (isString$2(format2) || isMessageAST(format2) || isMessageFunction(format2)) {
-      break;
-    }
-    if (!isImplicitFallback(targetLocale, locales)) {
-      const missingRet = handleMissing(
-        context,
-        // eslint-disable-line @typescript-eslint/no-explicit-any
-        key,
-        targetLocale,
-        missingWarn,
-        type
-      );
-      if (missingRet !== key) {
-        format2 = missingRet;
-      }
-    }
-    from = to;
-  }
-  return [format2, targetLocale, message3];
-}
-__name(resolveMessageFormat, "resolveMessageFormat");
-function compileMessageFormat(context, key, targetLocale, format2, cacheBaseKey, onError) {
-  const { messageCompiler, warnHtmlMessage } = context;
-  if (isMessageFunction(format2)) {
-    const msg2 = format2;
-    msg2.locale = msg2.locale || targetLocale;
-    msg2.key = msg2.key || key;
-    return msg2;
-  }
-  if (messageCompiler == null) {
-    const msg2 = /* @__PURE__ */ __name(() => format2, "msg2");
-    msg2.locale = targetLocale;
-    msg2.key = key;
-    return msg2;
-  }
-  let start2 = null;
-  let startTag;
-  let endTag;
-  if (false) {
-    start2 = window.performance.now();
-    startTag = "intlify-message-compilation-start";
-    endTag = "intlify-message-compilation-end";
-    mark && mark(startTag);
-  }
-  const msg = messageCompiler(format2, getCompileContext(context, targetLocale, cacheBaseKey, format2, warnHtmlMessage, onError));
-  if (false) {
-    const end = window.performance.now();
-    const emitter = context.__v_emitter;
-    if (emitter && start2) {
-      emitter.emit("message-compilation", {
-        type: "message-compilation",
-        message: format2,
-        time: end - start2,
-        groupId: `${"translate"}:${key}`
-      });
-    }
-    if (startTag && endTag && mark && measure) {
-      mark(endTag);
-      measure("intlify message compilation", startTag, endTag);
-    }
-  }
-  msg.locale = targetLocale;
-  msg.key = key;
-  msg.source = format2;
-  return msg;
-}
-__name(compileMessageFormat, "compileMessageFormat");
-function evaluateMessage(context, msg, msgCtx) {
-  let start2 = null;
-  let startTag;
-  let endTag;
-  if (false) {
-    start2 = window.performance.now();
-    startTag = "intlify-message-evaluation-start";
-    endTag = "intlify-message-evaluation-end";
-    mark && mark(startTag);
-  }
-  const messaged = msg(msgCtx);
-  if (false) {
-    const end = window.performance.now();
-    const emitter = context.__v_emitter;
-    if (emitter && start2) {
-      emitter.emit("message-evaluation", {
-        type: "message-evaluation",
-        value: messaged,
-        time: end - start2,
-        groupId: `${"translate"}:${msg.key}`
-      });
-    }
-    if (startTag && endTag && mark && measure) {
-      mark(endTag);
-      measure("intlify message evaluation", startTag, endTag);
-    }
-  }
-  return messaged;
-}
-__name(evaluateMessage, "evaluateMessage");
-function parseTranslateArgs(...args) {
-  const [arg1, arg2, arg3] = args;
-  const options3 = {};
-  if (!isString$2(arg1) && !isNumber$1(arg1) && !isMessageFunction(arg1) && !isMessageAST(arg1)) {
-    throw createCoreError(CoreErrorCodes.INVALID_ARGUMENT);
-  }
-  const key = isNumber$1(arg1) ? String(arg1) : isMessageFunction(arg1) ? arg1 : arg1;
-  if (isNumber$1(arg2)) {
-    options3.plural = arg2;
-  } else if (isString$2(arg2)) {
-    options3.default = arg2;
-  } else if (isPlainObject(arg2) && !isEmptyObject(arg2)) {
-    options3.named = arg2;
-  } else if (isArray$1(arg2)) {
-    options3.list = arg2;
-  }
-  if (isNumber$1(arg3)) {
-    options3.plural = arg3;
-  } else if (isString$2(arg3)) {
-    options3.default = arg3;
-  } else if (isPlainObject(arg3)) {
-    assign$1(options3, arg3);
-  }
-  return [key, options3];
-}
-__name(parseTranslateArgs, "parseTranslateArgs");
-function getCompileContext(context, locale2, key, source, warnHtmlMessage, onError) {
-  return {
-    locale: locale2,
-    key,
-    warnHtmlMessage,
-    onError: /* @__PURE__ */ __name((err) => {
-      onError && onError(err);
-      if (false) {
-        const _source = getSourceForCodeFrame(source);
-        const message3 = `Message compilation error: ${err.message}`;
-        const codeFrame = err.location && _source && generateCodeFrame(_source, err.location.start.offset, err.location.end.offset);
-        const emitter = context.__v_emitter;
-        if (emitter && _source) {
-          emitter.emit("compile-error", {
-            message: _source,
-            error: err.message,
-            start: err.location && err.location.start.offset,
-            end: err.location && err.location.end.offset,
-            groupId: `${"translate"}:${key}`
-          });
-        }
-        console.error(codeFrame ? `${message3}
-${codeFrame}` : message3);
-      } else {
-        throw err;
-      }
-    }, "onError"),
-    onCacheKey: /* @__PURE__ */ __name((source2) => generateFormatCacheKey(locale2, key, source2), "onCacheKey")
-  };
-}
-__name(getCompileContext, "getCompileContext");
-function getSourceForCodeFrame(source) {
-  if (isString$2(source)) {
-    return source;
-  } else {
-    if (source.loc && source.loc.source) {
-      return source.loc.source;
-    }
-  }
-}
-__name(getSourceForCodeFrame, "getSourceForCodeFrame");
-function getMessageContextOptions(context, locale2, message3, options3) {
-  const { modifiers, pluralRules, messageResolver: resolveValue2, fallbackLocale, fallbackWarn, missingWarn, fallbackContext } = context;
-  const resolveMessage = /* @__PURE__ */ __name((key) => {
-    let val = resolveValue2(message3, key);
-    if (val == null && fallbackContext) {
-      const [, , message22] = resolveMessageFormat(fallbackContext, key, locale2, fallbackLocale, fallbackWarn, missingWarn);
-      val = resolveValue2(message22, key);
-    }
-    if (isString$2(val) || isMessageAST(val)) {
-      let occurred = false;
-      const onError = /* @__PURE__ */ __name(() => {
-        occurred = true;
-      }, "onError");
-      const msg = compileMessageFormat(context, key, locale2, val, key, onError);
-      return !occurred ? msg : NOOP_MESSAGE_FUNCTION;
-    } else if (isMessageFunction(val)) {
-      return val;
-    } else {
-      return NOOP_MESSAGE_FUNCTION;
-    }
-  }, "resolveMessage");
-  const ctxOptions = {
-    locale: locale2,
-    modifiers,
-    pluralRules,
-    messages: resolveMessage
-  };
-  if (context.processor) {
-    ctxOptions.processor = context.processor;
-  }
-  if (options3.list) {
-    ctxOptions.list = options3.list;
-  }
-  if (options3.named) {
-    ctxOptions.named = options3.named;
-  }
-  if (isNumber$1(options3.plural)) {
-    ctxOptions.pluralIndex = options3.plural;
-  }
-  return ctxOptions;
-}
-__name(getMessageContextOptions, "getMessageContextOptions");
-const intlDefined = typeof Intl !== "undefined";
-const Availabilities = {
-  dateTimeFormat: intlDefined && typeof Intl.DateTimeFormat !== "undefined",
-  numberFormat: intlDefined && typeof Intl.NumberFormat !== "undefined"
-};
-function datetime(context, ...args) {
-  const { datetimeFormats, unresolving, fallbackLocale, onWarn, localeFallbacker } = context;
-  const { __datetimeFormatters } = context;
-  if (false) {
-    onWarn(getWarnMessage$1(CoreWarnCodes.CANNOT_FORMAT_DATE));
-    return MISSING_RESOLVE_VALUE;
-  }
-  const [key, value3, options3, overrides] = parseDateTimeArgs(...args);
-  const missingWarn = isBoolean$1(options3.missingWarn) ? options3.missingWarn : context.missingWarn;
-  const fallbackWarn = isBoolean$1(options3.fallbackWarn) ? options3.fallbackWarn : context.fallbackWarn;
-  const part = !!options3.part;
-  const locale2 = getLocale(context, options3);
-  const locales = localeFallbacker(
-    context,
-    // eslint-disable-line @typescript-eslint/no-explicit-any
-    fallbackLocale,
-    locale2
-  );
-  if (!isString$2(key) || key === "") {
-    return new Intl.DateTimeFormat(locale2, overrides).format(value3);
-  }
-  let datetimeFormat = {};
-  let targetLocale;
-  let format2 = null;
-  let from = locale2;
-  let to = null;
-  const type = "datetime format";
-  for (let i2 = 0; i2 < locales.length; i2++) {
-    targetLocale = to = locales[i2];
-    if (false) {
-      onWarn(getWarnMessage$1(CoreWarnCodes.FALLBACK_TO_DATE_FORMAT, {
-        key,
-        target: targetLocale
-      }));
-    }
-    if (false) {
-      const emitter = context.__v_emitter;
-      if (emitter) {
-        emitter.emit("fallback", {
-          type,
-          key,
-          from,
-          to,
-          groupId: `${type}:${key}`
-        });
-      }
-    }
-    datetimeFormat = datetimeFormats[targetLocale] || {};
-    format2 = datetimeFormat[key];
-    if (isPlainObject(format2))
-      break;
-    handleMissing(context, key, targetLocale, missingWarn, type);
-    from = to;
-  }
-  if (!isPlainObject(format2) || !isString$2(targetLocale)) {
-    return unresolving ? NOT_REOSLVED : key;
-  }
-  let id2 = `${targetLocale}__${key}`;
-  if (!isEmptyObject(overrides)) {
-    id2 = `${id2}__${JSON.stringify(overrides)}`;
-  }
-  let formatter = __datetimeFormatters.get(id2);
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat(targetLocale, assign$1({}, format2, overrides));
-    __datetimeFormatters.set(id2, formatter);
-  }
-  return !part ? formatter.format(value3) : formatter.formatToParts(value3);
-}
-__name(datetime, "datetime");
-const DATETIME_FORMAT_OPTIONS_KEYS = [
-  "localeMatcher",
-  "weekday",
-  "era",
-  "year",
-  "month",
-  "day",
-  "hour",
-  "minute",
-  "second",
-  "timeZoneName",
-  "formatMatcher",
-  "hour12",
-  "timeZone",
-  "dateStyle",
-  "timeStyle",
-  "calendar",
-  "dayPeriod",
-  "numberingSystem",
-  "hourCycle",
-  "fractionalSecondDigits"
-];
-function parseDateTimeArgs(...args) {
-  const [arg1, arg2, arg3, arg4] = args;
-  const options3 = {};
-  let overrides = {};
-  let value3;
-  if (isString$2(arg1)) {
-    const matches2 = arg1.match(/(\d{4}-\d{2}-\d{2})(T|\s)?(.*)/);
-    if (!matches2) {
-      throw createCoreError(CoreErrorCodes.INVALID_ISO_DATE_ARGUMENT);
-    }
-    const dateTime = matches2[3] ? matches2[3].trim().startsWith("T") ? `${matches2[1].trim()}${matches2[3].trim()}` : `${matches2[1].trim()}T${matches2[3].trim()}` : matches2[1].trim();
-    value3 = new Date(dateTime);
-    try {
-      value3.toISOString();
-    } catch (e) {
-      throw createCoreError(CoreErrorCodes.INVALID_ISO_DATE_ARGUMENT);
-    }
-  } else if (isDate(arg1)) {
-    if (isNaN(arg1.getTime())) {
-      throw createCoreError(CoreErrorCodes.INVALID_DATE_ARGUMENT);
-    }
-    value3 = arg1;
-  } else if (isNumber$1(arg1)) {
-    value3 = arg1;
-  } else {
-    throw createCoreError(CoreErrorCodes.INVALID_ARGUMENT);
-  }
-  if (isString$2(arg2)) {
-    options3.key = arg2;
-  } else if (isPlainObject(arg2)) {
-    Object.keys(arg2).forEach((key) => {
-      if (DATETIME_FORMAT_OPTIONS_KEYS.includes(key)) {
-        overrides[key] = arg2[key];
-      } else {
-        options3[key] = arg2[key];
-      }
-    });
-  }
-  if (isString$2(arg3)) {
-    options3.locale = arg3;
-  } else if (isPlainObject(arg3)) {
-    overrides = arg3;
-  }
-  if (isPlainObject(arg4)) {
-    overrides = arg4;
-  }
-  return [options3.key || "", value3, options3, overrides];
-}
-__name(parseDateTimeArgs, "parseDateTimeArgs");
-function clearDateTimeFormat(ctx, locale2, format2) {
-  const context = ctx;
-  for (const key in format2) {
-    const id2 = `${locale2}__${key}`;
-    if (!context.__datetimeFormatters.has(id2)) {
-      continue;
-    }
-    context.__datetimeFormatters.delete(id2);
-  }
-}
-__name(clearDateTimeFormat, "clearDateTimeFormat");
-function number(context, ...args) {
-  const { numberFormats, unresolving, fallbackLocale, onWarn, localeFallbacker } = context;
-  const { __numberFormatters } = context;
-  if (false) {
-    onWarn(getWarnMessage$1(CoreWarnCodes.CANNOT_FORMAT_NUMBER));
-    return MISSING_RESOLVE_VALUE;
-  }
-  const [key, value3, options3, overrides] = parseNumberArgs(...args);
-  const missingWarn = isBoolean$1(options3.missingWarn) ? options3.missingWarn : context.missingWarn;
-  const fallbackWarn = isBoolean$1(options3.fallbackWarn) ? options3.fallbackWarn : context.fallbackWarn;
-  const part = !!options3.part;
-  const locale2 = getLocale(context, options3);
-  const locales = localeFallbacker(
-    context,
-    // eslint-disable-line @typescript-eslint/no-explicit-any
-    fallbackLocale,
-    locale2
-  );
-  if (!isString$2(key) || key === "") {
-    return new Intl.NumberFormat(locale2, overrides).format(value3);
-  }
-  let numberFormat = {};
-  let targetLocale;
-  let format2 = null;
-  let from = locale2;
-  let to = null;
-  const type = "number format";
-  for (let i2 = 0; i2 < locales.length; i2++) {
-    targetLocale = to = locales[i2];
-    if (false) {
-      onWarn(getWarnMessage$1(CoreWarnCodes.FALLBACK_TO_NUMBER_FORMAT, {
-        key,
-        target: targetLocale
-      }));
-    }
-    if (false) {
-      const emitter = context.__v_emitter;
-      if (emitter) {
-        emitter.emit("fallback", {
-          type,
-          key,
-          from,
-          to,
-          groupId: `${type}:${key}`
-        });
-      }
-    }
-    numberFormat = numberFormats[targetLocale] || {};
-    format2 = numberFormat[key];
-    if (isPlainObject(format2))
-      break;
-    handleMissing(context, key, targetLocale, missingWarn, type);
-    from = to;
-  }
-  if (!isPlainObject(format2) || !isString$2(targetLocale)) {
-    return unresolving ? NOT_REOSLVED : key;
-  }
-  let id2 = `${targetLocale}__${key}`;
-  if (!isEmptyObject(overrides)) {
-    id2 = `${id2}__${JSON.stringify(overrides)}`;
-  }
-  let formatter = __numberFormatters.get(id2);
-  if (!formatter) {
-    formatter = new Intl.NumberFormat(targetLocale, assign$1({}, format2, overrides));
-    __numberFormatters.set(id2, formatter);
-  }
-  return !part ? formatter.format(value3) : formatter.formatToParts(value3);
-}
-__name(number, "number");
-const NUMBER_FORMAT_OPTIONS_KEYS = [
-  "localeMatcher",
-  "style",
-  "currency",
-  "currencyDisplay",
-  "currencySign",
-  "useGrouping",
-  "minimumIntegerDigits",
-  "minimumFractionDigits",
-  "maximumFractionDigits",
-  "minimumSignificantDigits",
-  "maximumSignificantDigits",
-  "compactDisplay",
-  "notation",
-  "signDisplay",
-  "unit",
-  "unitDisplay",
-  "roundingMode",
-  "roundingPriority",
-  "roundingIncrement",
-  "trailingZeroDisplay"
-];
-function parseNumberArgs(...args) {
-  const [arg1, arg2, arg3, arg4] = args;
-  const options3 = {};
-  let overrides = {};
-  if (!isNumber$1(arg1)) {
-    throw createCoreError(CoreErrorCodes.INVALID_ARGUMENT);
-  }
-  const value3 = arg1;
-  if (isString$2(arg2)) {
-    options3.key = arg2;
-  } else if (isPlainObject(arg2)) {
-    Object.keys(arg2).forEach((key) => {
-      if (NUMBER_FORMAT_OPTIONS_KEYS.includes(key)) {
-        overrides[key] = arg2[key];
-      } else {
-        options3[key] = arg2[key];
-      }
-    });
-  }
-  if (isString$2(arg3)) {
-    options3.locale = arg3;
-  } else if (isPlainObject(arg3)) {
-    overrides = arg3;
-  }
-  if (isPlainObject(arg4)) {
-    overrides = arg4;
-  }
-  return [options3.key || "", value3, options3, overrides];
-}
-__name(parseNumberArgs, "parseNumberArgs");
-function clearNumberFormat(ctx, locale2, format2) {
-  const context = ctx;
-  for (const key in format2) {
-    const id2 = `${locale2}__${key}`;
-    if (!context.__numberFormatters.has(id2)) {
-      continue;
-    }
-    context.__numberFormatters.delete(id2);
-  }
-}
-__name(clearNumberFormat, "clearNumberFormat");
-{
-  initFeatureFlags$1();
-}
-/*!
-  * vue-i18n v9.13.1
-  * (c) 2024 kazuya kawaguchi
-  * Released under the MIT License.
-  */
-const VERSION = "9.13.1";
-function initFeatureFlags() {
-  if (typeof __VUE_I18N_FULL_INSTALL__ !== "boolean") {
-    getGlobalThis().__VUE_I18N_FULL_INSTALL__ = true;
-  }
-  if (typeof __VUE_I18N_LEGACY_API__ !== "boolean") {
-    getGlobalThis().__VUE_I18N_LEGACY_API__ = true;
-  }
-  if (typeof __INTLIFY_JIT_COMPILATION__ !== "boolean") {
-    getGlobalThis().__INTLIFY_JIT_COMPILATION__ = false;
-  }
-  if (typeof __INTLIFY_DROP_MESSAGE_COMPILER__ !== "boolean") {
-    getGlobalThis().__INTLIFY_DROP_MESSAGE_COMPILER__ = false;
-  }
-  if (typeof __INTLIFY_PROD_DEVTOOLS__ !== "boolean") {
-    getGlobalThis().__INTLIFY_PROD_DEVTOOLS__ = false;
-  }
-}
-__name(initFeatureFlags, "initFeatureFlags");
-const code$1 = CoreWarnCodes.__EXTEND_POINT__;
-const inc$1 = incrementer(code$1);
-const I18nWarnCodes = {
-  FALLBACK_TO_ROOT: code$1,
-  // 9
-  NOT_SUPPORTED_PRESERVE: inc$1(),
-  // 10
-  NOT_SUPPORTED_FORMATTER: inc$1(),
-  // 11
-  NOT_SUPPORTED_PRESERVE_DIRECTIVE: inc$1(),
-  // 12
-  NOT_SUPPORTED_GET_CHOICE_INDEX: inc$1(),
-  // 13
-  COMPONENT_NAME_LEGACY_COMPATIBLE: inc$1(),
-  // 14
-  NOT_FOUND_PARENT_SCOPE: inc$1(),
-  // 15
-  IGNORE_OBJ_FLATTEN: inc$1(),
-  // 16
-  NOTICE_DROP_ALLOW_COMPOSITION: inc$1(),
-  // 17
-  NOTICE_DROP_TRANSLATE_EXIST_COMPATIBLE_FLAG: inc$1()
-  // 18
-};
-const warnMessages = {
-  [I18nWarnCodes.FALLBACK_TO_ROOT]: `Fall back to {type} '{key}' with root locale.`,
-  [I18nWarnCodes.NOT_SUPPORTED_PRESERVE]: `Not supported 'preserve'.`,
-  [I18nWarnCodes.NOT_SUPPORTED_FORMATTER]: `Not supported 'formatter'.`,
-  [I18nWarnCodes.NOT_SUPPORTED_PRESERVE_DIRECTIVE]: `Not supported 'preserveDirectiveContent'.`,
-  [I18nWarnCodes.NOT_SUPPORTED_GET_CHOICE_INDEX]: `Not supported 'getChoiceIndex'.`,
-  [I18nWarnCodes.COMPONENT_NAME_LEGACY_COMPATIBLE]: `Component name legacy compatible: '{name}' -> 'i18n'`,
-  [I18nWarnCodes.NOT_FOUND_PARENT_SCOPE]: `Not found parent scope. use the global scope.`,
-  [I18nWarnCodes.IGNORE_OBJ_FLATTEN]: `Ignore object flatten: '{key}' key has an string value`,
-  [I18nWarnCodes.NOTICE_DROP_ALLOW_COMPOSITION]: `'allowComposition' option will be dropped in the next major version. For more information, please see 👉 https://tinyurl.com/2p97mcze`,
-  [I18nWarnCodes.NOTICE_DROP_TRANSLATE_EXIST_COMPATIBLE_FLAG]: `'translateExistCompatible' option will be dropped in the next major version.`
-};
-function getWarnMessage(code2, ...args) {
-  return format$4(warnMessages[code2], ...args);
-}
-__name(getWarnMessage, "getWarnMessage");
-const code = CoreErrorCodes.__EXTEND_POINT__;
-const inc = incrementer(code);
-const I18nErrorCodes = {
-  // composer module errors
-  UNEXPECTED_RETURN_TYPE: code,
-  // 24
-  // legacy module errors
-  INVALID_ARGUMENT: inc(),
-  // 25
-  // i18n module errors
-  MUST_BE_CALL_SETUP_TOP: inc(),
-  // 26
-  NOT_INSTALLED: inc(),
-  // 27
-  NOT_AVAILABLE_IN_LEGACY_MODE: inc(),
-  // 28
-  // directive module errors
-  REQUIRED_VALUE: inc(),
-  // 29
-  INVALID_VALUE: inc(),
-  // 30
-  // vue-devtools errors
-  CANNOT_SETUP_VUE_DEVTOOLS_PLUGIN: inc(),
-  // 31
-  NOT_INSTALLED_WITH_PROVIDE: inc(),
-  // 32
-  // unexpected error
-  UNEXPECTED_ERROR: inc(),
-  // 33
-  // not compatible legacy vue-i18n constructor
-  NOT_COMPATIBLE_LEGACY_VUE_I18N: inc(),
-  // 34
-  // bridge support vue 2.x only
-  BRIDGE_SUPPORT_VUE_2_ONLY: inc(),
-  // 35
-  // need to define `i18n` option in `allowComposition: true` and `useScope: 'local' at `useI18n``
-  MUST_DEFINE_I18N_OPTION_IN_ALLOW_COMPOSITION: inc(),
-  // 36
-  // Not available Compostion API in Legacy API mode. Please make sure that the legacy API mode is working properly
-  NOT_AVAILABLE_COMPOSITION_IN_LEGACY: inc(),
-  // 37
-  // for enhancement
-  __EXTEND_POINT__: inc()
-  // 38
-};
-function createI18nError(code2, ...args) {
-  return createCompileError(code2, null, false ? { messages: errorMessages, args } : void 0);
-}
-__name(createI18nError, "createI18nError");
-const errorMessages = {
-  [I18nErrorCodes.UNEXPECTED_RETURN_TYPE]: "Unexpected return type in composer",
-  [I18nErrorCodes.INVALID_ARGUMENT]: "Invalid argument",
-  [I18nErrorCodes.MUST_BE_CALL_SETUP_TOP]: "Must be called at the top of a `setup` function",
-  [I18nErrorCodes.NOT_INSTALLED]: "Need to install with `app.use` function",
-  [I18nErrorCodes.UNEXPECTED_ERROR]: "Unexpected error",
-  [I18nErrorCodes.NOT_AVAILABLE_IN_LEGACY_MODE]: "Not available in legacy mode",
-  [I18nErrorCodes.REQUIRED_VALUE]: `Required in value: {0}`,
-  [I18nErrorCodes.INVALID_VALUE]: `Invalid value`,
-  [I18nErrorCodes.CANNOT_SETUP_VUE_DEVTOOLS_PLUGIN]: `Cannot setup vue-devtools plugin`,
-  [I18nErrorCodes.NOT_INSTALLED_WITH_PROVIDE]: "Need to install with `provide` function",
-  [I18nErrorCodes.NOT_COMPATIBLE_LEGACY_VUE_I18N]: "Not compatible legacy VueI18n.",
-  [I18nErrorCodes.BRIDGE_SUPPORT_VUE_2_ONLY]: "vue-i18n-bridge support Vue 2.x only",
-  [I18nErrorCodes.MUST_DEFINE_I18N_OPTION_IN_ALLOW_COMPOSITION]: "Must define ‘i18n’ option or custom block in Composition API with using local scope in Legacy API mode",
-  [I18nErrorCodes.NOT_AVAILABLE_COMPOSITION_IN_LEGACY]: "Not available Compostion API in Legacy API mode. Please make sure that the legacy API mode is working properly"
-};
-const TranslateVNodeSymbol = /* @__PURE__ */ makeSymbol("__translateVNode");
-const DatetimePartsSymbol = /* @__PURE__ */ makeSymbol("__datetimeParts");
-const NumberPartsSymbol = /* @__PURE__ */ makeSymbol("__numberParts");
-const EnableEmitter = /* @__PURE__ */ makeSymbol("__enableEmitter");
-const DisableEmitter = /* @__PURE__ */ makeSymbol("__disableEmitter");
-const SetPluralRulesSymbol = makeSymbol("__setPluralRules");
-makeSymbol("__intlifyMeta");
-const InejctWithOptionSymbol = /* @__PURE__ */ makeSymbol("__injectWithOption");
-const DisposeSymbol = /* @__PURE__ */ makeSymbol("__dispose");
-const __VUE_I18N_BRIDGE__ = "__VUE_I18N_BRIDGE__";
-function handleFlatJson(obj) {
-  if (!isObject$2(obj)) {
-    return obj;
-  }
-  for (const key in obj) {
-    if (!hasOwn$1(obj, key)) {
-      continue;
-    }
-    if (!key.includes(".")) {
-      if (isObject$2(obj[key])) {
-        handleFlatJson(obj[key]);
-      }
-    } else {
-      const subKeys = key.split(".");
-      const lastIndex = subKeys.length - 1;
-      let currentObj = obj;
-      let hasStringValue = false;
-      for (let i2 = 0; i2 < lastIndex; i2++) {
-        if (!(subKeys[i2] in currentObj)) {
-          currentObj[subKeys[i2]] = {};
-        }
-        if (!isObject$2(currentObj[subKeys[i2]])) {
-          hasStringValue = true;
-          break;
-        }
-        currentObj = currentObj[subKeys[i2]];
-      }
-      if (!hasStringValue) {
-        currentObj[subKeys[lastIndex]] = obj[key];
-        delete obj[key];
-      }
-      if (isObject$2(currentObj[subKeys[lastIndex]])) {
-        handleFlatJson(currentObj[subKeys[lastIndex]]);
-      }
-    }
-  }
-  return obj;
-}
-__name(handleFlatJson, "handleFlatJson");
-function getLocaleMessages(locale2, options3) {
-  const { messages: messages2, __i18n, messageResolver, flatJson } = options3;
-  const ret = isPlainObject(messages2) ? messages2 : isArray$1(__i18n) ? {} : { [locale2]: {} };
-  if (isArray$1(__i18n)) {
-    __i18n.forEach((custom2) => {
-      if ("locale" in custom2 && "resource" in custom2) {
-        const { locale: locale22, resource } = custom2;
-        if (locale22) {
-          ret[locale22] = ret[locale22] || {};
-          deepCopy(resource, ret[locale22]);
-        } else {
-          deepCopy(resource, ret);
-        }
-      } else {
-        isString$2(custom2) && deepCopy(JSON.parse(custom2), ret);
-      }
-    });
-  }
-  if (messageResolver == null && flatJson) {
-    for (const key in ret) {
-      if (hasOwn$1(ret, key)) {
-        handleFlatJson(ret[key]);
-      }
-    }
-  }
-  return ret;
-}
-__name(getLocaleMessages, "getLocaleMessages");
-function getComponentOptions(instance) {
-  return instance.type;
-}
-__name(getComponentOptions, "getComponentOptions");
-function adjustI18nResources(gl, options3, componentOptions) {
-  let messages2 = isObject$2(options3.messages) ? options3.messages : {};
-  if ("__i18nGlobal" in componentOptions) {
-    messages2 = getLocaleMessages(gl.locale.value, {
-      messages: messages2,
-      __i18n: componentOptions.__i18nGlobal
-    });
-  }
-  const locales = Object.keys(messages2);
-  if (locales.length) {
-    locales.forEach((locale2) => {
-      gl.mergeLocaleMessage(locale2, messages2[locale2]);
-    });
-  }
-  {
-    if (isObject$2(options3.datetimeFormats)) {
-      const locales2 = Object.keys(options3.datetimeFormats);
-      if (locales2.length) {
-        locales2.forEach((locale2) => {
-          gl.mergeDateTimeFormat(locale2, options3.datetimeFormats[locale2]);
-        });
-      }
-    }
-    if (isObject$2(options3.numberFormats)) {
-      const locales2 = Object.keys(options3.numberFormats);
-      if (locales2.length) {
-        locales2.forEach((locale2) => {
-          gl.mergeNumberFormat(locale2, options3.numberFormats[locale2]);
-        });
-      }
-    }
-  }
-}
-__name(adjustI18nResources, "adjustI18nResources");
-function createTextNode(key) {
-  return createVNode(Text, null, key, 0);
-}
-__name(createTextNode, "createTextNode");
-const DEVTOOLS_META = "__INTLIFY_META__";
-const NOOP_RETURN_ARRAY = /* @__PURE__ */ __name(() => [], "NOOP_RETURN_ARRAY");
-const NOOP_RETURN_FALSE = /* @__PURE__ */ __name(() => false, "NOOP_RETURN_FALSE");
-let composerID = 0;
-function defineCoreMissingHandler(missing) {
-  return (ctx, locale2, key, type) => {
-    return missing(locale2, key, getCurrentInstance() || void 0, type);
-  };
-}
-__name(defineCoreMissingHandler, "defineCoreMissingHandler");
-const getMetaInfo = /* @__PURE__ */ __name(/* @__NO_SIDE_EFFECTS__ */ () => {
-  const instance = getCurrentInstance();
-  let meta = null;
-  return instance && (meta = getComponentOptions(instance)[DEVTOOLS_META]) ? { [DEVTOOLS_META]: meta } : null;
-}, "getMetaInfo");
-function createComposer(options3 = {}, VueI18nLegacy) {
-  const { __root, __injectWithOption } = options3;
-  const _isGlobal = __root === void 0;
-  const flatJson = options3.flatJson;
-  const _ref = inBrowser ? ref : shallowRef;
-  const translateExistCompatible = !!options3.translateExistCompatible;
-  if (false) {
-    if (translateExistCompatible && true) {
-      warnOnce(getWarnMessage(I18nWarnCodes.NOTICE_DROP_TRANSLATE_EXIST_COMPATIBLE_FLAG));
-    }
-  }
-  let _inheritLocale = isBoolean$1(options3.inheritLocale) ? options3.inheritLocale : true;
-  const _locale = _ref(
-    // prettier-ignore
-    __root && _inheritLocale ? __root.locale.value : isString$2(options3.locale) ? options3.locale : DEFAULT_LOCALE
-  );
-  const _fallbackLocale = _ref(
-    // prettier-ignore
-    __root && _inheritLocale ? __root.fallbackLocale.value : isString$2(options3.fallbackLocale) || isArray$1(options3.fallbackLocale) || isPlainObject(options3.fallbackLocale) || options3.fallbackLocale === false ? options3.fallbackLocale : _locale.value
-  );
-  const _messages = _ref(getLocaleMessages(_locale.value, options3));
-  const _datetimeFormats = _ref(isPlainObject(options3.datetimeFormats) ? options3.datetimeFormats : { [_locale.value]: {} });
-  const _numberFormats = _ref(isPlainObject(options3.numberFormats) ? options3.numberFormats : { [_locale.value]: {} });
-  let _missingWarn = __root ? __root.missingWarn : isBoolean$1(options3.missingWarn) || isRegExp(options3.missingWarn) ? options3.missingWarn : true;
-  let _fallbackWarn = __root ? __root.fallbackWarn : isBoolean$1(options3.fallbackWarn) || isRegExp(options3.fallbackWarn) ? options3.fallbackWarn : true;
-  let _fallbackRoot = __root ? __root.fallbackRoot : isBoolean$1(options3.fallbackRoot) ? options3.fallbackRoot : true;
-  let _fallbackFormat = !!options3.fallbackFormat;
-  let _missing = isFunction$1(options3.missing) ? options3.missing : null;
-  let _runtimeMissing = isFunction$1(options3.missing) ? defineCoreMissingHandler(options3.missing) : null;
-  let _postTranslation = isFunction$1(options3.postTranslation) ? options3.postTranslation : null;
-  let _warnHtmlMessage = __root ? __root.warnHtmlMessage : isBoolean$1(options3.warnHtmlMessage) ? options3.warnHtmlMessage : true;
-  let _escapeParameter = !!options3.escapeParameter;
-  const _modifiers = __root ? __root.modifiers : isPlainObject(options3.modifiers) ? options3.modifiers : {};
-  let _pluralRules = options3.pluralRules || __root && __root.pluralRules;
-  let _context;
-  const getCoreContext = /* @__PURE__ */ __name(() => {
-    _isGlobal && setFallbackContext(null);
-    const ctxOptions = {
-      version: VERSION,
-      locale: _locale.value,
-      fallbackLocale: _fallbackLocale.value,
-      messages: _messages.value,
-      modifiers: _modifiers,
-      pluralRules: _pluralRules,
-      missing: _runtimeMissing === null ? void 0 : _runtimeMissing,
-      missingWarn: _missingWarn,
-      fallbackWarn: _fallbackWarn,
-      fallbackFormat: _fallbackFormat,
-      unresolving: true,
-      postTranslation: _postTranslation === null ? void 0 : _postTranslation,
-      warnHtmlMessage: _warnHtmlMessage,
-      escapeParameter: _escapeParameter,
-      messageResolver: options3.messageResolver,
-      messageCompiler: options3.messageCompiler,
-      __meta: { framework: "vue" }
-    };
-    {
-      ctxOptions.datetimeFormats = _datetimeFormats.value;
-      ctxOptions.numberFormats = _numberFormats.value;
-      ctxOptions.__datetimeFormatters = isPlainObject(_context) ? _context.__datetimeFormatters : void 0;
-      ctxOptions.__numberFormatters = isPlainObject(_context) ? _context.__numberFormatters : void 0;
-    }
-    if (false) {
-      ctxOptions.__v_emitter = isPlainObject(_context) ? _context.__v_emitter : void 0;
-    }
-    const ctx = createCoreContext(ctxOptions);
-    _isGlobal && setFallbackContext(ctx);
-    return ctx;
-  }, "getCoreContext");
-  _context = getCoreContext();
-  updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
-  function trackReactivityValues() {
-    return [
-      _locale.value,
-      _fallbackLocale.value,
-      _messages.value,
-      _datetimeFormats.value,
-      _numberFormats.value
-    ];
-  }
-  __name(trackReactivityValues, "trackReactivityValues");
-  const locale2 = computed({
-    get: /* @__PURE__ */ __name(() => _locale.value, "get"),
-    set: /* @__PURE__ */ __name((val) => {
-      _locale.value = val;
-      _context.locale = _locale.value;
-    }, "set")
-  });
-  const fallbackLocale = computed({
-    get: /* @__PURE__ */ __name(() => _fallbackLocale.value, "get"),
-    set: /* @__PURE__ */ __name((val) => {
-      _fallbackLocale.value = val;
-      _context.fallbackLocale = _fallbackLocale.value;
-      updateFallbackLocale(_context, _locale.value, val);
-    }, "set")
-  });
-  const messages2 = computed(() => _messages.value);
-  const datetimeFormats = /* @__PURE__ */ computed(() => _datetimeFormats.value);
-  const numberFormats = /* @__PURE__ */ computed(() => _numberFormats.value);
-  function getPostTranslationHandler() {
-    return isFunction$1(_postTranslation) ? _postTranslation : null;
-  }
-  __name(getPostTranslationHandler, "getPostTranslationHandler");
-  function setPostTranslationHandler(handler6) {
-    _postTranslation = handler6;
-    _context.postTranslation = handler6;
-  }
-  __name(setPostTranslationHandler, "setPostTranslationHandler");
-  function getMissingHandler() {
-    return _missing;
-  }
-  __name(getMissingHandler, "getMissingHandler");
-  function setMissingHandler(handler6) {
-    if (handler6 !== null) {
-      _runtimeMissing = defineCoreMissingHandler(handler6);
-    }
-    _missing = handler6;
-    _context.missing = _runtimeMissing;
-  }
-  __name(setMissingHandler, "setMissingHandler");
-  function isResolvedTranslateMessage(type, arg) {
-    return type !== "translate" || !arg.resolvedMessage;
-  }
-  __name(isResolvedTranslateMessage, "isResolvedTranslateMessage");
-  const wrapWithDeps = /* @__PURE__ */ __name((fn, argumentParser, warnType, fallbackSuccess, fallbackFail, successCondition) => {
-    trackReactivityValues();
-    let ret;
-    try {
-      if (__INTLIFY_PROD_DEVTOOLS__) {
-        /* @__PURE__ */ setAdditionalMeta(/* @__PURE__ */ getMetaInfo());
-      }
-      if (!_isGlobal) {
-        _context.fallbackContext = __root ? getFallbackContext() : void 0;
-      }
-      ret = fn(_context);
-    } finally {
-      if (__INTLIFY_PROD_DEVTOOLS__) {
-        /* @__PURE__ */ setAdditionalMeta(null);
-      }
-      if (!_isGlobal) {
-        _context.fallbackContext = void 0;
-      }
-    }
-    if (warnType !== "translate exists" && // for not `te` (e.g `t`)
-    isNumber$1(ret) && ret === NOT_REOSLVED || warnType === "translate exists" && !ret) {
-      const [key, arg2] = argumentParser();
-      if (false) {
-        if (_fallbackRoot && (isTranslateFallbackWarn(_fallbackWarn, key) || isTranslateMissingWarn(_missingWarn, key))) {
-          warn(getWarnMessage(I18nWarnCodes.FALLBACK_TO_ROOT, {
-            key,
-            type: warnType
-          }));
-        }
-        if (false) {
-          const { __v_emitter: emitter } = _context;
-          if (emitter && _fallbackRoot) {
-            emitter.emit("fallback", {
-              type: warnType,
-              key,
-              to: "global",
-              groupId: `${warnType}:${key}`
-            });
-          }
-        }
-      }
-      return __root && _fallbackRoot ? fallbackSuccess(__root) : fallbackFail(key);
-    } else if (successCondition(ret)) {
-      return ret;
-    } else {
-      throw createI18nError(I18nErrorCodes.UNEXPECTED_RETURN_TYPE);
-    }
-  }, "wrapWithDeps");
-  function t(...args) {
-    return wrapWithDeps((context) => Reflect.apply(translate, null, [context, ...args]), () => parseTranslateArgs(...args), "translate", (root26) => Reflect.apply(root26.t, root26, [...args]), (key) => key, (val) => isString$2(val));
-  }
-  __name(t, "t");
-  function rt(...args) {
-    const [arg1, arg2, arg3] = args;
-    if (arg3 && !isObject$2(arg3)) {
-      throw createI18nError(I18nErrorCodes.INVALID_ARGUMENT);
-    }
-    return t(...[arg1, arg2, assign$1({ resolvedMessage: true }, arg3 || {})]);
-  }
-  __name(rt, "rt");
-  function d(...args) {
-    return wrapWithDeps((context) => Reflect.apply(datetime, null, [context, ...args]), () => parseDateTimeArgs(...args), "datetime format", (root26) => Reflect.apply(root26.d, root26, [...args]), () => MISSING_RESOLVE_VALUE, (val) => isString$2(val));
-  }
-  __name(d, "d");
-  function n(...args) {
-    return wrapWithDeps((context) => Reflect.apply(number, null, [context, ...args]), () => parseNumberArgs(...args), "number format", (root26) => Reflect.apply(root26.n, root26, [...args]), () => MISSING_RESOLVE_VALUE, (val) => isString$2(val));
-  }
-  __name(n, "n");
-  function normalize(values2) {
-    return values2.map((val) => isString$2(val) || isNumber$1(val) || isBoolean$1(val) ? createTextNode(String(val)) : val);
-  }
-  __name(normalize, "normalize");
-  const interpolate = /* @__PURE__ */ __name((val) => val, "interpolate");
-  const processor = {
-    normalize,
-    interpolate,
-    type: "vnode"
-  };
-  function translateVNode(...args) {
-    return wrapWithDeps(
-      (context) => {
-        let ret;
-        const _context2 = context;
-        try {
-          _context2.processor = processor;
-          ret = Reflect.apply(translate, null, [_context2, ...args]);
-        } finally {
-          _context2.processor = null;
-        }
-        return ret;
-      },
-      () => parseTranslateArgs(...args),
-      "translate",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (root26) => root26[TranslateVNodeSymbol](...args),
-      (key) => [createTextNode(key)],
-      (val) => isArray$1(val)
-    );
-  }
-  __name(translateVNode, "translateVNode");
-  function numberParts(...args) {
-    return wrapWithDeps(
-      (context) => Reflect.apply(number, null, [context, ...args]),
-      () => parseNumberArgs(...args),
-      "number format",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (root26) => root26[NumberPartsSymbol](...args),
-      NOOP_RETURN_ARRAY,
-      (val) => isString$2(val) || isArray$1(val)
-    );
-  }
-  __name(numberParts, "numberParts");
-  function datetimeParts(...args) {
-    return wrapWithDeps(
-      (context) => Reflect.apply(datetime, null, [context, ...args]),
-      () => parseDateTimeArgs(...args),
-      "datetime format",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (root26) => root26[DatetimePartsSymbol](...args),
-      NOOP_RETURN_ARRAY,
-      (val) => isString$2(val) || isArray$1(val)
-    );
-  }
-  __name(datetimeParts, "datetimeParts");
-  function setPluralRules(rules) {
-    _pluralRules = rules;
-    _context.pluralRules = _pluralRules;
-  }
-  __name(setPluralRules, "setPluralRules");
-  function te(key, locale22) {
-    return wrapWithDeps(() => {
-      if (!key) {
-        return false;
-      }
-      const targetLocale = isString$2(locale22) ? locale22 : _locale.value;
-      const message3 = getLocaleMessage(targetLocale);
-      const resolved = _context.messageResolver(message3, key);
-      return !translateExistCompatible ? isMessageAST(resolved) || isMessageFunction(resolved) || isString$2(resolved) : resolved != null;
-    }, () => [key], "translate exists", (root26) => {
-      return Reflect.apply(root26.te, root26, [key, locale22]);
-    }, NOOP_RETURN_FALSE, (val) => isBoolean$1(val));
-  }
-  __name(te, "te");
-  function resolveMessages(key) {
-    let messages22 = null;
-    const locales = fallbackWithLocaleChain(_context, _fallbackLocale.value, _locale.value);
-    for (let i2 = 0; i2 < locales.length; i2++) {
-      const targetLocaleMessages = _messages.value[locales[i2]] || {};
-      const messageValue = _context.messageResolver(targetLocaleMessages, key);
-      if (messageValue != null) {
-        messages22 = messageValue;
-        break;
-      }
-    }
-    return messages22;
-  }
-  __name(resolveMessages, "resolveMessages");
-  function tm(key) {
-    const messages22 = resolveMessages(key);
-    return messages22 != null ? messages22 : __root ? __root.tm(key) || {} : {};
-  }
-  __name(tm, "tm");
-  function getLocaleMessage(locale22) {
-    return _messages.value[locale22] || {};
-  }
-  __name(getLocaleMessage, "getLocaleMessage");
-  function setLocaleMessage(locale22, message3) {
-    if (flatJson) {
-      const _message = { [locale22]: message3 };
-      for (const key in _message) {
-        if (hasOwn$1(_message, key)) {
-          handleFlatJson(_message[key]);
-        }
-      }
-      message3 = _message[locale22];
-    }
-    _messages.value[locale22] = message3;
-    _context.messages = _messages.value;
-  }
-  __name(setLocaleMessage, "setLocaleMessage");
-  function mergeLocaleMessage(locale22, message3) {
-    _messages.value[locale22] = _messages.value[locale22] || {};
-    const _message = { [locale22]: message3 };
-    if (flatJson) {
-      for (const key in _message) {
-        if (hasOwn$1(_message, key)) {
-          handleFlatJson(_message[key]);
-        }
-      }
-    }
-    message3 = _message[locale22];
-    deepCopy(message3, _messages.value[locale22]);
-    _context.messages = _messages.value;
-  }
-  __name(mergeLocaleMessage, "mergeLocaleMessage");
-  function getDateTimeFormat(locale22) {
-    return _datetimeFormats.value[locale22] || {};
-  }
-  __name(getDateTimeFormat, "getDateTimeFormat");
-  function setDateTimeFormat(locale22, format2) {
-    _datetimeFormats.value[locale22] = format2;
-    _context.datetimeFormats = _datetimeFormats.value;
-    clearDateTimeFormat(_context, locale22, format2);
-  }
-  __name(setDateTimeFormat, "setDateTimeFormat");
-  function mergeDateTimeFormat(locale22, format2) {
-    _datetimeFormats.value[locale22] = assign$1(_datetimeFormats.value[locale22] || {}, format2);
-    _context.datetimeFormats = _datetimeFormats.value;
-    clearDateTimeFormat(_context, locale22, format2);
-  }
-  __name(mergeDateTimeFormat, "mergeDateTimeFormat");
-  function getNumberFormat(locale22) {
-    return _numberFormats.value[locale22] || {};
-  }
-  __name(getNumberFormat, "getNumberFormat");
-  function setNumberFormat(locale22, format2) {
-    _numberFormats.value[locale22] = format2;
-    _context.numberFormats = _numberFormats.value;
-    clearNumberFormat(_context, locale22, format2);
-  }
-  __name(setNumberFormat, "setNumberFormat");
-  function mergeNumberFormat(locale22, format2) {
-    _numberFormats.value[locale22] = assign$1(_numberFormats.value[locale22] || {}, format2);
-    _context.numberFormats = _numberFormats.value;
-    clearNumberFormat(_context, locale22, format2);
-  }
-  __name(mergeNumberFormat, "mergeNumberFormat");
-  composerID++;
-  if (__root && inBrowser) {
-    watch(__root.locale, (val) => {
-      if (_inheritLocale) {
-        _locale.value = val;
-        _context.locale = val;
-        updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
-      }
-    });
-    watch(__root.fallbackLocale, (val) => {
-      if (_inheritLocale) {
-        _fallbackLocale.value = val;
-        _context.fallbackLocale = val;
-        updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
-      }
-    });
-  }
-  const composer = {
-    id: composerID,
-    locale: locale2,
-    fallbackLocale,
-    get inheritLocale() {
-      return _inheritLocale;
-    },
-    set inheritLocale(val) {
-      _inheritLocale = val;
-      if (val && __root) {
-        _locale.value = __root.locale.value;
-        _fallbackLocale.value = __root.fallbackLocale.value;
-        updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
-      }
-    },
-    get availableLocales() {
-      return Object.keys(_messages.value).sort();
-    },
-    messages: messages2,
-    get modifiers() {
-      return _modifiers;
-    },
-    get pluralRules() {
-      return _pluralRules || {};
-    },
-    get isGlobal() {
-      return _isGlobal;
-    },
-    get missingWarn() {
-      return _missingWarn;
-    },
-    set missingWarn(val) {
-      _missingWarn = val;
-      _context.missingWarn = _missingWarn;
-    },
-    get fallbackWarn() {
-      return _fallbackWarn;
-    },
-    set fallbackWarn(val) {
-      _fallbackWarn = val;
-      _context.fallbackWarn = _fallbackWarn;
-    },
-    get fallbackRoot() {
-      return _fallbackRoot;
-    },
-    set fallbackRoot(val) {
-      _fallbackRoot = val;
-    },
-    get fallbackFormat() {
-      return _fallbackFormat;
-    },
-    set fallbackFormat(val) {
-      _fallbackFormat = val;
-      _context.fallbackFormat = _fallbackFormat;
-    },
-    get warnHtmlMessage() {
-      return _warnHtmlMessage;
-    },
-    set warnHtmlMessage(val) {
-      _warnHtmlMessage = val;
-      _context.warnHtmlMessage = val;
-    },
-    get escapeParameter() {
-      return _escapeParameter;
-    },
-    set escapeParameter(val) {
-      _escapeParameter = val;
-      _context.escapeParameter = val;
-    },
-    t,
-    getLocaleMessage,
-    setLocaleMessage,
-    mergeLocaleMessage,
-    getPostTranslationHandler,
-    setPostTranslationHandler,
-    getMissingHandler,
-    setMissingHandler,
-    [SetPluralRulesSymbol]: setPluralRules
-  };
-  {
-    composer.datetimeFormats = datetimeFormats;
-    composer.numberFormats = numberFormats;
-    composer.rt = rt;
-    composer.te = te;
-    composer.tm = tm;
-    composer.d = d;
-    composer.n = n;
-    composer.getDateTimeFormat = getDateTimeFormat;
-    composer.setDateTimeFormat = setDateTimeFormat;
-    composer.mergeDateTimeFormat = mergeDateTimeFormat;
-    composer.getNumberFormat = getNumberFormat;
-    composer.setNumberFormat = setNumberFormat;
-    composer.mergeNumberFormat = mergeNumberFormat;
-    composer[InejctWithOptionSymbol] = __injectWithOption;
-    composer[TranslateVNodeSymbol] = translateVNode;
-    composer[DatetimePartsSymbol] = datetimeParts;
-    composer[NumberPartsSymbol] = numberParts;
-  }
-  if (false) {
-    composer[EnableEmitter] = (emitter) => {
-      _context.__v_emitter = emitter;
-    };
-    composer[DisableEmitter] = () => {
-      _context.__v_emitter = void 0;
-    };
-  }
-  return composer;
-}
-__name(createComposer, "createComposer");
-function convertComposerOptions(options3) {
-  const locale2 = isString$2(options3.locale) ? options3.locale : DEFAULT_LOCALE;
-  const fallbackLocale = isString$2(options3.fallbackLocale) || isArray$1(options3.fallbackLocale) || isPlainObject(options3.fallbackLocale) || options3.fallbackLocale === false ? options3.fallbackLocale : locale2;
-  const missing = isFunction$1(options3.missing) ? options3.missing : void 0;
-  const missingWarn = isBoolean$1(options3.silentTranslationWarn) || isRegExp(options3.silentTranslationWarn) ? !options3.silentTranslationWarn : true;
-  const fallbackWarn = isBoolean$1(options3.silentFallbackWarn) || isRegExp(options3.silentFallbackWarn) ? !options3.silentFallbackWarn : true;
-  const fallbackRoot = isBoolean$1(options3.fallbackRoot) ? options3.fallbackRoot : true;
-  const fallbackFormat = !!options3.formatFallbackMessages;
-  const modifiers = isPlainObject(options3.modifiers) ? options3.modifiers : {};
-  const pluralizationRules = options3.pluralizationRules;
-  const postTranslation = isFunction$1(options3.postTranslation) ? options3.postTranslation : void 0;
-  const warnHtmlMessage = isString$2(options3.warnHtmlInMessage) ? options3.warnHtmlInMessage !== "off" : true;
-  const escapeParameter = !!options3.escapeParameterHtml;
-  const inheritLocale = isBoolean$1(options3.sync) ? options3.sync : true;
-  if (false) {
-    warn(getWarnMessage(I18nWarnCodes.NOT_SUPPORTED_FORMATTER));
-  }
-  if (false) {
-    warn(getWarnMessage(I18nWarnCodes.NOT_SUPPORTED_PRESERVE_DIRECTIVE));
-  }
-  let messages2 = options3.messages;
-  if (isPlainObject(options3.sharedMessages)) {
-    const sharedMessages = options3.sharedMessages;
-    const locales = Object.keys(sharedMessages);
-    messages2 = locales.reduce((messages22, locale22) => {
-      const message3 = messages22[locale22] || (messages22[locale22] = {});
-      assign$1(message3, sharedMessages[locale22]);
-      return messages22;
-    }, messages2 || {});
-  }
-  const { __i18n, __root, __injectWithOption } = options3;
-  const datetimeFormats = options3.datetimeFormats;
-  const numberFormats = options3.numberFormats;
-  const flatJson = options3.flatJson;
-  const translateExistCompatible = options3.translateExistCompatible;
-  return {
-    locale: locale2,
-    fallbackLocale,
-    messages: messages2,
-    flatJson,
-    datetimeFormats,
-    numberFormats,
-    missing,
-    missingWarn,
-    fallbackWarn,
-    fallbackRoot,
-    fallbackFormat,
-    modifiers,
-    pluralRules: pluralizationRules,
-    postTranslation,
-    warnHtmlMessage,
-    escapeParameter,
-    messageResolver: options3.messageResolver,
-    inheritLocale,
-    translateExistCompatible,
-    __i18n,
-    __root,
-    __injectWithOption
-  };
-}
-__name(convertComposerOptions, "convertComposerOptions");
-function createVueI18n(options3 = {}, VueI18nLegacy) {
-  {
-    const composer = createComposer(convertComposerOptions(options3));
-    const { __extender } = options3;
-    const vueI18n = {
-      // id
-      id: composer.id,
-      // locale
-      get locale() {
-        return composer.locale.value;
-      },
-      set locale(val) {
-        composer.locale.value = val;
-      },
-      // fallbackLocale
-      get fallbackLocale() {
-        return composer.fallbackLocale.value;
-      },
-      set fallbackLocale(val) {
-        composer.fallbackLocale.value = val;
-      },
-      // messages
-      get messages() {
-        return composer.messages.value;
-      },
-      // datetimeFormats
-      get datetimeFormats() {
-        return composer.datetimeFormats.value;
-      },
-      // numberFormats
-      get numberFormats() {
-        return composer.numberFormats.value;
-      },
-      // availableLocales
-      get availableLocales() {
-        return composer.availableLocales;
-      },
-      // formatter
-      get formatter() {
-        return {
-          interpolate() {
-            return [];
-          }
-        };
-      },
-      set formatter(val) {
-      },
-      // missing
-      get missing() {
-        return composer.getMissingHandler();
-      },
-      set missing(handler6) {
-        composer.setMissingHandler(handler6);
-      },
-      // silentTranslationWarn
-      get silentTranslationWarn() {
-        return isBoolean$1(composer.missingWarn) ? !composer.missingWarn : composer.missingWarn;
-      },
-      set silentTranslationWarn(val) {
-        composer.missingWarn = isBoolean$1(val) ? !val : val;
-      },
-      // silentFallbackWarn
-      get silentFallbackWarn() {
-        return isBoolean$1(composer.fallbackWarn) ? !composer.fallbackWarn : composer.fallbackWarn;
-      },
-      set silentFallbackWarn(val) {
-        composer.fallbackWarn = isBoolean$1(val) ? !val : val;
-      },
-      // modifiers
-      get modifiers() {
-        return composer.modifiers;
-      },
-      // formatFallbackMessages
-      get formatFallbackMessages() {
-        return composer.fallbackFormat;
-      },
-      set formatFallbackMessages(val) {
-        composer.fallbackFormat = val;
-      },
-      // postTranslation
-      get postTranslation() {
-        return composer.getPostTranslationHandler();
-      },
-      set postTranslation(handler6) {
-        composer.setPostTranslationHandler(handler6);
-      },
-      // sync
-      get sync() {
-        return composer.inheritLocale;
-      },
-      set sync(val) {
-        composer.inheritLocale = val;
-      },
-      // warnInHtmlMessage
-      get warnHtmlInMessage() {
-        return composer.warnHtmlMessage ? "warn" : "off";
-      },
-      set warnHtmlInMessage(val) {
-        composer.warnHtmlMessage = val !== "off";
-      },
-      // escapeParameterHtml
-      get escapeParameterHtml() {
-        return composer.escapeParameter;
-      },
-      set escapeParameterHtml(val) {
-        composer.escapeParameter = val;
-      },
-      // preserveDirectiveContent
-      get preserveDirectiveContent() {
-        return true;
-      },
-      set preserveDirectiveContent(val) {
-      },
-      // pluralizationRules
-      get pluralizationRules() {
-        return composer.pluralRules || {};
-      },
-      // for internal
-      __composer: composer,
-      // t
-      t(...args) {
-        const [arg1, arg2, arg3] = args;
-        const options22 = {};
-        let list = null;
-        let named = null;
-        if (!isString$2(arg1)) {
-          throw createI18nError(I18nErrorCodes.INVALID_ARGUMENT);
-        }
-        const key = arg1;
-        if (isString$2(arg2)) {
-          options22.locale = arg2;
-        } else if (isArray$1(arg2)) {
-          list = arg2;
-        } else if (isPlainObject(arg2)) {
-          named = arg2;
-        }
-        if (isArray$1(arg3)) {
-          list = arg3;
-        } else if (isPlainObject(arg3)) {
-          named = arg3;
-        }
-        return Reflect.apply(composer.t, composer, [
-          key,
-          list || named || {},
-          options22
-        ]);
-      },
-      rt(...args) {
-        return Reflect.apply(composer.rt, composer, [...args]);
-      },
-      // tc
-      tc(...args) {
-        const [arg1, arg2, arg3] = args;
-        const options22 = { plural: 1 };
-        let list = null;
-        let named = null;
-        if (!isString$2(arg1)) {
-          throw createI18nError(I18nErrorCodes.INVALID_ARGUMENT);
-        }
-        const key = arg1;
-        if (isString$2(arg2)) {
-          options22.locale = arg2;
-        } else if (isNumber$1(arg2)) {
-          options22.plural = arg2;
-        } else if (isArray$1(arg2)) {
-          list = arg2;
-        } else if (isPlainObject(arg2)) {
-          named = arg2;
-        }
-        if (isString$2(arg3)) {
-          options22.locale = arg3;
-        } else if (isArray$1(arg3)) {
-          list = arg3;
-        } else if (isPlainObject(arg3)) {
-          named = arg3;
-        }
-        return Reflect.apply(composer.t, composer, [
-          key,
-          list || named || {},
-          options22
-        ]);
-      },
-      // te
-      te(key, locale2) {
-        return composer.te(key, locale2);
-      },
-      // tm
-      tm(key) {
-        return composer.tm(key);
-      },
-      // getLocaleMessage
-      getLocaleMessage(locale2) {
-        return composer.getLocaleMessage(locale2);
-      },
-      // setLocaleMessage
-      setLocaleMessage(locale2, message3) {
-        composer.setLocaleMessage(locale2, message3);
-      },
-      // mergeLocaleMessage
-      mergeLocaleMessage(locale2, message3) {
-        composer.mergeLocaleMessage(locale2, message3);
-      },
-      // d
-      d(...args) {
-        return Reflect.apply(composer.d, composer, [...args]);
-      },
-      // getDateTimeFormat
-      getDateTimeFormat(locale2) {
-        return composer.getDateTimeFormat(locale2);
-      },
-      // setDateTimeFormat
-      setDateTimeFormat(locale2, format2) {
-        composer.setDateTimeFormat(locale2, format2);
-      },
-      // mergeDateTimeFormat
-      mergeDateTimeFormat(locale2, format2) {
-        composer.mergeDateTimeFormat(locale2, format2);
-      },
-      // n
-      n(...args) {
-        return Reflect.apply(composer.n, composer, [...args]);
-      },
-      // getNumberFormat
-      getNumberFormat(locale2) {
-        return composer.getNumberFormat(locale2);
-      },
-      // setNumberFormat
-      setNumberFormat(locale2, format2) {
-        composer.setNumberFormat(locale2, format2);
-      },
-      // mergeNumberFormat
-      mergeNumberFormat(locale2, format2) {
-        composer.mergeNumberFormat(locale2, format2);
-      },
-      // getChoiceIndex
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      getChoiceIndex(choice, choicesLength) {
-        return -1;
-      }
-    };
-    vueI18n.__extender = __extender;
-    if (false) {
-      vueI18n.__enableEmitter = (emitter) => {
-        const __composer = composer;
-        __composer[EnableEmitter] && __composer[EnableEmitter](emitter);
-      };
-      vueI18n.__disableEmitter = () => {
-        const __composer = composer;
-        __composer[DisableEmitter] && __composer[DisableEmitter]();
-      };
-    }
-    return vueI18n;
-  }
-}
-__name(createVueI18n, "createVueI18n");
-const baseFormatProps = {
-  tag: {
-    type: [String, Object]
-  },
-  locale: {
-    type: String
-  },
-  scope: {
-    type: String,
-    // NOTE: avoid https://github.com/microsoft/rushstack/issues/1050
-    validator: /* @__PURE__ */ __name((val) => val === "parent" || val === "global", "validator"),
-    default: "parent"
-    /* ComponentI18nScope */
-  },
-  i18n: {
-    type: Object
-  }
-};
-function getInterpolateArg({ slots }, keys2) {
-  if (keys2.length === 1 && keys2[0] === "default") {
-    const ret = slots.default ? slots.default() : [];
-    return ret.reduce((slot, current) => {
-      return [
-        ...slot,
-        // prettier-ignore
-        ...current.type === Fragment ? current.children : [current]
-      ];
-    }, []);
-  } else {
-    return keys2.reduce((arg, key) => {
-      const slot = slots[key];
-      if (slot) {
-        arg[key] = slot();
-      }
-      return arg;
-    }, {});
-  }
-}
-__name(getInterpolateArg, "getInterpolateArg");
-function getFragmentableTag(tag) {
-  return Fragment;
-}
-__name(getFragmentableTag, "getFragmentableTag");
-const TranslationImpl = /* @__PURE__ */ defineComponent({
-  /* eslint-disable */
-  name: "i18n-t",
-  props: assign$1({
-    keypath: {
-      type: String,
-      required: true
-    },
-    plural: {
-      type: [Number, String],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      validator: /* @__PURE__ */ __name((val) => isNumber$1(val) || !isNaN(val), "validator")
-    }
-  }, baseFormatProps),
-  /* eslint-enable */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setup(props, context) {
-    const { slots, attrs: attrs3 } = context;
-    const i18n2 = props.i18n || useI18n({
-      useScope: props.scope,
-      __useComponent: true
-    });
-    return () => {
-      const keys2 = Object.keys(slots).filter((key) => key !== "_");
-      const options3 = {};
-      if (props.locale) {
-        options3.locale = props.locale;
-      }
-      if (props.plural !== void 0) {
-        options3.plural = isString$2(props.plural) ? +props.plural : props.plural;
-      }
-      const arg = getInterpolateArg(context, keys2);
-      const children = i18n2[TranslateVNodeSymbol](props.keypath, arg, options3);
-      const assignedAttrs = assign$1({}, attrs3);
-      const tag = isString$2(props.tag) || isObject$2(props.tag) ? props.tag : getFragmentableTag();
-      return h(tag, assignedAttrs, children);
-    };
-  }
-});
-const Translation = TranslationImpl;
-const I18nT = Translation;
-function isVNode(target) {
-  return isArray$1(target) && !isString$2(target[0]);
-}
-__name(isVNode, "isVNode");
-function renderFormatter(props, context, slotKeys, partFormatter) {
-  const { slots, attrs: attrs3 } = context;
-  return () => {
-    const options3 = { part: true };
-    let overrides = {};
-    if (props.locale) {
-      options3.locale = props.locale;
-    }
-    if (isString$2(props.format)) {
-      options3.key = props.format;
-    } else if (isObject$2(props.format)) {
-      if (isString$2(props.format.key)) {
-        options3.key = props.format.key;
-      }
-      overrides = Object.keys(props.format).reduce((options22, prop2) => {
-        return slotKeys.includes(prop2) ? assign$1({}, options22, { [prop2]: props.format[prop2] }) : options22;
-      }, {});
-    }
-    const parts2 = partFormatter(...[props.value, options3, overrides]);
-    let children = [options3.key];
-    if (isArray$1(parts2)) {
-      children = parts2.map((part, index2) => {
-        const slot = slots[part.type];
-        const node3 = slot ? slot({ [part.type]: part.value, index: index2, parts: parts2 }) : [part.value];
-        if (isVNode(node3)) {
-          node3[0].key = `${part.type}-${index2}`;
-        }
-        return node3;
-      });
-    } else if (isString$2(parts2)) {
-      children = [parts2];
-    }
-    const assignedAttrs = assign$1({}, attrs3);
-    const tag = isString$2(props.tag) || isObject$2(props.tag) ? props.tag : getFragmentableTag();
-    return h(tag, assignedAttrs, children);
-  };
-}
-__name(renderFormatter, "renderFormatter");
-const NumberFormatImpl = /* @__PURE__ */ defineComponent({
-  /* eslint-disable */
-  name: "i18n-n",
-  props: assign$1({
-    value: {
-      type: Number,
-      required: true
-    },
-    format: {
-      type: [String, Object]
-    }
-  }, baseFormatProps),
-  /* eslint-enable */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setup(props, context) {
-    const i18n2 = props.i18n || useI18n({
-      useScope: props.scope,
-      __useComponent: true
-    });
-    return renderFormatter(props, context, NUMBER_FORMAT_OPTIONS_KEYS, (...args) => (
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      i18n2[NumberPartsSymbol](...args)
-    ));
-  }
-});
-const NumberFormat = NumberFormatImpl;
-const I18nN = NumberFormat;
-const DatetimeFormatImpl = /* @__PURE__ */ defineComponent({
-  /* eslint-disable */
-  name: "i18n-d",
-  props: assign$1({
-    value: {
-      type: [Number, Date],
-      required: true
-    },
-    format: {
-      type: [String, Object]
-    }
-  }, baseFormatProps),
-  /* eslint-enable */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setup(props, context) {
-    const i18n2 = props.i18n || useI18n({
-      useScope: props.scope,
-      __useComponent: true
-    });
-    return renderFormatter(props, context, DATETIME_FORMAT_OPTIONS_KEYS, (...args) => (
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      i18n2[DatetimePartsSymbol](...args)
-    ));
-  }
-});
-const DatetimeFormat = DatetimeFormatImpl;
-const I18nD = DatetimeFormat;
-function getComposer$2(i18n2, instance) {
-  const i18nInternal = i18n2;
-  if (i18n2.mode === "composition") {
-    return i18nInternal.__getInstance(instance) || i18n2.global;
-  } else {
-    const vueI18n = i18nInternal.__getInstance(instance);
-    return vueI18n != null ? vueI18n.__composer : i18n2.global.__composer;
-  }
-}
-__name(getComposer$2, "getComposer$2");
-function vTDirective(i18n2) {
-  const _process = /* @__PURE__ */ __name((binding) => {
-    const { instance, modifiers, value: value3 } = binding;
-    if (!instance || !instance.$) {
-      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
-    }
-    const composer = getComposer$2(i18n2, instance.$);
-    if (false) {
-      warn(getWarnMessage(I18nWarnCodes.NOT_SUPPORTED_PRESERVE));
-    }
-    const parsedValue = parseValue(value3);
-    return [
-      Reflect.apply(composer.t, composer, [...makeParams(parsedValue)]),
-      composer
-    ];
-  }, "_process");
-  const register3 = /* @__PURE__ */ __name((el, binding) => {
-    const [textContent, composer] = _process(binding);
-    if (inBrowser && i18n2.global === composer) {
-      el.__i18nWatcher = watch(composer.locale, () => {
-        binding.instance && binding.instance.$forceUpdate();
-      });
-    }
-    el.__composer = composer;
-    el.textContent = textContent;
-  }, "register");
-  const unregister = /* @__PURE__ */ __name((el) => {
-    if (inBrowser && el.__i18nWatcher) {
-      el.__i18nWatcher();
-      el.__i18nWatcher = void 0;
-      delete el.__i18nWatcher;
-    }
-    if (el.__composer) {
-      el.__composer = void 0;
-      delete el.__composer;
-    }
-  }, "unregister");
-  const update2 = /* @__PURE__ */ __name((el, { value: value3 }) => {
-    if (el.__composer) {
-      const composer = el.__composer;
-      const parsedValue = parseValue(value3);
-      el.textContent = Reflect.apply(composer.t, composer, [
-        ...makeParams(parsedValue)
-      ]);
-    }
-  }, "update");
-  const getSSRProps = /* @__PURE__ */ __name((binding) => {
-    const [textContent] = _process(binding);
-    return { textContent };
-  }, "getSSRProps");
-  return {
-    created: register3,
-    unmounted: unregister,
-    beforeUpdate: update2,
-    getSSRProps
-  };
-}
-__name(vTDirective, "vTDirective");
-function parseValue(value3) {
-  if (isString$2(value3)) {
-    return { path: value3 };
-  } else if (isPlainObject(value3)) {
-    if (!("path" in value3)) {
-      throw createI18nError(I18nErrorCodes.REQUIRED_VALUE, "path");
-    }
-    return value3;
-  } else {
-    throw createI18nError(I18nErrorCodes.INVALID_VALUE);
-  }
-}
-__name(parseValue, "parseValue");
-function makeParams(value3) {
-  const { path, locale: locale2, args, choice, plural } = value3;
-  const options3 = {};
-  const named = args || {};
-  if (isString$2(locale2)) {
-    options3.locale = locale2;
-  }
-  if (isNumber$1(choice)) {
-    options3.plural = choice;
-  }
-  if (isNumber$1(plural)) {
-    options3.plural = plural;
-  }
-  return [path, named, options3];
-}
-__name(makeParams, "makeParams");
-function apply(app2, i18n2, ...options3) {
-  const pluginOptions = isPlainObject(options3[0]) ? options3[0] : {};
-  const useI18nComponentName = !!pluginOptions.useI18nComponentName;
-  const globalInstall = isBoolean$1(pluginOptions.globalInstall) ? pluginOptions.globalInstall : true;
-  if (false) {
-    warn(getWarnMessage(I18nWarnCodes.COMPONENT_NAME_LEGACY_COMPATIBLE, {
-      name: Translation.name
-    }));
-  }
-  if (globalInstall) {
-    [!useI18nComponentName ? Translation.name : "i18n", "I18nT"].forEach((name) => app2.component(name, Translation));
-    [NumberFormat.name, "I18nN"].forEach((name) => app2.component(name, NumberFormat));
-    [DatetimeFormat.name, "I18nD"].forEach((name) => app2.component(name, DatetimeFormat));
-  }
-  {
-    app2.directive("t", vTDirective(i18n2));
-  }
-}
-__name(apply, "apply");
-const VueDevToolsLabels = {
-  [
-    "vue-devtools-plugin-vue-i18n"
-    /* VueDevToolsIDs.PLUGIN */
-  ]: "Vue I18n devtools",
-  [
-    "vue-i18n-resource-inspector"
-    /* VueDevToolsIDs.CUSTOM_INSPECTOR */
-  ]: "I18n Resources",
-  [
-    "vue-i18n-timeline"
-    /* VueDevToolsIDs.TIMELINE */
-  ]: "Vue I18n"
-};
-const VueDevToolsPlaceholders = {
-  [
-    "vue-i18n-resource-inspector"
-    /* VueDevToolsIDs.CUSTOM_INSPECTOR */
-  ]: "Search for scopes ..."
-};
-const VueDevToolsTimelineColors = {
-  [
-    "vue-i18n-timeline"
-    /* VueDevToolsIDs.TIMELINE */
-  ]: 16764185
-};
-const VUE_I18N_COMPONENT_TYPES = "vue-i18n: composer properties";
-let devtoolsApi;
-async function enableDevTools(app2, i18n2) {
-  return new Promise((resolve8, reject2) => {
-    try {
-      setupDevtoolsPlugin({
-        id: "vue-devtools-plugin-vue-i18n",
-        label: VueDevToolsLabels[
-          "vue-devtools-plugin-vue-i18n"
-          /* VueDevToolsIDs.PLUGIN */
-        ],
-        packageName: "vue-i18n",
-        homepage: "https://vue-i18n.intlify.dev",
-        logo: "https://vue-i18n.intlify.dev/vue-i18n-devtools-logo.png",
-        componentStateTypes: [VUE_I18N_COMPONENT_TYPES],
-        app: app2
-        // eslint-disable-line @typescript-eslint/no-explicit-any
-      }, (api2) => {
-        devtoolsApi = api2;
-        api2.on.visitComponentTree(({ componentInstance, treeNode }) => {
-          updateComponentTreeTags(componentInstance, treeNode, i18n2);
-        });
-        api2.on.inspectComponent(({ componentInstance, instanceData }) => {
-          if (componentInstance.vnode.el && componentInstance.vnode.el.__VUE_I18N__ && instanceData) {
-            if (i18n2.mode === "legacy") {
-              if (componentInstance.vnode.el.__VUE_I18N__ !== i18n2.global.__composer) {
-                inspectComposer(instanceData, componentInstance.vnode.el.__VUE_I18N__);
-              }
-            } else {
-              inspectComposer(instanceData, componentInstance.vnode.el.__VUE_I18N__);
-            }
-          }
-        });
-        api2.addInspector({
-          id: "vue-i18n-resource-inspector",
-          label: VueDevToolsLabels[
-            "vue-i18n-resource-inspector"
-            /* VueDevToolsIDs.CUSTOM_INSPECTOR */
-          ],
-          icon: "language",
-          treeFilterPlaceholder: VueDevToolsPlaceholders[
-            "vue-i18n-resource-inspector"
-            /* VueDevToolsIDs.CUSTOM_INSPECTOR */
-          ]
-        });
-        api2.on.getInspectorTree((payload) => {
-          if (payload.app === app2 && payload.inspectorId === "vue-i18n-resource-inspector") {
-            registerScope(payload, i18n2);
-          }
-        });
-        const roots = /* @__PURE__ */ new Map();
-        api2.on.getInspectorState(async (payload) => {
-          if (payload.app === app2 && payload.inspectorId === "vue-i18n-resource-inspector") {
-            api2.unhighlightElement();
-            inspectScope(payload, i18n2);
-            if (payload.nodeId === "global") {
-              if (!roots.has(payload.app)) {
-                const [root26] = await api2.getComponentInstances(payload.app);
-                roots.set(payload.app, root26);
-              }
-              api2.highlightElement(roots.get(payload.app));
-            } else {
-              const instance = getComponentInstance(payload.nodeId, i18n2);
-              instance && api2.highlightElement(instance);
-            }
-          }
-        });
-        api2.on.editInspectorState((payload) => {
-          if (payload.app === app2 && payload.inspectorId === "vue-i18n-resource-inspector") {
-            editScope(payload, i18n2);
-          }
-        });
-        api2.addTimelineLayer({
-          id: "vue-i18n-timeline",
-          label: VueDevToolsLabels[
-            "vue-i18n-timeline"
-            /* VueDevToolsIDs.TIMELINE */
-          ],
-          color: VueDevToolsTimelineColors[
-            "vue-i18n-timeline"
-            /* VueDevToolsIDs.TIMELINE */
-          ]
-        });
-        resolve8(true);
-      });
-    } catch (e) {
-      console.error(e);
-      reject2(false);
-    }
-  });
-}
-__name(enableDevTools, "enableDevTools");
-function getI18nScopeLable(instance) {
-  return instance.type.name || instance.type.displayName || instance.type.__file || "Anonymous";
-}
-__name(getI18nScopeLable, "getI18nScopeLable");
-function updateComponentTreeTags(instance, treeNode, i18n2) {
-  const global2 = i18n2.mode === "composition" ? i18n2.global : i18n2.global.__composer;
-  if (instance && instance.vnode.el && instance.vnode.el.__VUE_I18N__) {
-    if (instance.vnode.el.__VUE_I18N__ !== global2) {
-      const tag = {
-        label: `i18n (${getI18nScopeLable(instance)} Scope)`,
-        textColor: 0,
-        backgroundColor: 16764185
-      };
-      treeNode.tags.push(tag);
-    }
-  }
-}
-__name(updateComponentTreeTags, "updateComponentTreeTags");
-function inspectComposer(instanceData, composer) {
-  const type = VUE_I18N_COMPONENT_TYPES;
-  instanceData.state.push({
-    type,
-    key: "locale",
-    editable: true,
-    value: composer.locale.value
-  });
-  instanceData.state.push({
-    type,
-    key: "availableLocales",
-    editable: false,
-    value: composer.availableLocales
-  });
-  instanceData.state.push({
-    type,
-    key: "fallbackLocale",
-    editable: true,
-    value: composer.fallbackLocale.value
-  });
-  instanceData.state.push({
-    type,
-    key: "inheritLocale",
-    editable: true,
-    value: composer.inheritLocale
-  });
-  instanceData.state.push({
-    type,
-    key: "messages",
-    editable: false,
-    value: getLocaleMessageValue(composer.messages.value)
-  });
-  {
-    instanceData.state.push({
-      type,
-      key: "datetimeFormats",
-      editable: false,
-      value: composer.datetimeFormats.value
-    });
-    instanceData.state.push({
-      type,
-      key: "numberFormats",
-      editable: false,
-      value: composer.numberFormats.value
-    });
-  }
-}
-__name(inspectComposer, "inspectComposer");
-function getLocaleMessageValue(messages2) {
-  const value3 = {};
-  Object.keys(messages2).forEach((key) => {
-    const v2 = messages2[key];
-    if (isFunction$1(v2) && "source" in v2) {
-      value3[key] = getMessageFunctionDetails(v2);
-    } else if (isMessageAST(v2) && v2.loc && v2.loc.source) {
-      value3[key] = v2.loc.source;
-    } else if (isObject$2(v2)) {
-      value3[key] = getLocaleMessageValue(v2);
-    } else {
-      value3[key] = v2;
-    }
-  });
-  return value3;
-}
-__name(getLocaleMessageValue, "getLocaleMessageValue");
-const ESC = {
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "&": "&amp;"
-};
-function escape$1(s) {
-  return s.replace(/[<>"&]/g, escapeChar);
-}
-__name(escape$1, "escape$1");
-function escapeChar(a) {
-  return ESC[a] || a;
-}
-__name(escapeChar, "escapeChar");
-function getMessageFunctionDetails(func) {
-  const argString = func.source ? `("${escape$1(func.source)}")` : `(?)`;
-  return {
-    _custom: {
-      type: "function",
-      display: `<span>ƒ</span> ${argString}`
-    }
-  };
-}
-__name(getMessageFunctionDetails, "getMessageFunctionDetails");
-function registerScope(payload, i18n2) {
-  payload.rootNodes.push({
-    id: "global",
-    label: "Global Scope"
-  });
-  const global2 = i18n2.mode === "composition" ? i18n2.global : i18n2.global.__composer;
-  for (const [keyInstance, instance] of i18n2.__instances) {
-    const composer = i18n2.mode === "composition" ? instance : instance.__composer;
-    if (global2 === composer) {
-      continue;
-    }
-    payload.rootNodes.push({
-      id: composer.id.toString(),
-      label: `${getI18nScopeLable(keyInstance)} Scope`
-    });
-  }
-}
-__name(registerScope, "registerScope");
-function getComponentInstance(nodeId, i18n2) {
-  let instance = null;
-  if (nodeId !== "global") {
-    for (const [component, composer] of i18n2.__instances.entries()) {
-      if (composer.id.toString() === nodeId) {
-        instance = component;
-        break;
-      }
-    }
-  }
-  return instance;
-}
-__name(getComponentInstance, "getComponentInstance");
-function getComposer$1(nodeId, i18n2) {
-  if (nodeId === "global") {
-    return i18n2.mode === "composition" ? i18n2.global : i18n2.global.__composer;
-  } else {
-    const instance = Array.from(i18n2.__instances.values()).find((item2) => item2.id.toString() === nodeId);
-    if (instance) {
-      return i18n2.mode === "composition" ? instance : instance.__composer;
-    } else {
-      return null;
-    }
-  }
-}
-__name(getComposer$1, "getComposer$1");
-function inspectScope(payload, i18n2) {
-  const composer = getComposer$1(payload.nodeId, i18n2);
-  if (composer) {
-    payload.state = makeScopeInspectState(composer);
-  }
-  return null;
-}
-__name(inspectScope, "inspectScope");
-function makeScopeInspectState(composer) {
-  const state = {};
-  const localeType = "Locale related info";
-  const localeStates = [
-    {
-      type: localeType,
-      key: "locale",
-      editable: true,
-      value: composer.locale.value
-    },
-    {
-      type: localeType,
-      key: "fallbackLocale",
-      editable: true,
-      value: composer.fallbackLocale.value
-    },
-    {
-      type: localeType,
-      key: "availableLocales",
-      editable: false,
-      value: composer.availableLocales
-    },
-    {
-      type: localeType,
-      key: "inheritLocale",
-      editable: true,
-      value: composer.inheritLocale
-    }
-  ];
-  state[localeType] = localeStates;
-  const localeMessagesType = "Locale messages info";
-  const localeMessagesStates = [
-    {
-      type: localeMessagesType,
-      key: "messages",
-      editable: false,
-      value: getLocaleMessageValue(composer.messages.value)
-    }
-  ];
-  state[localeMessagesType] = localeMessagesStates;
-  {
-    const datetimeFormatsType = "Datetime formats info";
-    const datetimeFormatsStates = [
-      {
-        type: datetimeFormatsType,
-        key: "datetimeFormats",
-        editable: false,
-        value: composer.datetimeFormats.value
-      }
-    ];
-    state[datetimeFormatsType] = datetimeFormatsStates;
-    const numberFormatsType = "Datetime formats info";
-    const numberFormatsStates = [
-      {
-        type: numberFormatsType,
-        key: "numberFormats",
-        editable: false,
-        value: composer.numberFormats.value
-      }
-    ];
-    state[numberFormatsType] = numberFormatsStates;
-  }
-  return state;
-}
-__name(makeScopeInspectState, "makeScopeInspectState");
-function addTimelineEvent(event2, payload) {
-  if (devtoolsApi) {
-    let groupId;
-    if (payload && "groupId" in payload) {
-      groupId = payload.groupId;
-      delete payload.groupId;
-    }
-    devtoolsApi.addTimelineEvent({
-      layerId: "vue-i18n-timeline",
-      event: {
-        title: event2,
-        groupId,
-        time: Date.now(),
-        meta: {},
-        data: payload || {},
-        logType: event2 === "compile-error" ? "error" : event2 === "fallback" || event2 === "missing" ? "warning" : "default"
-      }
-    });
-  }
-}
-__name(addTimelineEvent, "addTimelineEvent");
-function editScope(payload, i18n2) {
-  const composer = getComposer$1(payload.nodeId, i18n2);
-  if (composer) {
-    const [field] = payload.path;
-    if (field === "locale" && isString$2(payload.state.value)) {
-      composer.locale.value = payload.state.value;
-    } else if (field === "fallbackLocale" && (isString$2(payload.state.value) || isArray$1(payload.state.value) || isObject$2(payload.state.value))) {
-      composer.fallbackLocale.value = payload.state.value;
-    } else if (field === "inheritLocale" && isBoolean$1(payload.state.value)) {
-      composer.inheritLocale = payload.state.value;
-    }
-  }
-}
-__name(editScope, "editScope");
-function defineMixin(vuei18n, composer, i18n2) {
-  return {
-    beforeCreate() {
-      const instance = getCurrentInstance();
-      if (!instance) {
-        throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
-      }
-      const options3 = this.$options;
-      if (options3.i18n) {
-        const optionsI18n = options3.i18n;
-        if (options3.__i18n) {
-          optionsI18n.__i18n = options3.__i18n;
-        }
-        optionsI18n.__root = composer;
-        if (this === this.$root) {
-          this.$i18n = mergeToGlobal(vuei18n, optionsI18n);
-        } else {
-          optionsI18n.__injectWithOption = true;
-          optionsI18n.__extender = i18n2.__vueI18nExtend;
-          this.$i18n = createVueI18n(optionsI18n);
-          const _vueI18n = this.$i18n;
-          if (_vueI18n.__extender) {
-            _vueI18n.__disposer = _vueI18n.__extender(this.$i18n);
-          }
-        }
-      } else if (options3.__i18n) {
-        if (this === this.$root) {
-          this.$i18n = mergeToGlobal(vuei18n, options3);
-        } else {
-          this.$i18n = createVueI18n({
-            __i18n: options3.__i18n,
-            __injectWithOption: true,
-            __extender: i18n2.__vueI18nExtend,
-            __root: composer
-          });
-          const _vueI18n = this.$i18n;
-          if (_vueI18n.__extender) {
-            _vueI18n.__disposer = _vueI18n.__extender(this.$i18n);
-          }
-        }
-      } else {
-        this.$i18n = vuei18n;
-      }
-      if (options3.__i18nGlobal) {
-        adjustI18nResources(composer, options3, options3);
-      }
-      this.$t = (...args) => this.$i18n.t(...args);
-      this.$rt = (...args) => this.$i18n.rt(...args);
-      this.$tc = (...args) => this.$i18n.tc(...args);
-      this.$te = (key, locale2) => this.$i18n.te(key, locale2);
-      this.$d = (...args) => this.$i18n.d(...args);
-      this.$n = (...args) => this.$i18n.n(...args);
-      this.$tm = (key) => this.$i18n.tm(key);
-      i18n2.__setInstance(instance, this.$i18n);
-    },
-    mounted() {
-      if (false) {
-        const _vueI18n = this.$i18n;
-        this.$el.__VUE_I18N__ = _vueI18n.__composer;
-        const emitter = this.__v_emitter = createEmitter();
-        _vueI18n.__enableEmitter && _vueI18n.__enableEmitter(emitter);
-        emitter.on("*", addTimelineEvent);
-      }
-    },
-    unmounted() {
-      const instance = getCurrentInstance();
-      if (!instance) {
-        throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
-      }
-      const _vueI18n = this.$i18n;
-      if (false) {
-        if (this.__v_emitter) {
-          this.__v_emitter.off("*", addTimelineEvent);
-          delete this.__v_emitter;
-        }
-        if (this.$i18n) {
-          _vueI18n.__disableEmitter && _vueI18n.__disableEmitter();
-          delete this.$el.__VUE_I18N__;
-        }
-      }
-      delete this.$t;
-      delete this.$rt;
-      delete this.$tc;
-      delete this.$te;
-      delete this.$d;
-      delete this.$n;
-      delete this.$tm;
-      if (_vueI18n.__disposer) {
-        _vueI18n.__disposer();
-        delete _vueI18n.__disposer;
-        delete _vueI18n.__extender;
-      }
-      i18n2.__deleteInstance(instance);
-      delete this.$i18n;
-    }
-  };
-}
-__name(defineMixin, "defineMixin");
-function mergeToGlobal(g, options3) {
-  g.locale = options3.locale || g.locale;
-  g.fallbackLocale = options3.fallbackLocale || g.fallbackLocale;
-  g.missing = options3.missing || g.missing;
-  g.silentTranslationWarn = options3.silentTranslationWarn || g.silentFallbackWarn;
-  g.silentFallbackWarn = options3.silentFallbackWarn || g.silentFallbackWarn;
-  g.formatFallbackMessages = options3.formatFallbackMessages || g.formatFallbackMessages;
-  g.postTranslation = options3.postTranslation || g.postTranslation;
-  g.warnHtmlInMessage = options3.warnHtmlInMessage || g.warnHtmlInMessage;
-  g.escapeParameterHtml = options3.escapeParameterHtml || g.escapeParameterHtml;
-  g.sync = options3.sync || g.sync;
-  g.__composer[SetPluralRulesSymbol](options3.pluralizationRules || g.pluralizationRules);
-  const messages2 = getLocaleMessages(g.locale, {
-    messages: options3.messages,
-    __i18n: options3.__i18n
-  });
-  Object.keys(messages2).forEach((locale2) => g.mergeLocaleMessage(locale2, messages2[locale2]));
-  if (options3.datetimeFormats) {
-    Object.keys(options3.datetimeFormats).forEach((locale2) => g.mergeDateTimeFormat(locale2, options3.datetimeFormats[locale2]));
-  }
-  if (options3.numberFormats) {
-    Object.keys(options3.numberFormats).forEach((locale2) => g.mergeNumberFormat(locale2, options3.numberFormats[locale2]));
-  }
-  return g;
-}
-__name(mergeToGlobal, "mergeToGlobal");
-const I18nInjectionKey = /* @__PURE__ */ makeSymbol("global-vue-i18n");
-function createI18n(options3 = {}, VueI18nLegacy) {
-  const __legacyMode = __VUE_I18N_LEGACY_API__ && isBoolean$1(options3.legacy) ? options3.legacy : __VUE_I18N_LEGACY_API__;
-  const __globalInjection = isBoolean$1(options3.globalInjection) ? options3.globalInjection : true;
-  const __allowComposition = __VUE_I18N_LEGACY_API__ && __legacyMode ? !!options3.allowComposition : true;
-  const __instances = /* @__PURE__ */ new Map();
-  const [globalScope, __global] = createGlobal(options3, __legacyMode);
-  const symbol = /* @__PURE__ */ makeSymbol(false ? "vue-i18n" : "");
-  if (false) {
-    if (__legacyMode && __allowComposition && true) {
-      warn(getWarnMessage(I18nWarnCodes.NOTICE_DROP_ALLOW_COMPOSITION));
-    }
-  }
-  function __getInstance(component) {
-    return __instances.get(component) || null;
-  }
-  __name(__getInstance, "__getInstance");
-  function __setInstance(component, instance) {
-    __instances.set(component, instance);
-  }
-  __name(__setInstance, "__setInstance");
-  function __deleteInstance(component) {
-    __instances.delete(component);
-  }
-  __name(__deleteInstance, "__deleteInstance");
-  {
-    const i18n2 = {
-      // mode
-      get mode() {
-        return __VUE_I18N_LEGACY_API__ && __legacyMode ? "legacy" : "composition";
-      },
-      // allowComposition
-      get allowComposition() {
-        return __allowComposition;
-      },
-      // install plugin
-      async install(app2, ...options22) {
-        if (false) {
-          app2.__VUE_I18N__ = i18n2;
-        }
-        app2.__VUE_I18N_SYMBOL__ = symbol;
-        app2.provide(app2.__VUE_I18N_SYMBOL__, i18n2);
-        if (isPlainObject(options22[0])) {
-          const opts = options22[0];
-          i18n2.__composerExtend = opts.__composerExtend;
-          i18n2.__vueI18nExtend = opts.__vueI18nExtend;
-        }
-        let globalReleaseHandler = null;
-        if (!__legacyMode && __globalInjection) {
-          globalReleaseHandler = injectGlobalFields(app2, i18n2.global);
-        }
-        if (__VUE_I18N_FULL_INSTALL__) {
-          apply(app2, i18n2, ...options22);
-        }
-        if (__VUE_I18N_LEGACY_API__ && __legacyMode) {
-          app2.mixin(defineMixin(__global, __global.__composer, i18n2));
-        }
-        const unmountApp = app2.unmount;
-        app2.unmount = () => {
-          globalReleaseHandler && globalReleaseHandler();
-          i18n2.dispose();
-          unmountApp();
-        };
-        if (false) {
-          const ret = await enableDevTools(app2, i18n2);
-          if (!ret) {
-            throw createI18nError(I18nErrorCodes.CANNOT_SETUP_VUE_DEVTOOLS_PLUGIN);
-          }
-          const emitter = createEmitter();
-          if (__legacyMode) {
-            const _vueI18n = __global;
-            _vueI18n.__enableEmitter && _vueI18n.__enableEmitter(emitter);
-          } else {
-            const _composer = __global;
-            _composer[EnableEmitter] && _composer[EnableEmitter](emitter);
-          }
-          emitter.on("*", addTimelineEvent);
-        }
-      },
-      // global accessor
-      get global() {
-        return __global;
-      },
-      dispose() {
-        globalScope.stop();
-      },
-      // @internal
-      __instances,
-      // @internal
-      __getInstance,
-      // @internal
-      __setInstance,
-      // @internal
-      __deleteInstance
-    };
-    return i18n2;
-  }
-}
-__name(createI18n, "createI18n");
-function useI18n(options3 = {}) {
-  const instance = getCurrentInstance();
-  if (instance == null) {
-    throw createI18nError(I18nErrorCodes.MUST_BE_CALL_SETUP_TOP);
-  }
-  if (!instance.isCE && instance.appContext.app != null && !instance.appContext.app.__VUE_I18N_SYMBOL__) {
-    throw createI18nError(I18nErrorCodes.NOT_INSTALLED);
-  }
-  const i18n2 = getI18nInstance(instance);
-  const gl = getGlobalComposer(i18n2);
-  const componentOptions = getComponentOptions(instance);
-  const scope = getScope(options3, componentOptions);
-  if (__VUE_I18N_LEGACY_API__) {
-    if (i18n2.mode === "legacy" && !options3.__useComponent) {
-      if (!i18n2.allowComposition) {
-        throw createI18nError(I18nErrorCodes.NOT_AVAILABLE_IN_LEGACY_MODE);
-      }
-      return useI18nForLegacy(instance, scope, gl, options3);
-    }
-  }
-  if (scope === "global") {
-    adjustI18nResources(gl, options3, componentOptions);
-    return gl;
-  }
-  if (scope === "parent") {
-    let composer2 = getComposer(i18n2, instance, options3.__useComponent);
-    if (composer2 == null) {
-      if (false) {
-        warn(getWarnMessage(I18nWarnCodes.NOT_FOUND_PARENT_SCOPE));
-      }
-      composer2 = gl;
-    }
-    return composer2;
-  }
-  const i18nInternal = i18n2;
-  let composer = i18nInternal.__getInstance(instance);
-  if (composer == null) {
-    const composerOptions = assign$1({}, options3);
-    if ("__i18n" in componentOptions) {
-      composerOptions.__i18n = componentOptions.__i18n;
-    }
-    if (gl) {
-      composerOptions.__root = gl;
-    }
-    composer = createComposer(composerOptions);
-    if (i18nInternal.__composerExtend) {
-      composer[DisposeSymbol] = i18nInternal.__composerExtend(composer);
-    }
-    setupLifeCycle(i18nInternal, instance, composer);
-    i18nInternal.__setInstance(instance, composer);
-  }
-  return composer;
-}
-__name(useI18n, "useI18n");
-const castToVueI18n = /* @__PURE__ */ __name(/* @__NO_SIDE_EFFECTS__ */ (i18n2) => {
-  if (!(__VUE_I18N_BRIDGE__ in i18n2)) {
-    throw createI18nError(I18nErrorCodes.NOT_COMPATIBLE_LEGACY_VUE_I18N);
-  }
-  return i18n2;
-}, "castToVueI18n");
-function createGlobal(options3, legacyMode, VueI18nLegacy) {
-  const scope = effectScope();
-  {
-    const obj = __VUE_I18N_LEGACY_API__ && legacyMode ? scope.run(() => createVueI18n(options3)) : scope.run(() => createComposer(options3));
-    if (obj == null) {
-      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
-    }
-    return [scope, obj];
-  }
-}
-__name(createGlobal, "createGlobal");
-function getI18nInstance(instance) {
-  {
-    const i18n2 = inject(!instance.isCE ? instance.appContext.app.__VUE_I18N_SYMBOL__ : I18nInjectionKey);
-    if (!i18n2) {
-      throw createI18nError(!instance.isCE ? I18nErrorCodes.UNEXPECTED_ERROR : I18nErrorCodes.NOT_INSTALLED_WITH_PROVIDE);
-    }
-    return i18n2;
-  }
-}
-__name(getI18nInstance, "getI18nInstance");
-function getScope(options3, componentOptions) {
-  return isEmptyObject(options3) ? "__i18n" in componentOptions ? "local" : "global" : !options3.useScope ? "local" : options3.useScope;
-}
-__name(getScope, "getScope");
-function getGlobalComposer(i18n2) {
-  return i18n2.mode === "composition" ? i18n2.global : i18n2.global.__composer;
-}
-__name(getGlobalComposer, "getGlobalComposer");
-function getComposer(i18n2, target, useComponent = false) {
-  let composer = null;
-  const root26 = target.root;
-  let current = getParentComponentInstance(target, useComponent);
-  while (current != null) {
-    const i18nInternal = i18n2;
-    if (i18n2.mode === "composition") {
-      composer = i18nInternal.__getInstance(current);
-    } else {
-      if (__VUE_I18N_LEGACY_API__) {
-        const vueI18n = i18nInternal.__getInstance(current);
-        if (vueI18n != null) {
-          composer = vueI18n.__composer;
-          if (useComponent && composer && !composer[InejctWithOptionSymbol]) {
-            composer = null;
-          }
-        }
-      }
-    }
-    if (composer != null) {
-      break;
-    }
-    if (root26 === current) {
-      break;
-    }
-    current = current.parent;
-  }
-  return composer;
-}
-__name(getComposer, "getComposer");
-function getParentComponentInstance(target, useComponent = false) {
-  if (target == null) {
-    return null;
-  }
-  {
-    return !useComponent ? target.parent : target.vnode.ctx || target.parent;
-  }
-}
-__name(getParentComponentInstance, "getParentComponentInstance");
-function setupLifeCycle(i18n2, target, composer) {
-  let emitter = null;
-  {
-    onMounted(() => {
-      if (false) {
-        target.vnode.el.__VUE_I18N__ = composer;
-        emitter = createEmitter();
-        const _composer = composer;
-        _composer[EnableEmitter] && _composer[EnableEmitter](emitter);
-        emitter.on("*", addTimelineEvent);
-      }
-    }, target);
-    onUnmounted(() => {
-      const _composer = composer;
-      if (false) {
-        emitter && emitter.off("*", addTimelineEvent);
-        _composer[DisableEmitter] && _composer[DisableEmitter]();
-        delete target.vnode.el.__VUE_I18N__;
-      }
-      i18n2.__deleteInstance(target);
-      const dispose = _composer[DisposeSymbol];
-      if (dispose) {
-        dispose();
-        delete _composer[DisposeSymbol];
-      }
-    }, target);
-  }
-}
-__name(setupLifeCycle, "setupLifeCycle");
-function useI18nForLegacy(instance, scope, root26, options3 = {}) {
-  const isLocalScope = scope === "local";
-  const _composer = shallowRef(null);
-  if (isLocalScope && instance.proxy && !(instance.proxy.$options.i18n || instance.proxy.$options.__i18n)) {
-    throw createI18nError(I18nErrorCodes.MUST_DEFINE_I18N_OPTION_IN_ALLOW_COMPOSITION);
-  }
-  const _inheritLocale = isBoolean$1(options3.inheritLocale) ? options3.inheritLocale : !isString$2(options3.locale);
-  const _locale = ref(
-    // prettier-ignore
-    !isLocalScope || _inheritLocale ? root26.locale.value : isString$2(options3.locale) ? options3.locale : DEFAULT_LOCALE
-  );
-  const _fallbackLocale = ref(
-    // prettier-ignore
-    !isLocalScope || _inheritLocale ? root26.fallbackLocale.value : isString$2(options3.fallbackLocale) || isArray$1(options3.fallbackLocale) || isPlainObject(options3.fallbackLocale) || options3.fallbackLocale === false ? options3.fallbackLocale : _locale.value
-  );
-  const _messages = ref(getLocaleMessages(_locale.value, options3));
-  const _datetimeFormats = ref(isPlainObject(options3.datetimeFormats) ? options3.datetimeFormats : { [_locale.value]: {} });
-  const _numberFormats = ref(isPlainObject(options3.numberFormats) ? options3.numberFormats : { [_locale.value]: {} });
-  const _missingWarn = isLocalScope ? root26.missingWarn : isBoolean$1(options3.missingWarn) || isRegExp(options3.missingWarn) ? options3.missingWarn : true;
-  const _fallbackWarn = isLocalScope ? root26.fallbackWarn : isBoolean$1(options3.fallbackWarn) || isRegExp(options3.fallbackWarn) ? options3.fallbackWarn : true;
-  const _fallbackRoot = isLocalScope ? root26.fallbackRoot : isBoolean$1(options3.fallbackRoot) ? options3.fallbackRoot : true;
-  const _fallbackFormat = !!options3.fallbackFormat;
-  const _missing = isFunction$1(options3.missing) ? options3.missing : null;
-  const _postTranslation = isFunction$1(options3.postTranslation) ? options3.postTranslation : null;
-  const _warnHtmlMessage = isLocalScope ? root26.warnHtmlMessage : isBoolean$1(options3.warnHtmlMessage) ? options3.warnHtmlMessage : true;
-  const _escapeParameter = !!options3.escapeParameter;
-  const _modifiers = isLocalScope ? root26.modifiers : isPlainObject(options3.modifiers) ? options3.modifiers : {};
-  const _pluralRules = options3.pluralRules || isLocalScope && root26.pluralRules;
-  function trackReactivityValues() {
-    return [
-      _locale.value,
-      _fallbackLocale.value,
-      _messages.value,
-      _datetimeFormats.value,
-      _numberFormats.value
-    ];
-  }
-  __name(trackReactivityValues, "trackReactivityValues");
-  const locale2 = computed({
-    get: /* @__PURE__ */ __name(() => {
-      return _composer.value ? _composer.value.locale.value : _locale.value;
-    }, "get"),
-    set: /* @__PURE__ */ __name((val) => {
-      if (_composer.value) {
-        _composer.value.locale.value = val;
-      }
-      _locale.value = val;
-    }, "set")
-  });
-  const fallbackLocale = computed({
-    get: /* @__PURE__ */ __name(() => {
-      return _composer.value ? _composer.value.fallbackLocale.value : _fallbackLocale.value;
-    }, "get"),
-    set: /* @__PURE__ */ __name((val) => {
-      if (_composer.value) {
-        _composer.value.fallbackLocale.value = val;
-      }
-      _fallbackLocale.value = val;
-    }, "set")
-  });
-  const messages2 = computed(() => {
-    if (_composer.value) {
-      return _composer.value.messages.value;
-    } else {
-      return _messages.value;
-    }
-  });
-  const datetimeFormats = computed(() => _datetimeFormats.value);
-  const numberFormats = computed(() => _numberFormats.value);
-  function getPostTranslationHandler() {
-    return _composer.value ? _composer.value.getPostTranslationHandler() : _postTranslation;
-  }
-  __name(getPostTranslationHandler, "getPostTranslationHandler");
-  function setPostTranslationHandler(handler6) {
-    if (_composer.value) {
-      _composer.value.setPostTranslationHandler(handler6);
-    }
-  }
-  __name(setPostTranslationHandler, "setPostTranslationHandler");
-  function getMissingHandler() {
-    return _composer.value ? _composer.value.getMissingHandler() : _missing;
-  }
-  __name(getMissingHandler, "getMissingHandler");
-  function setMissingHandler(handler6) {
-    if (_composer.value) {
-      _composer.value.setMissingHandler(handler6);
-    }
-  }
-  __name(setMissingHandler, "setMissingHandler");
-  function warpWithDeps(fn) {
-    trackReactivityValues();
-    return fn();
-  }
-  __name(warpWithDeps, "warpWithDeps");
-  function t(...args) {
-    return _composer.value ? warpWithDeps(() => Reflect.apply(_composer.value.t, null, [...args])) : warpWithDeps(() => "");
-  }
-  __name(t, "t");
-  function rt(...args) {
-    return _composer.value ? Reflect.apply(_composer.value.rt, null, [...args]) : "";
-  }
-  __name(rt, "rt");
-  function d(...args) {
-    return _composer.value ? warpWithDeps(() => Reflect.apply(_composer.value.d, null, [...args])) : warpWithDeps(() => "");
-  }
-  __name(d, "d");
-  function n(...args) {
-    return _composer.value ? warpWithDeps(() => Reflect.apply(_composer.value.n, null, [...args])) : warpWithDeps(() => "");
-  }
-  __name(n, "n");
-  function tm(key) {
-    return _composer.value ? _composer.value.tm(key) : {};
-  }
-  __name(tm, "tm");
-  function te(key, locale22) {
-    return _composer.value ? _composer.value.te(key, locale22) : false;
-  }
-  __name(te, "te");
-  function getLocaleMessage(locale22) {
-    return _composer.value ? _composer.value.getLocaleMessage(locale22) : {};
-  }
-  __name(getLocaleMessage, "getLocaleMessage");
-  function setLocaleMessage(locale22, message3) {
-    if (_composer.value) {
-      _composer.value.setLocaleMessage(locale22, message3);
-      _messages.value[locale22] = message3;
-    }
-  }
-  __name(setLocaleMessage, "setLocaleMessage");
-  function mergeLocaleMessage(locale22, message3) {
-    if (_composer.value) {
-      _composer.value.mergeLocaleMessage(locale22, message3);
-    }
-  }
-  __name(mergeLocaleMessage, "mergeLocaleMessage");
-  function getDateTimeFormat(locale22) {
-    return _composer.value ? _composer.value.getDateTimeFormat(locale22) : {};
-  }
-  __name(getDateTimeFormat, "getDateTimeFormat");
-  function setDateTimeFormat(locale22, format2) {
-    if (_composer.value) {
-      _composer.value.setDateTimeFormat(locale22, format2);
-      _datetimeFormats.value[locale22] = format2;
-    }
-  }
-  __name(setDateTimeFormat, "setDateTimeFormat");
-  function mergeDateTimeFormat(locale22, format2) {
-    if (_composer.value) {
-      _composer.value.mergeDateTimeFormat(locale22, format2);
-    }
-  }
-  __name(mergeDateTimeFormat, "mergeDateTimeFormat");
-  function getNumberFormat(locale22) {
-    return _composer.value ? _composer.value.getNumberFormat(locale22) : {};
-  }
-  __name(getNumberFormat, "getNumberFormat");
-  function setNumberFormat(locale22, format2) {
-    if (_composer.value) {
-      _composer.value.setNumberFormat(locale22, format2);
-      _numberFormats.value[locale22] = format2;
-    }
-  }
-  __name(setNumberFormat, "setNumberFormat");
-  function mergeNumberFormat(locale22, format2) {
-    if (_composer.value) {
-      _composer.value.mergeNumberFormat(locale22, format2);
-    }
-  }
-  __name(mergeNumberFormat, "mergeNumberFormat");
-  const wrapper = {
-    get id() {
-      return _composer.value ? _composer.value.id : -1;
-    },
-    locale: locale2,
-    fallbackLocale,
-    messages: messages2,
-    datetimeFormats,
-    numberFormats,
-    get inheritLocale() {
-      return _composer.value ? _composer.value.inheritLocale : _inheritLocale;
-    },
-    set inheritLocale(val) {
-      if (_composer.value) {
-        _composer.value.inheritLocale = val;
-      }
-    },
-    get availableLocales() {
-      return _composer.value ? _composer.value.availableLocales : Object.keys(_messages.value);
-    },
-    get modifiers() {
-      return _composer.value ? _composer.value.modifiers : _modifiers;
-    },
-    get pluralRules() {
-      return _composer.value ? _composer.value.pluralRules : _pluralRules;
-    },
-    get isGlobal() {
-      return _composer.value ? _composer.value.isGlobal : false;
-    },
-    get missingWarn() {
-      return _composer.value ? _composer.value.missingWarn : _missingWarn;
-    },
-    set missingWarn(val) {
-      if (_composer.value) {
-        _composer.value.missingWarn = val;
-      }
-    },
-    get fallbackWarn() {
-      return _composer.value ? _composer.value.fallbackWarn : _fallbackWarn;
-    },
-    set fallbackWarn(val) {
-      if (_composer.value) {
-        _composer.value.missingWarn = val;
-      }
-    },
-    get fallbackRoot() {
-      return _composer.value ? _composer.value.fallbackRoot : _fallbackRoot;
-    },
-    set fallbackRoot(val) {
-      if (_composer.value) {
-        _composer.value.fallbackRoot = val;
-      }
-    },
-    get fallbackFormat() {
-      return _composer.value ? _composer.value.fallbackFormat : _fallbackFormat;
-    },
-    set fallbackFormat(val) {
-      if (_composer.value) {
-        _composer.value.fallbackFormat = val;
-      }
-    },
-    get warnHtmlMessage() {
-      return _composer.value ? _composer.value.warnHtmlMessage : _warnHtmlMessage;
-    },
-    set warnHtmlMessage(val) {
-      if (_composer.value) {
-        _composer.value.warnHtmlMessage = val;
-      }
-    },
-    get escapeParameter() {
-      return _composer.value ? _composer.value.escapeParameter : _escapeParameter;
-    },
-    set escapeParameter(val) {
-      if (_composer.value) {
-        _composer.value.escapeParameter = val;
-      }
-    },
-    t,
-    getPostTranslationHandler,
-    setPostTranslationHandler,
-    getMissingHandler,
-    setMissingHandler,
-    rt,
-    d,
-    n,
-    tm,
-    te,
-    getLocaleMessage,
-    setLocaleMessage,
-    mergeLocaleMessage,
-    getDateTimeFormat,
-    setDateTimeFormat,
-    mergeDateTimeFormat,
-    getNumberFormat,
-    setNumberFormat,
-    mergeNumberFormat
-  };
-  function sync(composer) {
-    composer.locale.value = _locale.value;
-    composer.fallbackLocale.value = _fallbackLocale.value;
-    Object.keys(_messages.value).forEach((locale22) => {
-      composer.mergeLocaleMessage(locale22, _messages.value[locale22]);
-    });
-    Object.keys(_datetimeFormats.value).forEach((locale22) => {
-      composer.mergeDateTimeFormat(locale22, _datetimeFormats.value[locale22]);
-    });
-    Object.keys(_numberFormats.value).forEach((locale22) => {
-      composer.mergeNumberFormat(locale22, _numberFormats.value[locale22]);
-    });
-    composer.escapeParameter = _escapeParameter;
-    composer.fallbackFormat = _fallbackFormat;
-    composer.fallbackRoot = _fallbackRoot;
-    composer.fallbackWarn = _fallbackWarn;
-    composer.missingWarn = _missingWarn;
-    composer.warnHtmlMessage = _warnHtmlMessage;
-  }
-  __name(sync, "sync");
-  onBeforeMount(() => {
-    if (instance.proxy == null || instance.proxy.$i18n == null) {
-      throw createI18nError(I18nErrorCodes.NOT_AVAILABLE_COMPOSITION_IN_LEGACY);
-    }
-    const composer = _composer.value = instance.proxy.$i18n.__composer;
-    if (scope === "global") {
-      _locale.value = composer.locale.value;
-      _fallbackLocale.value = composer.fallbackLocale.value;
-      _messages.value = composer.messages.value;
-      _datetimeFormats.value = composer.datetimeFormats.value;
-      _numberFormats.value = composer.numberFormats.value;
-    } else if (isLocalScope) {
-      sync(composer);
-    }
-  });
-  return wrapper;
-}
-__name(useI18nForLegacy, "useI18nForLegacy");
-const globalExportProps = [
-  "locale",
-  "fallbackLocale",
-  "availableLocales"
-];
-const globalExportMethods = ["t", "rt", "d", "n", "tm", "te"];
-function injectGlobalFields(app2, composer) {
-  const i18n2 = /* @__PURE__ */ Object.create(null);
-  globalExportProps.forEach((prop2) => {
-    const desc = Object.getOwnPropertyDescriptor(composer, prop2);
-    if (!desc) {
-      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
-    }
-    const wrap = isRef(desc.value) ? {
-      get() {
-        return desc.value.value;
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      set(val) {
-        desc.value.value = val;
-      }
-    } : {
-      get() {
-        return desc.get && desc.get();
-      }
-    };
-    Object.defineProperty(i18n2, prop2, wrap);
-  });
-  app2.config.globalProperties.$i18n = i18n2;
-  globalExportMethods.forEach((method) => {
-    const desc = Object.getOwnPropertyDescriptor(composer, method);
-    if (!desc || !desc.value) {
-      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
-    }
-    Object.defineProperty(app2.config.globalProperties, `$${method}`, desc);
-  });
-  const dispose = /* @__PURE__ */ __name(() => {
-    delete app2.config.globalProperties.$i18n;
-    globalExportMethods.forEach((method) => {
-      delete app2.config.globalProperties[`$${method}`];
-    });
-  }, "dispose");
-  return dispose;
-}
-__name(injectGlobalFields, "injectGlobalFields");
-{
-  initFeatureFlags();
-}
-if (__INTLIFY_JIT_COMPILATION__) {
-  registerMessageCompiler(compile);
-} else {
-  registerMessageCompiler(compileToFunction);
-}
-registerMessageResolver(resolveValue);
-registerLocaleFallbacker(fallbackWithLocaleChain);
-if (__INTLIFY_PROD_DEVTOOLS__) {
-  const target = getGlobalThis();
-  target.__INTLIFY__ = true;
-  setDevToolsHook(target.__INTLIFY_DEVTOOLS_GLOBAL_HOOK__);
-}
-if (false) ;
-const GITHUB_API_URL = "";
-const _sfc_main$t = /* @__PURE__ */ defineComponent({
+const _sfc_main$x = /* @__PURE__ */ defineComponent({
   __name: "FindIssueButton",
   props: {
     errorMessage: {},
@@ -64425,25 +58493,6 @@ const _sfc_main$t = /* @__PURE__ */ defineComponent({
   setup(__props) {
     const props = __props;
     const queryString = computed(() => props.errorMessage + " is:issue");
-    const getIssueCount = /* @__PURE__ */ __name(async () => {
-      const query = `${queryString.value} repo:${props.repoOwner}/${props.repoName}`;
-      const response = await axios.get(GITHUB_API_URL, {
-        params: {
-          q: query,
-          per_page: 1
-        }
-      });
-      return response.data.total_count;
-    }, "getIssueCount");
-    const {
-      state: issueCount,
-      isLoading,
-      execute
-    } = useAsyncState(getIssueCount, 0);
-    const { t } = useI18n();
-    const buttonLabel = computed(() => {
-      return isLoading.value ? "Loading..." : t("findIssues");
-    });
     const openGitHubIssues = /* @__PURE__ */ __name(() => {
       const query = encodeURIComponent(queryString.value);
       const url = `https://github.com/${props.repoOwner}/${props.repoName}/issues?q=${query}`;
@@ -64452,21 +58501,20 @@ const _sfc_main$t = /* @__PURE__ */ defineComponent({
     return (_ctx, _cache) => {
       return openBlock(), createBlock(unref(script$J), {
         onClick: openGitHubIssues,
-        label: buttonLabel.value,
+        label: _ctx.$t("findIssues"),
         severity: "secondary",
-        icon: "pi pi-github",
-        badge: unref(issueCount).toString()
-      }, null, 8, ["label", "badge"]);
+        icon: "pi pi-github"
+      }, null, 8, ["label"]);
     };
   }
 });
-const _withScopeId$e = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-12539d86"), n = n(), popScopeId(), n), "_withScopeId$e");
+const _withScopeId$e = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-a103fd62"), n = n(), popScopeId(), n), "_withScopeId$e");
 const _hoisted_1$C = { class: "comfy-error-report" };
 const _hoisted_2$s = { class: "wrapper-pre" };
-const _hoisted_3$c = { class: "action-container" };
+const _hoisted_3$d = { class: "action-container" };
 const repoOwner = "comfyanonymous";
 const repoName = "ComfyUI";
-const _sfc_main$s = /* @__PURE__ */ defineComponent({
+const _sfc_main$w = /* @__PURE__ */ defineComponent({
   __name: "ExecutionErrorDialogContent",
   props: {
     error: {}
@@ -64604,8 +58652,8 @@ ${workflowText}
             }),
             createVNode(unref(script$F))
           ], 64)) : createCommentVNode("", true),
-          createBaseVNode("div", _hoisted_3$c, [
-            createVNode(_sfc_main$t, {
+          createBaseVNode("div", _hoisted_3$d, [
+            createVNode(_sfc_main$x, {
               errorMessage: props.error.exception_message,
               repoOwner,
               repoName
@@ -64622,7 +58670,7 @@ ${workflowText}
     };
   }
 });
-const ExecutionErrorDialogContent = /* @__PURE__ */ _export_sfc(_sfc_main$s, [["__scopeId", "data-v-12539d86"]]);
+const ExecutionErrorDialogContent = /* @__PURE__ */ _export_sfc(_sfc_main$w, [["__scopeId", "data-v-a103fd62"]]);
 function showLoadWorkflowWarning(props) {
   const dialogStore = useDialogStore();
   dialogStore.showDialog({
@@ -64832,6 +58880,8 @@ const globalExport = {};
     // if true, all newly created nodes/links will use string UUIDs for their id fields instead of integers.
     // use this if you must have node IDs that are unique across all graphs and subgraphs.
     use_uuids: false,
+    // Whether to highlight the bounding box of selected groups
+    highlight_selected_group: false,
     /**
      * Register a node class so it can be listed when the user wants to create a new one
      * @method registerNodeType
@@ -66035,16 +60085,16 @@ const globalExport = {};
          * @method getGroupOnPos
          * @param {number} x the x coordinate in canvas space
          * @param {number} y the y coordinate in canvas space
-         * @return {LGraphGroup} the group or null
+         * @return {LGraphGroup | null} the group or null
          */
-    getGroupOnPos(x2, y2) {
-      for (var i2 = this._groups.length - 1; i2 >= 0; i2--) {
-        var g = this._groups[i2];
-        if (g.isPointInside(x2, y2, 2, true)) {
-          return g;
-        }
-      }
-      return null;
+    getGroupOnPos(x2, y2, { margin = 2 } = {}) {
+      return this._groups.reverse().find((g) => g.isPointInside(
+        x2,
+        y2,
+        margin,
+        /* skip_title */
+        true
+      ));
     }
     /**
          * Checks that the node type matches the node type registered, used when replacing a nodetype by a newer version during execution
@@ -66618,7 +60668,7 @@ const globalExport = {};
       this.title = title || "Unnamed";
       this.size = [LiteGraph.NODE_WIDTH, 60];
       this.graph = null;
-      this._pos = new Float32Array(10, 10);
+      this._pos = new Float32Array([10, 10]);
       Object.defineProperty(this, "pos", {
         set: /* @__PURE__ */ __name(function(v2) {
           if (!v2 || v2.length < 2) {
@@ -66718,6 +60768,9 @@ const globalExport = {};
             }
           }
         }
+      }
+      if (this.pinned) {
+        this.pin(true);
       }
       if (this.onConfigure) {
         this.onConfigure(info);
@@ -68639,13 +62692,19 @@ const globalExport = {};
         c.node_capturing_input = v2 ? this : null;
       }
     }
+    get collapsed() {
+      return !!this.flags.collapsed;
+    }
+    get collapsible() {
+      return !this.pinned && this.constructor.collapsable !== false;
+    }
     /**
          * Collapse the node to make it smaller on the canvas
          * @method collapse
          **/
     collapse(force) {
       this.graph._version++;
-      if (this.constructor.collapsable === false && !force) {
+      if (!this.collapsible && !force) {
         return;
       }
       if (!this.flags.collapsed) {
@@ -68655,8 +62714,11 @@ const globalExport = {};
       }
       this.setDirtyCanvas(true, true);
     }
+    get pinned() {
+      return !!this.flags.pinned;
+    }
     /**
-         * Forces the node to do not move or realign on Z
+         * Forces the node to do not move or realign on Z or resize
          * @method pin
          **/
     pin(v2) {
@@ -68665,6 +62727,10 @@ const globalExport = {};
         this.flags.pinned = !this.flags.pinned;
       } else {
         this.flags.pinned = v2;
+      }
+      this.resizable = !this.pinned;
+      if (!this.pinned) {
+        delete this.flags.pinned;
       }
     }
     localToScreen(x2, y2, graphcanvas) {
@@ -68691,6 +62757,7 @@ const globalExport = {};
       this._size = this._bounding.subarray(2, 4);
       this._nodes = [];
       this.graph = null;
+      this.flags = {};
       Object.defineProperty(this, "pos", {
         set: /* @__PURE__ */ __name(function(v2) {
           if (!v2 || v2.length < 2) {
@@ -68718,10 +62785,27 @@ const globalExport = {};
         enumerable: true
       });
     }
+    get titleHeight() {
+      return this.font_size * 1.4;
+    }
+    get selected() {
+      var _a, _b;
+      return !!((_b = (_a = this.graph) == null ? void 0 : _a.list_of_graphcanvas) == null ? void 0 : _b.some((c) => c.selected_group === this));
+    }
+    get pinned() {
+      return !!this.flags.pinned;
+    }
+    pin() {
+      this.flags.pinned = true;
+    }
+    unpin() {
+      delete this.flags.pinned;
+    }
     configure(o) {
       this.title = o.title;
       this._bounding.set(o.bounding);
       this.color = o.color;
+      this.flags = o.flags || this.flags;
       if (o.font_size) {
         this.font_size = o.font_size;
       }
@@ -68737,10 +62821,57 @@ const globalExport = {};
           Math.round(b[3])
         ],
         color: this.color,
-        font_size: this.font_size
+        font_size: this.font_size,
+        flags: this.flags
       };
     }
+    /**
+     * Draws the group on the canvas
+     * @param {LGraphCanvas} graphCanvas
+     * @param {CanvasRenderingContext2D} ctx
+     */
+    draw(graphCanvas, ctx) {
+      const padding = 4;
+      ctx.fillStyle = this.color;
+      ctx.strokeStyle = this.color;
+      const [x2, y2] = this._pos;
+      const [width2, height] = this._size;
+      ctx.globalAlpha = 0.25 * graphCanvas.editor_alpha;
+      ctx.beginPath();
+      ctx.rect(x2 + 0.5, y2 + 0.5, width2, height);
+      ctx.fill();
+      ctx.globalAlpha = graphCanvas.editor_alpha;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x2 + width2, y2 + height);
+      ctx.lineTo(x2 + width2 - 10, y2 + height);
+      ctx.lineTo(x2 + width2, y2 + height - 10);
+      ctx.fill();
+      const font_size = this.font_size || LiteGraph.DEFAULT_GROUP_FONT_SIZE;
+      ctx.font = font_size + "px Arial";
+      ctx.textAlign = "left";
+      ctx.fillText(this.title + (this.pinned ? "📌" : ""), x2 + padding, y2 + font_size);
+      if (LiteGraph.highlight_selected_group && this.selected) {
+        graphCanvas.drawSelectionBounding(ctx, this._bounding, {
+          shape: LiteGraph.BOX_SHAPE,
+          title_height: this.titleHeight,
+          title_mode: LiteGraph.NORMAL_TITLE,
+          fgcolor: this.color,
+          padding
+        });
+      }
+    }
+    resize(width2, height) {
+      if (this.pinned) {
+        return;
+      }
+      this._size[0] = width2;
+      this._size[1] = height;
+    }
     move(deltax, deltay, ignore_nodes) {
+      if (this.pinned) {
+        return;
+      }
       this._pos[0] += deltax;
       this._pos[1] += deltay;
       if (ignore_nodes) {
@@ -68790,14 +62921,39 @@ const globalExport = {};
           bottom: Math.max(acc.bottom, bottom)
         };
       }, { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
-      const groupTitleHeight = Math.round(this.font_size * 1.4);
       this.pos = [
         bounds.left - padding,
-        bounds.top - padding - groupTitleHeight
+        bounds.top - padding - this.titleHeight
       ];
       this.size = [
         bounds.right - bounds.left + padding * 2,
-        bounds.bottom - bounds.top + padding * 2 + groupTitleHeight
+        bounds.bottom - bounds.top + padding * 2 + this.titleHeight
+      ];
+    }
+    getMenuOptions() {
+      return [
+        {
+          content: this.pinned ? "Unpin" : "Pin",
+          callback: /* @__PURE__ */ __name(() => {
+            this.pinned ? this.unpin() : this.pin();
+            this.setDirtyCanvas(false, true);
+          }, "callback")
+        },
+        null,
+        { content: "Title", callback: LGraphCanvas.onShowPropertyEditor },
+        {
+          content: "Color",
+          has_submenu: true,
+          callback: LGraphCanvas.onMenuNodeColors
+        },
+        {
+          content: "Font size",
+          property: "font_size",
+          type: "Number",
+          callback: LGraphCanvas.onShowPropertyEditor
+        },
+        null,
+        { content: "Remove", callback: LGraphCanvas.onMenuNodeRemove }
       ];
     }
   }
@@ -70428,7 +64584,7 @@ const globalExport = {};
           }
           if (!skip_action) {
             var block_drag_node = false;
-            if (node22 && node22.flags && node22.flags.pinned) {
+            if (node22 == null ? void 0 : node22.pinned) {
               block_drag_node = true;
             }
             var pos2 = [e.canvasX - node22.pos[0], e.canvasY - node22.pos[1]];
@@ -70504,8 +64660,20 @@ const globalExport = {};
               } else {
                 this.selected_group.recomputeInsideNodes();
               }
-            }
-            if (is_double_click && !this.read_only) {
+              if (is_double_click) {
+                this.canvas.dispatchEvent(new CustomEvent(
+                  "litegraph:canvas",
+                  {
+                    bubbles: true,
+                    detail: {
+                      subType: "group-double-click",
+                      originalEvent: e,
+                      group: this.selected_group
+                    }
+                  }
+                ));
+              }
+            } else if (is_double_click && !this.read_only) {
               if (this.allow_searchbox) {
                 this.showSearchBox(e);
                 e.preventDefault();
@@ -70658,10 +64826,10 @@ const globalExport = {};
         this.dirty_canvas = true;
       } else if (this.selected_group && !this.read_only) {
         if (this.selected_group_resizing) {
-          this.selected_group.size = [
+          this.selected_group.resize(
             e.canvasX - this.selected_group.pos[0],
             e.canvasY - this.selected_group.pos[1]
-          ];
+          );
         } else {
           var deltax = delta2[0] / this.ds.scale;
           var deltay = delta2[1] / this.ds.scale;
@@ -72758,7 +66926,7 @@ const globalExport = {};
         }
         if (!low_quality) {
           ctx.font = this.title_text_font;
-          var title = String(node22.getTitle());
+          var title = String(node22.getTitle()) + (node22.pinned ? "📌" : "");
           if (title) {
             if (selected2) {
               ctx.fillStyle = LiteGraph.NODE_SELECTED_TITLE_COLOR;
@@ -72813,52 +66981,72 @@ const globalExport = {};
         if (node22.onBounding) {
           node22.onBounding(area);
         }
-        if (title_mode == LiteGraph.TRANSPARENT_TITLE) {
-          area[1] -= title_height;
-          area[3] += title_height;
-        }
-        ctx.lineWidth = 1;
-        ctx.globalAlpha = 0.8;
-        ctx.beginPath();
-        if (shape == LiteGraph.BOX_SHAPE) {
-          ctx.rect(
-            -6 + area[0],
-            -6 + area[1],
-            12 + area[2],
-            12 + area[3]
-          );
-        } else if (shape == LiteGraph.ROUND_SHAPE || shape == LiteGraph.CARD_SHAPE && node22.flags.collapsed) {
-          ctx.roundRect(
-            -6 + area[0],
-            -6 + area[1],
-            12 + area[2],
-            12 + area[3],
-            [this.round_radius * 2]
-          );
-        } else if (shape == LiteGraph.CARD_SHAPE) {
-          ctx.roundRect(
-            -6 + area[0],
-            -6 + area[1],
-            12 + area[2],
-            12 + area[3],
-            [this.round_radius * 2, 2, this.round_radius * 2, 2]
-          );
-        } else if (shape == LiteGraph.CIRCLE_SHAPE) {
-          ctx.arc(
-            size2[0] * 0.5,
-            size2[1] * 0.5,
-            size2[0] * 0.5 + 6,
-            0,
-            Math.PI * 2
-          );
-        }
-        ctx.strokeStyle = LiteGraph.NODE_BOX_OUTLINE_COLOR;
-        ctx.stroke();
-        ctx.strokeStyle = fgcolor;
-        ctx.globalAlpha = 1;
+        this.drawSelectionBounding(
+          ctx,
+          area,
+          {
+            shape,
+            title_height,
+            title_mode,
+            fgcolor
+          }
+        );
       }
       if (node22.execute_triggered > 0) node22.execute_triggered--;
       if (node22.action_triggered > 0) node22.action_triggered--;
+    }
+    /**
+     * Draws the selection bounding of an area.
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {Vector4} area
+     * @param {{
+     *   shape: LiteGraph.Shape,
+     *   title_height: number,
+     *   title_mode: LiteGraph.TitleMode,
+     *   fgcolor: string,
+     *   padding: number,
+     * }} options
+     */
+    drawSelectionBounding(ctx, area, {
+      shape = LiteGraph.BOX_SHAPE,
+      title_height = LiteGraph.NODE_TITLE_HEIGHT,
+      title_mode = LiteGraph.NORMAL_TITLE,
+      fgcolor = LiteGraph.NODE_BOX_OUTLINE_COLOR,
+      padding = 6
+    } = {}) {
+      if (title_mode === LiteGraph.TRANSPARENT_TITLE) {
+        area[1] -= title_height;
+        area[3] += title_height;
+      }
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.8;
+      ctx.beginPath();
+      const [x2, y2, width2, height] = area;
+      switch (shape) {
+        case LiteGraph.BOX_SHAPE: {
+          ctx.rect(x2 - padding, y2 - padding, width2 + 2 * padding, height + 2 * padding);
+          break;
+        }
+        case LiteGraph.ROUND_SHAPE:
+        case LiteGraph.CARD_SHAPE: {
+          const radius = this.round_radius * 2;
+          const isCollapsed = shape === LiteGraph.CARD_SHAPE && node.flags.collapsed;
+          const cornerRadii = isCollapsed || shape === LiteGraph.ROUND_SHAPE ? [radius] : [radius, 2, radius, 2];
+          ctx.roundRect(x2 - padding, y2 - padding, width2 + 2 * padding, height + 2 * padding, cornerRadii);
+          break;
+        }
+        case LiteGraph.CIRCLE_SHAPE: {
+          const centerX = x2 + width2 / 2;
+          const centerY = y2 + height / 2;
+          const radius = Math.max(width2, height) / 2 + padding;
+          ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+          break;
+        }
+      }
+      ctx.strokeStyle = LiteGraph.NODE_BOX_OUTLINE_COLOR;
+      ctx.stroke();
+      ctx.strokeStyle = fgcolor;
+      ctx.globalAlpha = 1;
     }
     drawConnections(ctx) {
       var now2 = LiteGraph.getTime();
@@ -73711,9 +67899,9 @@ const globalExport = {};
       return null;
     }
     /**
-         * draws every group area in the background
-         * @method drawGroups
-         **/
+     * draws every group area in the background
+     * @method drawGroups
+     **/
     drawGroups(canvas, ctx) {
       if (!this.graph) {
         return;
@@ -73726,25 +67914,7 @@ const globalExport = {};
         if (!overlapBounding(this.visible_area, group._bounding)) {
           continue;
         }
-        ctx.fillStyle = group.color || "#335";
-        ctx.strokeStyle = group.color || "#335";
-        var pos2 = group._pos;
-        var size2 = group._size;
-        ctx.globalAlpha = 0.25 * this.editor_alpha;
-        ctx.beginPath();
-        ctx.rect(pos2[0] + 0.5, pos2[1] + 0.5, size2[0], size2[1]);
-        ctx.fill();
-        ctx.globalAlpha = this.editor_alpha;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(pos2[0] + size2[0], pos2[1] + size2[1]);
-        ctx.lineTo(pos2[0] + size2[0] - 10, pos2[1] + size2[1]);
-        ctx.lineTo(pos2[0] + size2[0], pos2[1] + size2[1] - 10);
-        ctx.fill();
-        var font_size = group.font_size || LiteGraph.DEFAULT_GROUP_FONT_SIZE;
-        ctx.font = font_size + "px Arial";
-        ctx.textAlign = "left";
-        ctx.fillText(group.title, pos2[0] + 4, pos2[1] + font_size);
+        group.draw(this, ctx);
       }
       ctx.restore();
     }
@@ -73983,7 +68153,9 @@ const globalExport = {};
           slotFrom: null,
           nodeTo: null,
           slotTo: null,
-          e: null
+          e: null,
+          allow_searchbox: this.allow_searchbox,
+          showSearchBox: this.showSearchBox
         },
         optPass
       );
@@ -73992,7 +68164,7 @@ const globalExport = {};
       var isTo = !isFrom && opts.nodeTo && opts.slotTo;
       if (!isFrom && !isTo) {
         console.warn("No data passed to showConnectionMenu");
-        return false;
+        return;
       }
       var nodeX = isFrom ? opts.nodeFrom : opts.nodeTo;
       var slotX = isFrom ? opts.slotFrom : opts.slotTo;
@@ -74011,10 +68183,10 @@ const globalExport = {};
           break;
         default:
           console.warn("Cant get slot information " + slotX);
-          return false;
+          return;
       }
       var options3 = ["Add Node", null];
-      if (that2.allow_searchbox) {
+      if (opts.allow_searchbox) {
         options3.push("Search");
         options3.push(null);
       }
@@ -74047,9 +68219,9 @@ const globalExport = {};
             break;
           case "Search":
             if (isFrom) {
-              that2.showSearchBox(e, { node_from: opts.nodeFrom, slot_from: slotX, type_filter_in: fromSlotType });
+              opts.showSearchBox(e, { node_from: opts.nodeFrom, slot_from: slotX, type_filter_in: fromSlotType });
             } else {
-              that2.showSearchBox(e, { node_to: opts.nodeTo, slot_from: slotX, type_filter_out: fromSlotType });
+              opts.showSearchBox(e, { node_to: opts.nodeTo, slot_from: slotX, type_filter_out: fromSlotType });
             }
             break;
           default:
@@ -74061,7 +68233,6 @@ const globalExport = {};
         }
       }
       __name(inner_clicked, "inner_clicked");
-      return false;
     }
     // refactor: there are different dialogs, some uses createDialog some dont
     prompt(title, value3, callback, event2, multiline) {
@@ -75319,7 +69490,6 @@ const globalExport = {};
     }
     //called by processContextMenu to extract the menu list
     getNodeMenuOptions(node22) {
-      var _a;
       var options3 = null;
       if (node22.getMenuOptions) {
         options3 = node22.getMenuOptions(this);
@@ -75366,13 +69536,15 @@ const globalExport = {};
             callback: __LGraphCanvas.onMenuResizeNode
           });
         }
+        if (node22.collapsible) {
+          options3.push({
+            content: node22.collapsed ? "Expand" : "Collapse",
+            callback: __LGraphCanvas.onMenuNodeCollapse
+          });
+        }
         options3.push(
           {
-            content: "Collapse",
-            callback: __LGraphCanvas.onMenuNodeCollapse
-          },
-          {
-            content: ((_a = node22.flags) == null ? void 0 : _a.pinned) ? "Unpin" : "Pin",
+            content: node22.pinned ? "Unpin" : "Pin",
             callback: __LGraphCanvas.onMenuNodePin
           },
           {
@@ -75431,23 +69603,8 @@ const globalExport = {};
       return options3;
     }
     getGroupMenuOptions(node22) {
-      var o = [
-        { content: "Title", callback: __LGraphCanvas.onShowPropertyEditor },
-        {
-          content: "Color",
-          has_submenu: true,
-          callback: __LGraphCanvas.onMenuNodeColors
-        },
-        {
-          content: "Font size",
-          property: "font_size",
-          type: "Number",
-          callback: __LGraphCanvas.onShowPropertyEditor
-        },
-        null,
-        { content: "Remove", callback: __LGraphCanvas.onMenuNodeRemove }
-      ];
-      return o;
+      console.warn("LGraphCanvas.getGroupMenuOptions is deprecated, use LGraphGroup.getMenuOptions instead");
+      return node22.getMenuOptions();
     }
     processContextMenu(node22, event2) {
       var that2 = this;
@@ -75507,7 +69664,7 @@ const globalExport = {};
               submenu: {
                 title: "Group",
                 extra: group,
-                options: this.getGroupMenuOptions(group)
+                options: group.getMenuOptions()
               }
             });
           }
@@ -76387,6 +70544,18 @@ const LGraphGroup = globalExport.LGraphGroup;
 const DragAndScale = globalExport.DragAndScale;
 const LGraphCanvas = globalExport.LGraphCanvas;
 const ContextMenu = globalExport.ContextMenu;
+const useTitleEditorStore = defineStore("titleEditor", () => {
+  const titleEditorTarget = shallowRef(null);
+  return {
+    titleEditorTarget
+  };
+});
+const useCanvasStore = defineStore("canvas", () => {
+  const canvas = shallowRef(null);
+  return {
+    canvas
+  };
+});
 const ComfyDialog = ComfyDialog$1;
 function $el(tag, propsOrChildren, children) {
   const split = tag.split(".");
@@ -77040,6 +71209,7 @@ class ComfyUI {
           );
           group.addNodes(Object.values(app2.canvas.selected_nodes), padding);
           app2.canvas.graph.add(group);
+          useTitleEditorStore().titleEditorTarget = group;
         }, "onclick")
       })
     ]);
@@ -77324,7 +71494,7 @@ class ComfyLogging {
     const htmlSettingId = settingId.replaceAll(".", "-");
     const setting = this.app.ui.settings.addSetting({
       id: settingId,
-      name: settingId,
+      name: "Enable logging",
       defaultValue: true,
       onChange: /* @__PURE__ */ __name((value3) => {
         this.enabled = value3;
@@ -79256,9 +73426,9 @@ const parts = {
   m: /* @__PURE__ */ __name((d) => d.getMinutes(), "m"),
   s: /* @__PURE__ */ __name((d) => d.getSeconds(), "s")
 };
-const format$1 = Object.keys(parts).map((k) => k + k + "?").join("|") + "|yyy?y?";
+const format$4 = Object.keys(parts).map((k) => k + k + "?").join("|") + "|yyy?y?";
 function formatDate(text, date) {
-  return text.replace(new RegExp(format$1, "g"), (text2) => {
+  return text.replace(new RegExp(format$4, "g"), (text2) => {
     if (text2 === "yy") return (date.getFullYear() + "").substring(2);
     if (text2 === "yyyy") return date.getFullYear().toString();
     if (text2[0] in parts) {
@@ -80094,7 +74264,10 @@ class ChangeTracker {
     if (prevState) {
       target.push(this.activeState);
       this.isOurLoad = true;
-      await this.app.loadGraphData(prevState, false, false, this.workflow);
+      await this.app.loadGraphData(prevState, false, false, this.workflow, {
+        showMissingModelsDialog: false,
+        showMissingNodesDialog: false
+      });
       this.activeState = prevState;
     }
   }
@@ -80559,7 +74732,11 @@ class ComfyWorkflow {
         this.changeTracker.activeState,
         true,
         true,
-        this
+        this,
+        {
+          showMissingModelsDialog: false,
+          showMissingNodesDialog: false
+        }
       );
     } else {
       const data24 = await this.getWorkflowData();
@@ -81771,10 +75948,10 @@ const getNodeSource = /* @__PURE__ */ __name((python_module) => {
     throw new Error(`Unknown node source: ${python_module}`);
   }
 }, "getNodeSource");
-function isArray(value3) {
+function isArray$1(value3) {
   return !Array.isArray ? getTag(value3) === "[object Array]" : Array.isArray(value3);
 }
-__name(isArray, "isArray");
+__name(isArray$1, "isArray$1");
 const INFINITY = 1 / 0;
 function baseToString(value3) {
   if (typeof value3 == "string") {
@@ -81788,24 +75965,24 @@ function toString(value3) {
   return value3 == null ? "" : baseToString(value3);
 }
 __name(toString, "toString");
-function isString(value3) {
+function isString$2(value3) {
   return typeof value3 === "string";
 }
-__name(isString, "isString");
-function isNumber(value3) {
+__name(isString$2, "isString$2");
+function isNumber$1(value3) {
   return typeof value3 === "number";
 }
-__name(isNumber, "isNumber");
-function isBoolean(value3) {
+__name(isNumber$1, "isNumber$1");
+function isBoolean$1(value3) {
   return value3 === true || value3 === false || isObjectLike(value3) && getTag(value3) == "[object Boolean]";
 }
-__name(isBoolean, "isBoolean");
-function isObject(value3) {
+__name(isBoolean$1, "isBoolean$1");
+function isObject$2(value3) {
   return typeof value3 === "object";
 }
-__name(isObject, "isObject");
+__name(isObject$2, "isObject$2");
 function isObjectLike(value3) {
-  return isObject(value3) && value3 !== null;
+  return isObject$2(value3) && value3 !== null;
 }
 __name(isObjectLike, "isObjectLike");
 function isDefined(value3) {
@@ -81826,7 +76003,7 @@ const LOGICAL_SEARCH_INVALID_QUERY_FOR_KEY = /* @__PURE__ */ __name((key) => `In
 const PATTERN_LENGTH_TOO_LARGE = /* @__PURE__ */ __name((max) => `Pattern length exceeds max of ${max}.`, "PATTERN_LENGTH_TOO_LARGE");
 const MISSING_KEY_PROPERTY = /* @__PURE__ */ __name((name) => `Missing ${name} property in key`, "MISSING_KEY_PROPERTY");
 const INVALID_KEY_WEIGHT_VALUE = /* @__PURE__ */ __name((key) => `Property 'weight' in key '${key}' must be a positive integer`, "INVALID_KEY_WEIGHT_VALUE");
-const hasOwn = Object.prototype.hasOwnProperty;
+const hasOwn$1 = Object.prototype.hasOwnProperty;
 class KeyStore {
   static {
     __name(this, "KeyStore");
@@ -81861,17 +76038,17 @@ function createKey(key) {
   let src = null;
   let weight = 1;
   let getFn = null;
-  if (isString(key) || isArray(key)) {
+  if (isString$2(key) || isArray$1(key)) {
     src = key;
     path = createKeyPath(key);
     id2 = createKeyId(key);
   } else {
-    if (!hasOwn.call(key, "name")) {
+    if (!hasOwn$1.call(key, "name")) {
       throw new Error(MISSING_KEY_PROPERTY("name"));
     }
     const name = key.name;
     src = name;
-    if (hasOwn.call(key, "weight")) {
+    if (hasOwn$1.call(key, "weight")) {
       weight = key.weight;
       if (weight <= 0) {
         throw new Error(INVALID_KEY_WEIGHT_VALUE(name));
@@ -81885,11 +76062,11 @@ function createKey(key) {
 }
 __name(createKey, "createKey");
 function createKeyPath(key) {
-  return isArray(key) ? key : key.split(".");
+  return isArray$1(key) ? key : key.split(".");
 }
 __name(createKeyPath, "createKeyPath");
 function createKeyId(key) {
-  return isArray(key) ? key.join(".") : key;
+  return isArray$1(key) ? key.join(".") : key;
 }
 __name(createKeyId, "createKeyId");
 function get(obj, path) {
@@ -81907,9 +76084,9 @@ function get(obj, path) {
       if (!isDefined(value3)) {
         return;
       }
-      if (index2 === path2.length - 1 && (isString(value3) || isNumber(value3) || isBoolean(value3))) {
+      if (index2 === path2.length - 1 && (isString$2(value3) || isNumber$1(value3) || isBoolean$1(value3))) {
         list.push(toString(value3));
-      } else if (isArray(value3)) {
+      } else if (isArray$1(value3)) {
         arr = true;
         for (let i2 = 0, len = value3.length; i2 < len; i2 += 1) {
           deepGet(value3[i2], path2, index2 + 1);
@@ -81919,7 +76096,7 @@ function get(obj, path) {
       }
     }
   }, "deepGet");
-  deepGet(obj, isString(path) ? path.split(".") : path, 0);
+  deepGet(obj, isString$2(path) ? path.split(".") : path, 0);
   return arr ? list : list[0];
 }
 __name(get, "get");
@@ -82035,7 +76212,7 @@ class FuseIndex {
       return;
     }
     this.isCreated = true;
-    if (isString(this.docs[0])) {
+    if (isString$2(this.docs[0])) {
       this.docs.forEach((doc2, docIndex) => {
         this._addString(doc2, docIndex);
       });
@@ -82049,7 +76226,7 @@ class FuseIndex {
   // Adds a doc to the end of the index
   add(doc2) {
     const idx = this.size();
-    if (isString(doc2)) {
+    if (isString$2(doc2)) {
       this._addString(doc2, idx);
     } else {
       this._addObject(doc2, idx);
@@ -82086,7 +76263,7 @@ class FuseIndex {
       if (!isDefined(value3)) {
         return;
       }
-      if (isArray(value3)) {
+      if (isArray$1(value3)) {
         let subRecords = [];
         const stack2 = [{ nestedArrIndex: -1, value: value3 }];
         while (stack2.length) {
@@ -82094,14 +76271,14 @@ class FuseIndex {
           if (!isDefined(value4)) {
             continue;
           }
-          if (isString(value4) && !isBlank(value4)) {
+          if (isString$2(value4) && !isBlank(value4)) {
             let subRecord = {
               v: value4,
               i: nestedArrIndex,
               n: this.norm.get(value4)
             };
             subRecords.push(subRecord);
-          } else if (isArray(value4)) {
+          } else if (isArray$1(value4)) {
             value4.forEach((item2, k) => {
               stack2.push({
                 nestedArrIndex: k,
@@ -82111,7 +76288,7 @@ class FuseIndex {
           } else ;
         }
         record.$[keyIndex] = subRecords;
-      } else if (isString(value3) && !isBlank(value3)) {
+      } else if (isString$2(value3) && !isBlank(value3)) {
         let subRecord = {
           v: value3,
           n: this.norm.get(value3)
@@ -82825,13 +77002,13 @@ const KeyType = {
 };
 const isExpression = /* @__PURE__ */ __name((query) => !!(query[LogicalOperator.AND] || query[LogicalOperator.OR]), "isExpression");
 const isPath = /* @__PURE__ */ __name((query) => !!query[KeyType.PATH], "isPath");
-const isLeaf = /* @__PURE__ */ __name((query) => !isArray(query) && isObject(query) && !isExpression(query), "isLeaf");
+const isLeaf = /* @__PURE__ */ __name((query) => !isArray$1(query) && isObject$2(query) && !isExpression(query), "isLeaf");
 const convertToExplicit = /* @__PURE__ */ __name((query) => ({
   [LogicalOperator.AND]: Object.keys(query).map((key) => ({
     [key]: query[key]
   }))
 }), "convertToExplicit");
-function parse(query, options3, { auto = true } = {}) {
+function parse$1(query, options3, { auto = true } = {}) {
   const next2 = /* @__PURE__ */ __name((query2) => {
     let keys2 = Object.keys(query2);
     const isQueryPath = isPath(query2);
@@ -82841,7 +77018,7 @@ function parse(query, options3, { auto = true } = {}) {
     if (isLeaf(query2)) {
       const key = isQueryPath ? query2[KeyType.PATH] : keys2[0];
       const pattern = isQueryPath ? query2[KeyType.PATTERN] : query2[key];
-      if (!isString(pattern)) {
+      if (!isString$2(pattern)) {
         throw new Error(LOGICAL_SEARCH_INVALID_QUERY_FOR_KEY(key));
       }
       const obj = {
@@ -82859,7 +77036,7 @@ function parse(query, options3, { auto = true } = {}) {
     };
     keys2.forEach((key) => {
       const value3 = query2[key];
-      if (isArray(value3)) {
+      if (isArray$1(value3)) {
         value3.forEach((item2) => {
           node3.children.push(next2(item2));
         });
@@ -82872,7 +77049,7 @@ function parse(query, options3, { auto = true } = {}) {
   }
   return next2(query);
 }
-__name(parse, "parse");
+__name(parse$1, "parse$1");
 function computeScore(results, { ignoreFieldNorm = Config.ignoreFieldNorm }) {
   results.forEach((result) => {
     let totalScore = 1;
@@ -82916,7 +77093,7 @@ function transformScore(result, data24) {
   data24.score = result.score;
 }
 __name(transformScore, "transformScore");
-function format(results, docs, {
+function format$3(results, docs, {
   includeMatches = Config.includeMatches,
   includeScore = Config.includeScore
 } = {}) {
@@ -82937,7 +77114,7 @@ function format(results, docs, {
     return data24;
   });
 }
-__name(format, "format");
+__name(format$3, "format$3");
 class Fuse {
   static {
     __name(this, "Fuse");
@@ -82995,15 +77172,15 @@ class Fuse {
       sortFn,
       ignoreFieldNorm
     } = this.options;
-    let results = isString(query) ? isString(this._docs[0]) ? this._searchStringList(query) : this._searchObjectList(query) : this._searchLogical(query);
+    let results = isString$2(query) ? isString$2(this._docs[0]) ? this._searchStringList(query) : this._searchObjectList(query) : this._searchLogical(query);
     computeScore(results, { ignoreFieldNorm });
     if (shouldSort) {
       results.sort(sortFn);
     }
-    if (isNumber(limit) && limit > -1) {
+    if (isNumber$1(limit) && limit > -1) {
       results = results.slice(0, limit);
     }
-    return format(results, this._docs, {
+    return format$3(results, this._docs, {
       includeMatches,
       includeScore
     });
@@ -83028,7 +77205,7 @@ class Fuse {
     return results;
   }
   _searchLogical(query) {
-    const expression = parse(query, this.options);
+    const expression = parse$1(query, this.options);
     const evaluate = /* @__PURE__ */ __name((node3, item2, idx) => {
       if (!node3.children) {
         const { keyId, searcher } = node3;
@@ -83112,7 +77289,7 @@ class Fuse {
       return [];
     }
     let matches2 = [];
-    if (isArray(value3)) {
+    if (isArray$1(value3)) {
       value3.forEach(({ v: text, i: idx, n: norm2 }) => {
         if (!isDefined(text)) {
           return;
@@ -83144,7 +77321,7 @@ Fuse.createIndex = createIndex;
 Fuse.parseIndex = parseIndex;
 Fuse.config = Config;
 {
-  Fuse.parseQuery = parse;
+  Fuse.parseQuery = parse$1;
 }
 {
   register$1(ExtendedSearch);
@@ -83573,10 +77750,10 @@ function getGlobal() {
   }
 }
 __name(getGlobal, "getGlobal");
-function isPromise(p2) {
+function isPromise$1(p2) {
   return p2 !== null && typeof p2 === "object" && typeof p2.then === "function";
 }
-__name(isPromise, "isPromise");
+__name(isPromise$1, "isPromise$1");
 var __spreadArray = function(to, from, pack) {
   if (pack || arguments.length === 2) for (var i2 = 0, l = from.length, ar; i2 < l; i2++) {
     if (ar || !(i2 in from)) {
@@ -83674,7 +77851,7 @@ var TransformOperationExecutor = (
         if (value3 === null || value3 === void 0)
           return value3;
         return Buffer.from(value3);
-      } else if (isPromise(value3) && !isMap2) {
+      } else if (isPromise$1(value3) && !isMap2) {
         return new Promise(function(resolve8, reject2) {
           value3.then(function(data24) {
             return resolve8(_this.transform(void 0, data24, targetType, void 0, void 0, level + 1));
@@ -84410,7 +78587,7 @@ const _ComfyNodeDefImpl = class _ComfyNodeDefImpl2 {
     return new ComfyOutputsSpec(result);
   }
   get nodePath() {
-    return (this.category ? this.category + "/" : "") + this.display_name;
+    return (this.category ? this.category + "/" : "") + this.name;
   }
   get isDummyFolder() {
     return this.name === "";
@@ -84548,6 +78725,125 @@ const useNodeDefStore = defineStore("nodeDef", {
     }
   }
 });
+function _findInMetadata(metadata, ...keys2) {
+  for (const key of keys2) {
+    if (key in metadata) {
+      return metadata[key];
+    }
+    for (const k in metadata) {
+      if (k.endsWith(key)) {
+        return metadata[k];
+      }
+    }
+  }
+  return null;
+}
+__name(_findInMetadata, "_findInMetadata");
+class ComfyModelDef {
+  static {
+    __name(this, "ComfyModelDef");
+  }
+  /** Proper filename of the model */
+  name = "";
+  /** Directory containing the model, eg 'checkpoints' */
+  directory = "";
+  /** Title / display name of the model, sometimes same as the name but not always */
+  title = "";
+  /** Metadata: architecture ID for the model, such as 'stable-diffusion-xl-v1-base' */
+  architecture_id = "";
+  /** Metadata: author of the model */
+  author = "";
+  /** Metadata: resolution of the model, eg '1024x1024' */
+  resolution = "";
+  /** Metadata: description of the model */
+  description = "";
+  /** Metadata: usage hint for the model */
+  usage_hint = "";
+  /** Metadata: trigger phrase for the model */
+  trigger_phrase = "";
+  /** Metadata: tags list for the model */
+  tags = [];
+  /** Metadata: image for the model */
+  image = "";
+  /** Whether the model metadata has been loaded from the server, used for `load()` */
+  has_loaded_metadata = false;
+  constructor(name, directory) {
+    this.name = name;
+    this.title = name;
+    this.directory = directory;
+  }
+  /** Loads the model metadata from the server, filling in this object if data is available */
+  async load() {
+    if (this.has_loaded_metadata) {
+      return;
+    }
+    const metadata = await api.viewMetadata(this.directory, this.name);
+    if (!metadata) {
+      return;
+    }
+    this.title = _findInMetadata(
+      metadata,
+      "modelspec.title",
+      "title",
+      "display_name",
+      "name"
+    ) || this.name;
+    this.architecture_id = _findInMetadata(metadata, "modelspec.architecture", "architecture") || "";
+    this.author = _findInMetadata(metadata, "modelspec.author", "author") || "";
+    this.description = _findInMetadata(metadata, "modelspec.description", "description") || "";
+    this.resolution = _findInMetadata(metadata, "modelspec.resolution", "resolution") || "";
+    this.usage_hint = _findInMetadata(metadata, "modelspec.usage_hint", "usage_hint") || "";
+    this.trigger_phrase = _findInMetadata(metadata, "modelspec.trigger_phrase", "trigger_phrase") || "";
+    this.image = _findInMetadata(
+      metadata,
+      "modelspec.thumbnail",
+      "thumbnail",
+      "image",
+      "icon"
+    ) || "";
+    const tagsCommaSeparated = _findInMetadata(metadata, "modelspec.tags", "tags") || "";
+    this.tags = tagsCommaSeparated.split(",").map((tag) => tag.trim());
+    this.has_loaded_metadata = true;
+  }
+}
+class ModelStore {
+  static {
+    __name(this, "ModelStore");
+  }
+  models = {};
+  constructor(directory, models) {
+    for (const model of models) {
+      this.models[model] = new ComfyModelDef(model, directory);
+    }
+  }
+  async loadModelMetadata(modelName) {
+    if (this.models[modelName]) {
+      await this.models[modelName].load();
+    }
+  }
+}
+const useModelStore = defineStore("modelStore", {
+  state: /* @__PURE__ */ __name(() => ({
+    modelStoreMap: {}
+  }), "state"),
+  actions: {
+    async getModelsInFolderCached(folder) {
+      if (folder in this.modelStoreMap) {
+        return this.modelStoreMap[folder];
+      }
+      const models = await api.getModels(folder);
+      if (!models) {
+        return null;
+      }
+      const store = new ModelStore(folder, models);
+      this.modelStoreMap[folder] = store;
+      return store;
+    },
+    clearCache() {
+      this.modelStoreMap = {};
+    }
+  }
+});
 const useWorkspaceStore = defineStore("workspace", {
   state: /* @__PURE__ */ __name(() => ({
     spinner: false,
@@ -84660,7 +78956,6 @@ class ComfyApp {
   bodyBottom;
   canvasContainer;
   menu;
-  modelsInFolderCache;
   constructor() {
     this.vueAppReady = false;
     this.ui = new ComfyUI(this);
@@ -84674,7 +78969,6 @@ class ComfyApp {
       parent: document.body
     });
     this.menu = new ComfyAppMenu(this);
-    this.modelsInFolderCache = {};
     this.extensions = [];
     this.nodeOutputs = {};
     this.nodePreviewImages = {};
@@ -85595,6 +79889,15 @@ class ComfyApp {
           }
           block_default = true;
         }
+        if (e.key === "p") {
+          if (this.selected_nodes) {
+            for (const i22 in this.selected_nodes) {
+              const node3 = this.selected_nodes[i22];
+              node3.pin();
+            }
+          }
+          block_default = true;
+        }
         if (e.key === "c" && e.altKey) {
           if (this.selected_nodes) {
             for (var i2 in this.selected_nodes) {
@@ -85905,7 +80208,7 @@ class ComfyApp {
   async #loadExtensions() {
     const extensions = await api.getExtensions();
     this.logging.addEntry("Comfy.App", "debug", { Extensions: extensions });
-    await __vitePreload(() => import("./index-BD-Ia1C4.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url);
+    await __vitePreload(() => import("./index-CrROdkG4.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url);
     await Promise.all(
       extensions.filter((extension) => !extension.includes("extensions/core")).map(async (ext) => {
         try {
@@ -85953,7 +80256,7 @@ class ComfyApp {
     if (!user || !users[user]) {
       if (this.vueAppReady) useWorkspaceStore().spinner = false;
       const { UserSelectionScreen } = await __vitePreload(async () => {
-        const { UserSelectionScreen: UserSelectionScreen2 } = await import("./userSelection-CyXKCVy3.js");
+        const { UserSelectionScreen: UserSelectionScreen2 } = await import("./userSelection-DSpF-zVD.js");
         return { UserSelectionScreen: UserSelectionScreen2 };
       }, true ? __vite__mapDeps([2,3]) : void 0, import.meta.url);
       this.ui.menuContainer.style.display = "none";
@@ -86101,7 +80404,9 @@ class ComfyApp {
       ...SYSTEM_NODE_DEFS
     };
     const nodeDefStore = useNodeDefStore();
-    nodeDefStore.updateNodeDefs(Object.values(allNodeDefs));
+    const nodeDefArray = Object.values(allNodeDefs);
+    this.#invokeExtensions("beforeRegisterVueAppNodeDefs", nodeDefArray, this);
+    nodeDefStore.updateNodeDefs(nodeDefArray);
     nodeDefStore.updateWidgets(this.widgets);
   }
   /**
@@ -86274,7 +80579,7 @@ class ComfyApp {
       console.error(error);
     }
   }
-  async loadGraphData(graphData, clean = true, restore_view = true, workflow = null) {
+  async loadGraphData(graphData, clean = true, restore_view = true, workflow = null, { showMissingNodesDialog = true, showMissingModelsDialog = true } = {}) {
     if (clean !== false) {
       this.clean();
     }
@@ -86321,11 +80626,13 @@ class ComfyApp {
     }
     if (graphData.models && useSettingStore().get("Comfy.Workflow.ShowMissingModelsWarning")) {
       for (let m of graphData.models) {
-        const models_available = await this.getModelsInFolderCached(m.directory);
+        const models_available = await useModelStore().getModelsInFolderCached(
+          m.directory
+        );
         if (models_available === null) {
           m.directory_invalid = true;
           missingModels.push(m);
-        } else if (!models_available.includes(m.name)) {
+        } else if (!(m.name in models_available.models)) {
           missingModels.push(m);
         }
       }
@@ -86417,10 +80724,10 @@ class ComfyApp {
       }
       this.#invokeExtensions("loadedGraphNode", node3);
     }
-    if (missingNodeTypes.length) {
+    if (missingNodeTypes.length && showMissingNodesDialog) {
       this.showMissingNodesError(missingNodeTypes);
     }
-    if (missingModels.length) {
+    if (missingModels.length && showMissingModelsDialog) {
       this.showMissingModelsError(missingModels);
     }
     await this.#invokeExtensionsAsync("afterConfigureGraph", missingNodeTypes);
@@ -86748,7 +81055,7 @@ class ComfyApp {
     this.changeWorkflow(() => {
       for (const id2 of ids) {
         const data24 = apiData[id2];
-        const node3 = app$1.graph.getNodeById(Number.parseInt(id2));
+        const node3 = app$1.graph.getNodeById(id2);
         for (const input in data24.inputs ?? {}) {
           const value3 = data24.inputs[input];
           if (value3 instanceof Array) {
@@ -86780,7 +81087,7 @@ class ComfyApp {
     }, fileName);
     for (const id2 of ids) {
       const data24 = apiData[id2];
-      const node3 = app$1.graph.getNodeById(Number.parseInt(id2));
+      const node3 = app$1.graph.getNodeById(id2);
       for (const input in data24.inputs ?? {}) {
         const value3 = data24.inputs[input];
         if (value3 instanceof Array) {
@@ -86811,23 +81118,16 @@ class ComfyApp {
     app$1.graph.arrange();
   }
   /**
-   * Gets the list of model names in a folder, using a temporary local cache
-   */
-  async getModelsInFolderCached(folder) {
-    if (folder in this.modelsInFolderCache) {
-      return this.modelsInFolderCache[folder];
-    }
-    const models = await api.getModels(folder);
-    this.modelsInFolderCache[folder] = models;
-    return models;
-  }
-  /**
    * Registers a Comfy web extension with the app
    * @param {ComfyExtension} extension
    */
   registerExtension(extension) {
     if (!extension.name) {
       throw new Error("Extensions must have a 'name' property.");
+    }
+    if (extension.name === "pysssss.Locking") {
+      console.log("pysssss.Locking is replaced by pin/unpin in ComfyUI core.");
+      return;
     }
     if (this.extensions.find((ext) => ext.name === extension.name)) {
       throw new Error(`Extension named '${extension.name}' already registered.`);
@@ -86843,8 +81143,10 @@ class ComfyApp {
       summary: "Update",
       detail: "Update requested"
     };
-    if (this.vueAppReady) useToastStore().add(requestToastMessage);
-    this.modelsInFolderCache = {};
+    if (this.vueAppReady) {
+      useToastStore().add(requestToastMessage);
+      useModelStore().clearCache();
+    }
     const defs = await api.getNodeDefs();
     for (const nodeId in defs) {
       this.registerNodeDef(nodeId, defs[nodeId]);
@@ -86935,7 +81237,7 @@ window.comfyAPI.app.app = app$1;
 const _withScopeId$d = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-8ac76bc5"), n = n(), popScopeId(), n), "_withScopeId$d");
 const _hoisted_1$B = { class: "editable-text" };
 const _hoisted_2$r = { key: 0 };
-const _sfc_main$r = /* @__PURE__ */ defineComponent({
+const _sfc_main$v = /* @__PURE__ */ defineComponent({
   __name: "EditableText",
   props: {
     modelValue: {},
@@ -87002,9 +81304,9 @@ const _sfc_main$r = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const EditableText = /* @__PURE__ */ _export_sfc(_sfc_main$r, [["__scopeId", "data-v-8ac76bc5"]]);
-const _sfc_main$q = /* @__PURE__ */ defineComponent({
-  __name: "NodeTitleEditor",
+const EditableText = /* @__PURE__ */ _export_sfc(_sfc_main$v, [["__scopeId", "data-v-8ac76bc5"]]);
+const _sfc_main$u = /* @__PURE__ */ defineComponent({
+  __name: "TitleEditor",
   setup(__props) {
     const settingStore = useSettingStore();
     const showInput = ref(false);
@@ -87014,16 +81316,75 @@ const _sfc_main$q = /* @__PURE__ */ defineComponent({
       left: "0px",
       top: "0px",
       width: "200px",
-      height: "20px"
+      height: "20px",
+      fontSize: "12px"
     });
-    const currentNode = ref(null);
+    const titleEditorStore = useTitleEditorStore();
     const onEdit = /* @__PURE__ */ __name((newValue) => {
-      if (currentNode.value && newValue.trim() !== "") {
-        currentNode.value.title = newValue.trim();
+      if (titleEditorStore.titleEditorTarget && newValue.trim() !== "") {
+        titleEditorStore.titleEditorTarget.title = newValue.trim();
         app$1.graph.setDirtyCanvas(true, true);
       }
       showInput.value = false;
+      titleEditorStore.titleEditorTarget = null;
     }, "onEdit");
+    watch(
+      () => titleEditorStore.titleEditorTarget,
+      (target) => {
+        if (target === null) {
+          return;
+        }
+        editedTitle.value = target.title;
+        showInput.value = true;
+        if (target instanceof LGraphGroup) {
+          const group = target;
+          const [x2, y2] = group.pos;
+          const [w2, h2] = group.size;
+          const [left, top] = app$1.canvasPosToClientPos([x2, y2]);
+          inputStyle.value.left = `${left}px`;
+          inputStyle.value.top = `${top}px`;
+          const width2 = w2 * app$1.canvas.ds.scale;
+          const height = group.titleHeight * app$1.canvas.ds.scale;
+          inputStyle.value.width = `${width2}px`;
+          inputStyle.value.height = `${height}px`;
+          const fontSize = group.font_size * app$1.canvas.ds.scale;
+          inputStyle.value.fontSize = `${fontSize}px`;
+        } else if (target instanceof LGraphNode) {
+          const node3 = target;
+          const isCollapsed = node3.flags?.collapsed;
+          const [x2, y2, nodeWidth, nodeHeight] = node3.getBounding();
+          const canvasWidth = (
+            // @ts-expect-error Remove after collapsed_width is exposed in LiteGraph
+            isCollapsed && node3._collapsed_width ? node3._collapsed_width : nodeWidth
+          );
+          const canvasHeight = LiteGraph.NODE_TITLE_HEIGHT;
+          const [left, top] = app$1.canvasPosToClientPos([x2, y2]);
+          inputStyle.value.left = `${left}px`;
+          inputStyle.value.top = `${top}px`;
+          const width2 = canvasWidth * app$1.canvas.ds.scale;
+          const height = canvasHeight * app$1.canvas.ds.scale;
+          inputStyle.value.width = `${width2}px`;
+          inputStyle.value.height = `${height}px`;
+          const fontSize = 12 * app$1.canvas.ds.scale;
+          inputStyle.value.fontSize = `${fontSize}px`;
+        }
+      }
+    );
+    const canvasEventHandler = /* @__PURE__ */ __name((event2) => {
+      if (!settingStore.get("Comfy.Group.DoubleClickTitleToEdit")) {
+        return;
+      }
+      if (event2.detail.subType === "group-double-click") {
+        const group = event2.detail.group;
+        const [x2, y2] = group.pos;
+        const e = event2.detail.originalEvent;
+        const relativeY = e.canvasY - y2;
+        if (relativeY > group.titleHeight) {
+          return;
+        }
+        titleEditorStore.titleEditorTarget = group;
+      }
+    }, "canvasEventHandler");
     const extension = {
       name: "Comfy.NodeTitleEditor",
       nodeCreated(node3) {
@@ -87032,24 +81393,7 @@ const _sfc_main$q = /* @__PURE__ */ defineComponent({
           if (!settingStore.get("Comfy.Node.DoubleClickTitleToEdit")) {
             return;
           }
-          currentNode.value = this;
-          editedTitle.value = this.title;
-          showInput.value = true;
-          const isCollapsed = node3.flags?.collapsed;
-          const [x1, y1, x2, y2] = this.getBounding();
-          const [nodeWidth, nodeHeight] = this.size;
-          const canvasWidth = (
-            // @ts-expect-error Remove after collapsed_width is exposed in LiteGraph
-            isCollapsed && node3._collapsed_width ? node3._collapsed_width : nodeWidth
-          );
-          const canvasHeight = LiteGraph.NODE_TITLE_HEIGHT;
-          const [left, top] = app$1.canvasPosToClientPos([x1, y1]);
-          inputStyle.value.left = `${left}px`;
-          inputStyle.value.top = `${top}px`;
-          const width2 = canvasWidth * app$1.canvas.ds.scale;
-          const height = canvasHeight * app$1.canvas.ds.scale;
-          inputStyle.value.width = `${width2}px`;
-          inputStyle.value.height = `${height}px`;
+          titleEditorStore.titleEditorTarget = this;
           if (typeof originalCallback === "function") {
             originalCallback.call(this, e, ...args);
           }
@@ -87057,12 +81401,16 @@ const _sfc_main$q = /* @__PURE__ */ defineComponent({
       }
     };
     onMounted(() => {
+      document.addEventListener("litegraph:canvas", canvasEventHandler);
       app$1.registerExtension(extension);
+    });
+    onUnmounted(() => {
+      document.removeEventListener("litegraph:canvas", canvasEventHandler);
     });
     return (_ctx, _cache) => {
       return showInput.value ? (openBlock(), createElementBlock("div", {
         key: 0,
-        class: "node-title-editor",
+        class: "group-title-editor node-title-editor",
         style: normalizeStyle(inputStyle.value)
       }, [
         createVNode(EditableText, {
@@ -87074,7 +81422,7 @@ const _sfc_main$q = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const NodeTitleEditor = /* @__PURE__ */ _export_sfc(_sfc_main$q, [["__scopeId", "data-v-77799b26"]]);
+const TitleEditor = /* @__PURE__ */ _export_sfc(_sfc_main$u, [["__scopeId", "data-v-f0cbabc5"]]);
 var theme$e = /* @__PURE__ */ __name(function theme23(_ref) {
   var dt3 = _ref.dt;
   return "\n.p-overlaybadge {\n    position: relative;\n}\n\n.p-overlaybadge .p-badge {\n    position: absolute;\n    top: 0;\n    right: 0;\n    transform: translate(50%, -50%);\n    transform-origin: 100% 0;\n    margin: 0;\n    outline-width: ".concat(dt3("overlaybadge.outline.width"), ";\n    outline-style: solid;\n    outline-color: ").concat(dt3("overlaybadge.outline.color"), ";\n}\n");
@@ -87116,7 +81464,7 @@ function render$p(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render$p, "render$p");
 script$q.render = render$p;
-const _sfc_main$p = /* @__PURE__ */ defineComponent({
+const _sfc_main$t = /* @__PURE__ */ defineComponent({
   __name: "SidebarIcon",
   props: {
     icon: String,
@@ -87175,8 +81523,8 @@ const _sfc_main$p = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const SidebarIcon = /* @__PURE__ */ _export_sfc(_sfc_main$p, [["__scopeId", "data-v-4f2f01b3"]]);
-const _sfc_main$o = /* @__PURE__ */ defineComponent({
+const SidebarIcon = /* @__PURE__ */ _export_sfc(_sfc_main$t, [["__scopeId", "data-v-4f2f01b3"]]);
+const _sfc_main$s = /* @__PURE__ */ defineComponent({
   __name: "SidebarThemeToggleIcon",
   setup(__props) {
     const previousDarkTheme = ref("dark");
@@ -87201,7 +81549,7 @@ const _sfc_main$o = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_main$n = /* @__PURE__ */ defineComponent({
+const _sfc_main$r = /* @__PURE__ */ defineComponent({
   __name: "SidebarSettingsToggleIcon",
   setup(__props) {
     const dialogStore = useDialogStore();
@@ -87226,7 +81574,7 @@ const _hoisted_2$q = {
   key: 0,
   class: "sidebar-content-container"
 };
-const _sfc_main$m = /* @__PURE__ */ defineComponent({
+const _sfc_main$q = /* @__PURE__ */ defineComponent({
   __name: "SideToolbar",
   setup(__props) {
     const workspaceStore = useWorkspaceStore();
@@ -87275,8 +81623,8 @@ const _sfc_main$m = /* @__PURE__ */ defineComponent({
               }, null, 8, ["icon", "iconBadge", "tooltip", "selected", "class", "onClick"]);
             }), 128)),
             createBaseVNode("div", _hoisted_1$A, [
-              createVNode(_sfc_main$o),
-              createVNode(_sfc_main$n)
+              createVNode(_sfc_main$s),
+              createVNode(_sfc_main$r)
             ])
           ], 2)
         ], 8, ["to"])),
@@ -87296,7 +81644,7 @@ const _sfc_main$m = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const SideToolbar = /* @__PURE__ */ _export_sfc(_sfc_main$m, [["__scopeId", "data-v-ed7a1148"]]);
+const SideToolbar = /* @__PURE__ */ _export_sfc(_sfc_main$q, [["__scopeId", "data-v-ed7a1148"]]);
 var theme$d = /* @__PURE__ */ __name(function theme24(_ref) {
   var dt3 = _ref.dt;
   return "\n.p-splitter {\n    display: flex;\n    flex-wrap: nowrap;\n    border: 1px solid ".concat(dt3("splitter.border.color"), ";\n    background: ").concat(dt3("splitter.background"), ";\n    border-radius: ").concat(dt3("border.radius.md"), ";\n    color: ").concat(dt3("splitter.color"), ";\n}\n\n.p-splitter-vertical {\n    flex-direction: column;\n}\n\n.p-splitter-gutter {\n    flex-grow: 0;\n    flex-shrink: 0;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    z-index: 1;\n    background: ").concat(dt3("splitter.gutter.background"), ";\n}\n\n.p-splitter-gutter-handle {\n    border-radius: ").concat(dt3("splitter.handle.border.radius"), ";\n    background: ").concat(dt3("splitter.handle.background"), ";\n    transition: outline-color ").concat(dt3("splitter.transition.duration"), ", box-shadow ").concat(dt3("splitter.transition.duration"), ";\n    outline-color: transparent;\n}\n\n.p-splitter-gutter-handle:focus-visible {\n    box-shadow: ").concat(dt3("splitter.handle.focus.ring.shadow"), ";\n    outline: ").concat(dt3("splitter.handle.focus.ring.width"), " ").concat(dt3("splitter.handle.focus.ring.style"), " ").concat(dt3("splitter.handle.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("splitter.handle.focus.ring.offset"), ";\n}\n\n.p-splitter-horizontal.p-splitter-resizing {\n    cursor: col-resize;\n    user-select: none;\n}\n\n.p-splitter-vertical.p-splitter-resizing {\n    cursor: row-resize;\n    user-select: none;\n}\n\n.p-splitter-horizontal > .p-splitter-gutter > .p-splitter-gutter-handle {\n    height: ").concat(dt3("splitter.handle.size"), ";\n    width: 100%;\n}\n\n.p-splitter-vertical > .p-splitter-gutter > .p-splitter-gutter-handle {\n    width: ").concat(dt3("splitter.handle.size"), ";\n    height: 100%;\n}\n\n.p-splitter-horizontal > .p-splitter-gutter {\n    cursor: col-resize;\n}\n\n.p-splitter-vertical > .p-splitter-gutter {\n    cursor: row-resize;\n}\n\n.p-splitterpanel {\n    flex-grow: 1;\n    overflow: hidden;\n}\n\n.p-splitterpanel-nested {\n    display: flex;\n}\n\n.p-splitterpanel .p-splitter {\n    flex-grow: 1;\n    border: 0 none;\n}\n");
@@ -87851,7 +82199,7 @@ __name(render$n, "render$n");
 script$o.render = render$n;
 const _withScopeId$b = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-edca8328"), n = n(), popScopeId(), n), "_withScopeId$b");
 const _hoisted_1$y = /* @__PURE__ */ _withScopeId$b(() => /* @__PURE__ */ createBaseVNode("div", null, null, -1));
-const _sfc_main$l = /* @__PURE__ */ defineComponent({
+const _sfc_main$p = /* @__PURE__ */ defineComponent({
   __name: "LiteGraphCanvasSplitterOverlay",
   setup(__props) {
     const settingStore = useSettingStore();
@@ -87911,7 +82259,7 @@ const _sfc_main$l = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const LiteGraphCanvasSplitterOverlay = /* @__PURE__ */ _export_sfc(_sfc_main$l, [["__scopeId", "data-v-edca8328"]]);
+const LiteGraphCanvasSplitterOverlay = /* @__PURE__ */ _export_sfc(_sfc_main$p, [["__scopeId", "data-v-edca8328"]]);
 var theme$c = /* @__PURE__ */ __name(function theme25(_ref) {
   var dt3 = _ref.dt;
   return "\n.p-autocomplete {\n    display: inline-flex;\n}\n\n.p-autocomplete-loader {\n    position: absolute;\n    top: 50%;\n    margin-top: -0.5rem;\n    right: ".concat(dt3("autocomplete.padding.x"), ";\n}\n\n.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-loader {\n    right: calc(").concat(dt3("autocomplete.dropdown.width"), " + ").concat(dt3("autocomplete.padding.x"), ");\n}\n\n.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-input {\n    flex: 1 1 auto;\n    width: 1%;\n}\n\n.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-input,\n.p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-input-multiple {\n    border-top-right-radius: 0;\n    border-bottom-right-radius: 0;\n}\n\n.p-autocomplete-dropdown {\n    cursor: pointer;\n    display: inline-flex;\n    cursor: pointer;\n    user-select: none;\n    align-items: center;\n    justify-content: center;\n    overflow: hidden;\n    position: relative;\n    width: ").concat(dt3("autocomplete.dropdown.width"), ";\n    border-top-right-radius: ").concat(dt3("autocomplete.dropdown.border.radius"), ";\n    border-bottom-right-radius: ").concat(dt3("autocomplete.dropdown.border.radius"), ";\n    background: ").concat(dt3("autocomplete.dropdown.background"), ";\n    border: 1px solid ").concat(dt3("autocomplete.dropdown.border.color"), ";\n    border-left: 0 none;\n    color: ").concat(dt3("autocomplete.dropdown.color"), ";\n    transition: background ").concat(dt3("autocomplete.transition.duration"), ", color ").concat(dt3("autocomplete.transition.duration"), ", border-color ").concat(dt3("autocomplete.transition.duration"), ", outline-color ").concat(dt3("autocomplete.transition.duration"), ", box-shadow ").concat(dt3("autocomplete.transition.duration"), ";\n    outline-color: transparent;\n}\n\n.p-autocomplete-dropdown:not(:disabled):hover {\n    background: ").concat(dt3("autocomplete.dropdown.hover.background"), ";\n    border-color: ").concat(dt3("autocomplete.dropdown.hover.border.color"), ";\n    color: ").concat(dt3("autocomplete.dropdown.hover.color"), ";\n}\n\n.p-autocomplete-dropdown:not(:disabled):active {\n    background: ").concat(dt3("autocomplete.dropdown.active.background"), ";\n    border-color: ").concat(dt3("autocomplete.dropdown.active.border.color"), ";\n    color: ").concat(dt3("autocomplete.dropdown.active.color"), ";\n}\n\n.p-autocomplete-dropdown:focus-visible {\n    box-shadow: ").concat(dt3("autocomplete.dropdown.focus.ring.shadow"), ";\n    outline: ").concat(dt3("autocomplete.dropdown.focus.ring.width"), " ").concat(dt3("autocomplete.dropdown.focus.ring.style"), " ").concat(dt3("autocomplete.dropdown.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("autocomplete.dropdown.focus.ring.offset"), ";\n}\n\n.p-autocomplete .p-autocomplete-overlay {\n    min-width: 100%;\n}\n\n.p-autocomplete-overlay {\n    position: absolute;\n    overflow: auto;\n    top: 0;\n    left: 0;\n    background: ").concat(dt3("autocomplete.overlay.background"), ";\n    color: ").concat(dt3("autocomplete.overlay.color"), ";\n    border: 1px solid ").concat(dt3("autocomplete.overlay.border.color"), ";\n    border-radius: ").concat(dt3("autocomplete.overlay.border.radius"), ";\n    box-shadow: ").concat(dt3("autocomplete.overlay.shadow"), ";\n}\n\n.p-autocomplete-list {\n    margin: 0;\n    padding: 0;\n    list-style-type: none;\n    display: flex;\n    flex-direction: column;\n    gap: ").concat(dt3("autocomplete.list.gap"), ";\n    padding: ").concat(dt3("autocomplete.list.padding"), ";\n}\n\n.p-autocomplete-option {\n    cursor: pointer;\n    white-space: nowrap;\n    position: relative;\n    overflow: hidden;\n    display: flex;\n    align-items: center;\n    padding: ").concat(dt3("autocomplete.option.padding"), ";\n    border: 0 none;\n    color: ").concat(dt3("autocomplete.option.color"), ";\n    background: transparent;\n    transition: background ").concat(dt3("autocomplete.transition.duration"), ", color ").concat(dt3("autocomplete.transition.duration"), ", border-color ").concat(dt3("autocomplete.transition.duration"), ";\n    border-radius: ").concat(dt3("autocomplete.option.border.radius"), ";\n}\n\n.p-autocomplete-option:not(.p-autocomplete-option-selected):not(.p-disabled).p-focus {\n    background: ").concat(dt3("autocomplete.option.focus.background"), ";\n    color: ").concat(dt3("autocomplete.option.focus.color"), ";\n}\n\n.p-autocomplete-option-selected {\n    background: ").concat(dt3("autocomplete.option.selected.background"), ";\n    color: ").concat(dt3("autocomplete.option.selected.color"), ";\n}\n\n.p-autocomplete-option-selected.p-focus {\n    background: ").concat(dt3("autocomplete.option.selected.focus.background"), ";\n    color: ").concat(dt3("autocomplete.option.selected.focus.color"), ";\n}\n\n.p-autocomplete-option-group {\n    margin: 0;\n    padding: ").concat(dt3("autocomplete.option.group.padding"), ";\n    color: ").concat(dt3("autocomplete.option.group.color"), ";\n    background: ").concat(dt3("autocomplete.option.group.background"), ";\n    font-weight: ").concat(dt3("autocomplete.option.group.font.weight"), ";\n}\n\n.p-autocomplete-input-multiple {\n    margin: 0;\n    list-style-type: none;\n    cursor: text;\n    overflow: hidden;\n    display: flex;\n    align-items: center;\n    flex-wrap: wrap;\n    padding: calc(").concat(dt3("autocomplete.padding.y"), " / 2) ").concat(dt3("autocomplete.padding.x"), ";\n    gap: calc(").concat(dt3("autocomplete.padding.y"), " / 2);\n    color: ").concat(dt3("autocomplete.color"), ";\n    background: ").concat(dt3("autocomplete.background"), ";\n    border: 1px solid ").concat(dt3("autocomplete.border.color"), ";\n    border-radius: ").concat(dt3("autocomplete.border.radius"), ";\n    width: 100%;\n    transition: background ").concat(dt3("autocomplete.transition.duration"), ", color ").concat(dt3("autocomplete.transition.duration"), ", border-color ").concat(dt3("autocomplete.transition.duration"), ", outline-color ").concat(dt3("autocomplete.transition.duration"), ", box-shadow ").concat(dt3("autocomplete.transition.duration"), ";\n    outline-color: transparent;\n    box-shadow: ").concat(dt3("autocomplete.shadow"), ";\n}\n\n.p-autocomplete:not(.p-disabled):hover .p-autocomplete-input-multiple {\n    border-color: ").concat(dt3("autocomplete.hover.border.color"), ";\n}\n\n.p-autocomplete:not(.p-disabled).p-focus .p-autocomplete-input-multiple {\n    border-color: ").concat(dt3("autocomplete.focus.border.color"), ";\n    box-shadow: ").concat(dt3("autocomplete.focus.ring.shadow"), ";\n    outline: ").concat(dt3("autocomplete.focus.ring.width"), " ").concat(dt3("autocomplete.focus.ring.style"), " ").concat(dt3("autocomplete.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("autocomplete.focus.ring.offset"), ";\n}\n\n.p-autocomplete.p-invalid .p-autocomplete-input-multiple {\n    border-color: ").concat(dt3("autocomplete.invalid.border.color"), ";\n}\n\n.p-variant-filled.p-autocomplete-input-multiple {\n    background: ").concat(dt3("autocomplete.filled.background"), ";\n}\n\n.p-autocomplete:not(.p-disabled).p-focus .p-variant-filled.p-autocomplete-input-multiple  {\n    background: ").concat(dt3("autocomplete.filled.focus.background"), ";\n}\n\n.p-autocomplete.p-disabled .p-autocomplete-input-multiple {\n    opacity: 1;\n    background: ").concat(dt3("autocomplete.disabled.background"), ";\n    color: ").concat(dt3("autocomplete.disabled.color"), ";\n}\n\n.p-autocomplete-chip.p-chip {\n    padding-top: calc(").concat(dt3("autocomplete.padding.y"), " / 2);\n    padding-bottom: calc(").concat(dt3("autocomplete.padding.y"), " / 2);\n    border-radius: ").concat(dt3("autocomplete.chip.border.radius"), ";\n}\n\n.p-autocomplete-input-multiple:has(.p-autocomplete-chip) {\n    padding-left: calc(").concat(dt3("autocomplete.padding.y"), " / 2);\n    padding-right: calc(").concat(dt3("autocomplete.padding.y"), " / 2);\n}\n\n.p-autocomplete-chip-item.p-focus .p-autocomplete-chip {\n    background: ").concat(dt3("inputchips.chip.focus.background"), ";\n    color: ").concat(dt3("inputchips.chip.focus.color"), ";\n}\n\n.p-autocomplete-input-chip {\n    flex: 1 1 auto;\n    display: inline-flex;\n    padding-top: calc(").concat(dt3("autocomplete.padding.y"), " / 2);\n    padding-bottom: calc(").concat(dt3("autocomplete.padding.y"), " / 2);\n}\n\n.p-autocomplete-input-chip input {\n    border: 0 none;\n    outline: 0 none;\n    background: transparent;\n    margin: 0;\n    padding: 0;\n    box-shadow: none;\n    border-radius: 0;\n    width: 100%;\n    font-family: inherit;\n    font-feature-settings: inherit;\n    font-size: 1rem;\n    color: inherit;\n}\n\n.p-autocomplete-input-chip input::placeholder {\n    color: ").concat(dt3("autocomplete.placeholder.color"), ";\n}\n\n.p-autocomplete-empty-message {\n    padding: ").concat(dt3("autocomplete.empty.message.padding"), ";\n}\n\n.p-autocomplete-fluid {\n    display: flex;\n}\n\n.p-autocomplete-fluid:has(.p-autocomplete-dropdown) .p-autocomplete-input {\n    width: 1%;\n}\n");
@@ -89024,7 +83372,7 @@ function _toPrimitive$7(t, r) {
 __name(_toPrimitive$7, "_toPrimitive$7");
 var _hoisted_1$x = ["aria-activedescendant"];
 var _hoisted_2$o = ["id", "aria-label", "aria-setsize", "aria-posinset"];
-var _hoisted_3$b = ["id", "placeholder", "tabindex", "disabled", "aria-label", "aria-labelledby", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-invalid"];
+var _hoisted_3$c = ["id", "placeholder", "tabindex", "disabled", "aria-label", "aria-labelledby", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-invalid"];
 var _hoisted_4$8 = ["disabled", "aria-expanded", "aria-controls"];
 var _hoisted_5$6 = ["id"];
 var _hoisted_6$5 = ["id", "aria-label"];
@@ -89172,7 +83520,7 @@ function render$m(_ctx, _cache, $props, $setup, $data, $options) {
     onChange: _cache[4] || (_cache[4] = function() {
       return $options.onChange && $options.onChange.apply($options, arguments);
     })
-  }, _ctx.ptm("input")), null, 16, _hoisted_3$b)], 16)], 16, _hoisted_1$x)) : createCommentVNode("", true), $data.searching || _ctx.loading ? renderSlot(_ctx.$slots, _ctx.$slots.loader ? "loader" : "loadingicon", {
+  }, _ctx.ptm("input")), null, 16, _hoisted_3$c)], 16)], 16, _hoisted_1$x)) : createCommentVNode("", true), $data.searching || _ctx.loading ? renderSlot(_ctx.$slots, _ctx.$slots.loader ? "loader" : "loadingicon", {
     key: 2,
     "class": normalizeClass(_ctx.cx("loader"))
   }, function() {
@@ -89354,7 +83702,7 @@ function render$m(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render$m, "render$m");
 script$n.render = render$m;
-const _sfc_main$k = {
+const _sfc_main$o = {
   name: "AutoCompletePlus",
   extends: script$n,
   emits: ["focused-option-changed"],
@@ -90659,7 +85007,7 @@ script$i.render = render$h;
 const _withScopeId$a = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-def4f809"), n = n(), popScopeId(), n), "_withScopeId$a");
 const _hoisted_1$r = { class: "_content" };
 const _hoisted_2$k = { class: "_footer" };
-const _sfc_main$j = /* @__PURE__ */ defineComponent({
+const _sfc_main$n = /* @__PURE__ */ defineComponent({
   __name: "NodeSearchFilter",
   emits: ["addFilter"],
   setup(__props, { emit: __emit }) {
@@ -90714,8 +85062,8 @@ const _sfc_main$j = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const NodeSearchFilter = /* @__PURE__ */ _export_sfc(_sfc_main$j, [["__scopeId", "data-v-def4f809"]]);
-const _sfc_main$i = /* @__PURE__ */ defineComponent({
+const NodeSearchFilter = /* @__PURE__ */ _export_sfc(_sfc_main$n, [["__scopeId", "data-v-def4f809"]]);
+const _sfc_main$m = /* @__PURE__ */ defineComponent({
   __name: "NodeSourceChip",
   props: {
     python_module: {
@@ -90738,19 +85086,19 @@ const _sfc_main$i = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const NodeSourceChip = /* @__PURE__ */ _export_sfc(_sfc_main$i, [["__scopeId", "data-v-b0730aa8"]]);
+const NodeSourceChip = /* @__PURE__ */ _export_sfc(_sfc_main$m, [["__scopeId", "data-v-b0730aa8"]]);
 const _withScopeId$9 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-cbec679a"), n = n(), popScopeId(), n), "_withScopeId$9");
 const _hoisted_1$q = { class: "_sb_node_preview" };
 const _hoisted_2$j = { class: "_sb_table" };
-const _hoisted_3$a = { class: "node_header" };
+const _hoisted_3$b = { class: "node_header" };
 const _hoisted_4$7 = /* @__PURE__ */ _withScopeId$9(() => /* @__PURE__ */ createBaseVNode("div", { class: "_sb_dot headdot" }, null, -1));
 const _hoisted_5$5 = /* @__PURE__ */ _withScopeId$9(() => /* @__PURE__ */ createBaseVNode("div", { class: "_sb_preview_badge" }, "PREVIEW", -1));
 const _hoisted_6$4 = { class: "_sb_col" };
 const _hoisted_7$3 = { class: "_sb_col" };
 const _hoisted_8$2 = /* @__PURE__ */ _withScopeId$9(() => /* @__PURE__ */ createBaseVNode("div", { class: "_sb_col middle-column" }, null, -1));
 const _hoisted_9$2 = { class: "_sb_col _sb_inherit" };
-const _hoisted_10$1 = { class: "_sb_col" };
-const _hoisted_11$1 = /* @__PURE__ */ _withScopeId$9(() => /* @__PURE__ */ createBaseVNode("div", { class: "_sb_col _sb_arrow" }, "◀", -1));
+const _hoisted_10$2 = { class: "_sb_col" };
+const _hoisted_11$2 = /* @__PURE__ */ _withScopeId$9(() => /* @__PURE__ */ createBaseVNode("div", { class: "_sb_col _sb_arrow" }, "◀", -1));
 const _hoisted_12$1 = { class: "_sb_col" };
 const _hoisted_13 = /* @__PURE__ */ _withScopeId$9(() => /* @__PURE__ */ createBaseVNode("div", { class: "_sb_col middle-column" }, null, -1));
 const _hoisted_14 = { class: "_sb_col _sb_inherit" };
@@ -90759,7 +85107,7 @@ const _hoisted_16 = {
   key: 0,
   class: "_sb_description"
 };
-const _sfc_main$h = /* @__PURE__ */ defineComponent({
+const _sfc_main$l = /* @__PURE__ */ defineComponent({
   __name: "NodePreview",
   props: {
     nodeDef: {
@@ -90795,7 +85143,7 @@ const _sfc_main$h = /* @__PURE__ */ defineComponent({
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock("div", _hoisted_1$q, [
         createBaseVNode("div", _hoisted_2$j, [
-          createBaseVNode("div", _hoisted_3$a, [
+          createBaseVNode("div", _hoisted_3$b, [
             _hoisted_4$7,
             createTextVNode(" " + toDisplayString$1(unref(nodeDef).display_name), 1)
           ]),
@@ -90814,7 +85162,7 @@ const _sfc_main$h = /* @__PURE__ */ defineComponent({
               createBaseVNode("div", _hoisted_7$3, toDisplayString$1(slotInput ? slotInput.name : ""), 1),
               _hoisted_8$2,
               createBaseVNode("div", _hoisted_9$2, toDisplayString$1(slotOutput ? slotOutput.name : ""), 1),
-              createBaseVNode("div", _hoisted_10$1, [
+              createBaseVNode("div", _hoisted_10$2, [
                 slotOutput ? (openBlock(), createElementBlock("div", {
                   key: 0,
                   class: normalizeClass(["_sb_dot", slotOutput.type])
@@ -90827,7 +85175,7 @@ const _sfc_main$h = /* @__PURE__ */ defineComponent({
               class: "_sb_row _long_field",
               key: widgetInput.name
             }, [
-              _hoisted_11$1,
+              _hoisted_11$2,
               createBaseVNode("div", _hoisted_12$1, toDisplayString$1(widgetInput.name), 1),
               _hoisted_13,
               createBaseVNode("div", _hoisted_14, toDisplayString$1(truncateDefaultValue(widgetInput.default)), 1),
@@ -90840,33 +85188,6057 @@ const _sfc_main$h = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const NodePreview = /* @__PURE__ */ _export_sfc(_sfc_main$h, [["__scopeId", "data-v-cbec679a"]]);
-const _withScopeId$8 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-077af1a9"), n = n(), popScopeId(), n), "_withScopeId$8");
+const NodePreview = /* @__PURE__ */ _export_sfc(_sfc_main$l, [["__scopeId", "data-v-cbec679a"]]);
+/*!
+  * shared v9.13.1
+  * (c) 2024 kazuya kawaguchi
+  * Released under the MIT License.
+  */
+const inBrowser = typeof window !== "undefined";
+let mark;
+let measure;
+if (false) {
+  const perf2 = inBrowser && window.performance;
+  if (perf2 && perf2.mark && perf2.measure && perf2.clearMarks && // @ts-ignore browser compat
+  perf2.clearMeasures) {
+    mark = /* @__PURE__ */ __name((tag) => {
+      perf2.mark(tag);
+    }, "mark");
+    measure = /* @__PURE__ */ __name((name, startTag, endTag) => {
+      perf2.measure(name, startTag, endTag);
+      perf2.clearMarks(startTag);
+      perf2.clearMarks(endTag);
+    }, "measure");
+  }
+}
+const RE_ARGS$1 = /\{([0-9a-zA-Z]+)\}/g;
+function format$2(message3, ...args) {
+  if (args.length === 1 && isObject$1(args[0])) {
+    args = args[0];
+  }
+  if (!args || !args.hasOwnProperty) {
+    args = {};
+  }
+  return message3.replace(RE_ARGS$1, (match, identifier) => {
+    return args.hasOwnProperty(identifier) ? args[identifier] : "";
+  });
+}
+__name(format$2, "format$2");
+const makeSymbol = /* @__PURE__ */ __name((name, shareable = false) => !shareable ? Symbol(name) : Symbol.for(name), "makeSymbol");
+const generateFormatCacheKey = /* @__PURE__ */ __name((locale2, key, source) => friendlyJSONstringify({ l: locale2, k: key, s: source }), "generateFormatCacheKey");
+const friendlyJSONstringify = /* @__PURE__ */ __name((json) => JSON.stringify(json).replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029").replace(/\u0027/g, "\\u0027"), "friendlyJSONstringify");
+const isNumber = /* @__PURE__ */ __name((val) => typeof val === "number" && isFinite(val), "isNumber");
+const isDate = /* @__PURE__ */ __name((val) => toTypeString(val) === "[object Date]", "isDate");
+const isRegExp = /* @__PURE__ */ __name((val) => toTypeString(val) === "[object RegExp]", "isRegExp");
+const isEmptyObject = /* @__PURE__ */ __name((val) => isPlainObject(val) && Object.keys(val).length === 0, "isEmptyObject");
+const assign$1 = Object.assign;
+let _globalThis;
+const getGlobalThis = /* @__PURE__ */ __name(() => {
+  return _globalThis || (_globalThis = typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {});
+}, "getGlobalThis");
+function escapeHtml(rawText) {
+  return rawText.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+}
+__name(escapeHtml, "escapeHtml");
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+function hasOwn(obj, key) {
+  return hasOwnProperty.call(obj, key);
+}
+__name(hasOwn, "hasOwn");
+const isArray = Array.isArray;
+const isFunction$1 = /* @__PURE__ */ __name((val) => typeof val === "function", "isFunction$1");
+const isString$1 = /* @__PURE__ */ __name((val) => typeof val === "string", "isString$1");
+const isBoolean = /* @__PURE__ */ __name((val) => typeof val === "boolean", "isBoolean");
+const isSymbol = /* @__PURE__ */ __name((val) => typeof val === "symbol", "isSymbol");
+const isObject$1 = /* @__PURE__ */ __name((val) => val !== null && typeof val === "object", "isObject$1");
+const isPromise = /* @__PURE__ */ __name((val) => {
+  return isObject$1(val) && isFunction$1(val.then) && isFunction$1(val.catch);
+}, "isPromise");
+const objectToString = Object.prototype.toString;
+const toTypeString = /* @__PURE__ */ __name((value3) => objectToString.call(value3), "toTypeString");
+const isPlainObject = /* @__PURE__ */ __name((val) => {
+  if (!isObject$1(val))
+    return false;
+  const proto = Object.getPrototypeOf(val);
+  return proto === null || proto.constructor === Object;
+}, "isPlainObject");
+const toDisplayString = /* @__PURE__ */ __name((val) => {
+  return val == null ? "" : isArray(val) || isPlainObject(val) && val.toString === objectToString ? JSON.stringify(val, null, 2) : String(val);
+}, "toDisplayString");
+function join$1(items2, separator = "") {
+  return items2.reduce((str, item2, index2) => index2 === 0 ? str + item2 : str + separator + item2, "");
+}
+__name(join$1, "join$1");
+const RANGE = 2;
+function generateCodeFrame(source, start2 = 0, end = source.length) {
+  const lines = source.split(/\r?\n/);
+  let count = 0;
+  const res = [];
+  for (let i2 = 0; i2 < lines.length; i2++) {
+    count += lines[i2].length + 1;
+    if (count >= start2) {
+      for (let j = i2 - RANGE; j <= i2 + RANGE || end > count; j++) {
+        if (j < 0 || j >= lines.length)
+          continue;
+        const line = j + 1;
+        res.push(`${line}${" ".repeat(3 - String(line).length)}|  ${lines[j]}`);
+        const lineLength = lines[j].length;
+        if (j === i2) {
+          const pad = start2 - (count - lineLength) + 1;
+          const length = Math.max(1, end > count ? lineLength - pad : end - start2);
+          res.push(`   |  ` + " ".repeat(pad) + "^".repeat(length));
+        } else if (j > i2) {
+          if (end > count) {
+            const length = Math.max(Math.min(end - count, lineLength), 1);
+            res.push(`   |  ` + "^".repeat(length));
+          }
+          count += lineLength + 1;
+        }
+      }
+      break;
+    }
+  }
+  return res.join("\n");
+}
+__name(generateCodeFrame, "generateCodeFrame");
+function incrementer(code2) {
+  let current = code2;
+  return () => ++current;
+}
+__name(incrementer, "incrementer");
+function warn(msg, err) {
+  if (typeof console !== "undefined") {
+    console.warn(`[intlify] ` + msg);
+    if (err) {
+      console.warn(err.stack);
+    }
+  }
+}
+__name(warn, "warn");
+const hasWarned = {};
+function warnOnce(msg) {
+  if (!hasWarned[msg]) {
+    hasWarned[msg] = true;
+    warn(msg);
+  }
+}
+__name(warnOnce, "warnOnce");
+function createEmitter() {
+  const events2 = /* @__PURE__ */ new Map();
+  const emitter = {
+    events: events2,
+    on(event2, handler6) {
+      const handlers2 = events2.get(event2);
+      const added = handlers2 && handlers2.push(handler6);
+      if (!added) {
+        events2.set(event2, [handler6]);
+      }
+    },
+    off(event2, handler6) {
+      const handlers2 = events2.get(event2);
+      if (handlers2) {
+        handlers2.splice(handlers2.indexOf(handler6) >>> 0, 1);
+      }
+    },
+    emit(event2, payload) {
+      (events2.get(event2) || []).slice().map((handler6) => handler6(payload));
+      (events2.get("*") || []).slice().map((handler6) => handler6(event2, payload));
+    }
+  };
+  return emitter;
+}
+__name(createEmitter, "createEmitter");
+const isNotObjectOrIsArray = /* @__PURE__ */ __name((val) => !isObject$1(val) || isArray(val), "isNotObjectOrIsArray");
+function deepCopy(src, des) {
+  if (isNotObjectOrIsArray(src) || isNotObjectOrIsArray(des)) {
+    throw new Error("Invalid value");
+  }
+  const stack2 = [{ src, des }];
+  while (stack2.length) {
+    const { src: src2, des: des2 } = stack2.pop();
+    Object.keys(src2).forEach((key) => {
+      if (isNotObjectOrIsArray(src2[key]) || isNotObjectOrIsArray(des2[key])) {
+        des2[key] = src2[key];
+      } else {
+        stack2.push({ src: src2[key], des: des2[key] });
+      }
+    });
+  }
+}
+__name(deepCopy, "deepCopy");
+/*!
+  * message-compiler v9.13.1
+  * (c) 2024 kazuya kawaguchi
+  * Released under the MIT License.
+  */
+const LOCATION_STUB = {
+  start: { line: 1, column: 1, offset: 0 },
+  end: { line: 1, column: 1, offset: 0 }
+};
+function createPosition(line, column, offset) {
+  return { line, column, offset };
+}
+__name(createPosition, "createPosition");
+function createLocation(start2, end, source) {
+  const loc = { start: start2, end };
+  if (source != null) {
+    loc.source = source;
+  }
+  return loc;
+}
+__name(createLocation, "createLocation");
+const RE_ARGS = /\{([0-9a-zA-Z]+)\}/g;
+function format$1(message3, ...args) {
+  if (args.length === 1 && isObject(args[0])) {
+    args = args[0];
+  }
+  if (!args || !args.hasOwnProperty) {
+    args = {};
+  }
+  return message3.replace(RE_ARGS, (match, identifier) => {
+    return args.hasOwnProperty(identifier) ? args[identifier] : "";
+  });
+}
+__name(format$1, "format$1");
+const assign = Object.assign;
+const isString = /* @__PURE__ */ __name((val) => typeof val === "string", "isString");
+const isObject = /* @__PURE__ */ __name((val) => val !== null && typeof val === "object", "isObject");
+function join(items2, separator = "") {
+  return items2.reduce((str, item2, index2) => index2 === 0 ? str + item2 : str + separator + item2, "");
+}
+__name(join, "join");
+const CompileWarnCodes = {
+  USE_MODULO_SYNTAX: 1,
+  __EXTEND_POINT__: 2
+};
+const warnMessages$2 = {
+  [CompileWarnCodes.USE_MODULO_SYNTAX]: `Use modulo before '{{0}}'.`
+};
+function createCompileWarn(code2, loc, ...args) {
+  const msg = format$1(warnMessages$2[code2] || "", ...args || []);
+  const message3 = { message: String(msg), code: code2 };
+  if (loc) {
+    message3.location = loc;
+  }
+  return message3;
+}
+__name(createCompileWarn, "createCompileWarn");
+const CompileErrorCodes = {
+  // tokenizer error codes
+  EXPECTED_TOKEN: 1,
+  INVALID_TOKEN_IN_PLACEHOLDER: 2,
+  UNTERMINATED_SINGLE_QUOTE_IN_PLACEHOLDER: 3,
+  UNKNOWN_ESCAPE_SEQUENCE: 4,
+  INVALID_UNICODE_ESCAPE_SEQUENCE: 5,
+  UNBALANCED_CLOSING_BRACE: 6,
+  UNTERMINATED_CLOSING_BRACE: 7,
+  EMPTY_PLACEHOLDER: 8,
+  NOT_ALLOW_NEST_PLACEHOLDER: 9,
+  INVALID_LINKED_FORMAT: 10,
+  // parser error codes
+  MUST_HAVE_MESSAGES_IN_PLURAL: 11,
+  UNEXPECTED_EMPTY_LINKED_MODIFIER: 12,
+  UNEXPECTED_EMPTY_LINKED_KEY: 13,
+  UNEXPECTED_LEXICAL_ANALYSIS: 14,
+  // generator error codes
+  UNHANDLED_CODEGEN_NODE_TYPE: 15,
+  // minifier error codes
+  UNHANDLED_MINIFIER_NODE_TYPE: 16,
+  // Special value for higher-order compilers to pick up the last code
+  // to avoid collision of error codes. This should always be kept as the last
+  // item.
+  __EXTEND_POINT__: 17
+};
+const errorMessages$2 = {
+  // tokenizer error messages
+  [CompileErrorCodes.EXPECTED_TOKEN]: `Expected token: '{0}'`,
+  [CompileErrorCodes.INVALID_TOKEN_IN_PLACEHOLDER]: `Invalid token in placeholder: '{0}'`,
+  [CompileErrorCodes.UNTERMINATED_SINGLE_QUOTE_IN_PLACEHOLDER]: `Unterminated single quote in placeholder`,
+  [CompileErrorCodes.UNKNOWN_ESCAPE_SEQUENCE]: `Unknown escape sequence: \\{0}`,
+  [CompileErrorCodes.INVALID_UNICODE_ESCAPE_SEQUENCE]: `Invalid unicode escape sequence: {0}`,
+  [CompileErrorCodes.UNBALANCED_CLOSING_BRACE]: `Unbalanced closing brace`,
+  [CompileErrorCodes.UNTERMINATED_CLOSING_BRACE]: `Unterminated closing brace`,
+  [CompileErrorCodes.EMPTY_PLACEHOLDER]: `Empty placeholder`,
+  [CompileErrorCodes.NOT_ALLOW_NEST_PLACEHOLDER]: `Not allowed nest placeholder`,
+  [CompileErrorCodes.INVALID_LINKED_FORMAT]: `Invalid linked format`,
+  // parser error messages
+  [CompileErrorCodes.MUST_HAVE_MESSAGES_IN_PLURAL]: `Plural must have messages`,
+  [CompileErrorCodes.UNEXPECTED_EMPTY_LINKED_MODIFIER]: `Unexpected empty linked modifier`,
+  [CompileErrorCodes.UNEXPECTED_EMPTY_LINKED_KEY]: `Unexpected empty linked key`,
+  [CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS]: `Unexpected lexical analysis in token: '{0}'`,
+  // generator error messages
+  [CompileErrorCodes.UNHANDLED_CODEGEN_NODE_TYPE]: `unhandled codegen node type: '{0}'`,
+  // minimizer error messages
+  [CompileErrorCodes.UNHANDLED_MINIFIER_NODE_TYPE]: `unhandled mimifier node type: '{0}'`
+};
+function createCompileError(code2, loc, options3 = {}) {
+  const { domain, messages: messages2, args } = options3;
+  const msg = format$1((messages2 || errorMessages$2)[code2] || "", ...args || []);
+  const error = new SyntaxError(String(msg));
+  error.code = code2;
+  if (loc) {
+    error.location = loc;
+  }
+  error.domain = domain;
+  return error;
+}
+__name(createCompileError, "createCompileError");
+function defaultOnError(error) {
+  throw error;
+}
+__name(defaultOnError, "defaultOnError");
+const RE_HTML_TAG = /<\/?[\w\s="/.':;#-\/]+>/;
+const detectHtmlTag = /* @__PURE__ */ __name((source) => RE_HTML_TAG.test(source), "detectHtmlTag");
+const CHAR_SP = " ";
+const CHAR_CR = "\r";
+const CHAR_LF = "\n";
+const CHAR_LS = String.fromCharCode(8232);
+const CHAR_PS = String.fromCharCode(8233);
+function createScanner(str) {
+  const _buf = str;
+  let _index = 0;
+  let _line = 1;
+  let _column = 1;
+  let _peekOffset = 0;
+  const isCRLF = /* @__PURE__ */ __name((index3) => _buf[index3] === CHAR_CR && _buf[index3 + 1] === CHAR_LF, "isCRLF");
+  const isLF = /* @__PURE__ */ __name((index3) => _buf[index3] === CHAR_LF, "isLF");
+  const isPS = /* @__PURE__ */ __name((index3) => _buf[index3] === CHAR_PS, "isPS");
+  const isLS = /* @__PURE__ */ __name((index3) => _buf[index3] === CHAR_LS, "isLS");
+  const isLineEnd = /* @__PURE__ */ __name((index3) => isCRLF(index3) || isLF(index3) || isPS(index3) || isLS(index3), "isLineEnd");
+  const index2 = /* @__PURE__ */ __name(() => _index, "index");
+  const line = /* @__PURE__ */ __name(() => _line, "line");
+  const column = /* @__PURE__ */ __name(() => _column, "column");
+  const peekOffset = /* @__PURE__ */ __name(() => _peekOffset, "peekOffset");
+  const charAt = /* @__PURE__ */ __name((offset) => isCRLF(offset) || isPS(offset) || isLS(offset) ? CHAR_LF : _buf[offset], "charAt");
+  const currentChar = /* @__PURE__ */ __name(() => charAt(_index), "currentChar");
+  const currentPeek = /* @__PURE__ */ __name(() => charAt(_index + _peekOffset), "currentPeek");
+  function next2() {
+    _peekOffset = 0;
+    if (isLineEnd(_index)) {
+      _line++;
+      _column = 0;
+    }
+    if (isCRLF(_index)) {
+      _index++;
+    }
+    _index++;
+    _column++;
+    return _buf[_index];
+  }
+  __name(next2, "next");
+  function peek() {
+    if (isCRLF(_index + _peekOffset)) {
+      _peekOffset++;
+    }
+    _peekOffset++;
+    return _buf[_index + _peekOffset];
+  }
+  __name(peek, "peek");
+  function reset() {
+    _index = 0;
+    _line = 1;
+    _column = 1;
+    _peekOffset = 0;
+  }
+  __name(reset, "reset");
+  function resetPeek(offset = 0) {
+    _peekOffset = offset;
+  }
+  __name(resetPeek, "resetPeek");
+  function skipToPeek() {
+    const target = _index + _peekOffset;
+    while (target !== _index) {
+      next2();
+    }
+    _peekOffset = 0;
+  }
+  __name(skipToPeek, "skipToPeek");
+  return {
+    index: index2,
+    line,
+    column,
+    peekOffset,
+    charAt,
+    currentChar,
+    currentPeek,
+    next: next2,
+    peek,
+    reset,
+    resetPeek,
+    skipToPeek
+  };
+}
+__name(createScanner, "createScanner");
+const EOF = void 0;
+const DOT = ".";
+const LITERAL_DELIMITER = "'";
+const ERROR_DOMAIN$3 = "tokenizer";
+function createTokenizer(source, options3 = {}) {
+  const location2 = options3.location !== false;
+  const _scnr = createScanner(source);
+  const currentOffset = /* @__PURE__ */ __name(() => _scnr.index(), "currentOffset");
+  const currentPosition = /* @__PURE__ */ __name(() => createPosition(_scnr.line(), _scnr.column(), _scnr.index()), "currentPosition");
+  const _initLoc = currentPosition();
+  const _initOffset = currentOffset();
+  const _context = {
+    currentType: 14,
+    offset: _initOffset,
+    startLoc: _initLoc,
+    endLoc: _initLoc,
+    lastType: 14,
+    lastOffset: _initOffset,
+    lastStartLoc: _initLoc,
+    lastEndLoc: _initLoc,
+    braceNest: 0,
+    inLinked: false,
+    text: ""
+  };
+  const context = /* @__PURE__ */ __name(() => _context, "context");
+  const { onError } = options3;
+  function emitError(code2, pos2, offset, ...args) {
+    const ctx = context();
+    pos2.column += offset;
+    pos2.offset += offset;
+    if (onError) {
+      const loc = location2 ? createLocation(ctx.startLoc, pos2) : null;
+      const err = createCompileError(code2, loc, {
+        domain: ERROR_DOMAIN$3,
+        args
+      });
+      onError(err);
+    }
+  }
+  __name(emitError, "emitError");
+  function getToken(context2, type, value3) {
+    context2.endLoc = currentPosition();
+    context2.currentType = type;
+    const token = { type };
+    if (location2) {
+      token.loc = createLocation(context2.startLoc, context2.endLoc);
+    }
+    if (value3 != null) {
+      token.value = value3;
+    }
+    return token;
+  }
+  __name(getToken, "getToken");
+  const getEndToken = /* @__PURE__ */ __name((context2) => getToken(
+    context2,
+    14
+    /* TokenTypes.EOF */
+  ), "getEndToken");
+  function eat(scnr, ch) {
+    if (scnr.currentChar() === ch) {
+      scnr.next();
+      return ch;
+    } else {
+      emitError(CompileErrorCodes.EXPECTED_TOKEN, currentPosition(), 0, ch);
+      return "";
+    }
+  }
+  __name(eat, "eat");
+  function peekSpaces(scnr) {
+    let buf = "";
+    while (scnr.currentPeek() === CHAR_SP || scnr.currentPeek() === CHAR_LF) {
+      buf += scnr.currentPeek();
+      scnr.peek();
+    }
+    return buf;
+  }
+  __name(peekSpaces, "peekSpaces");
+  function skipSpaces(scnr) {
+    const buf = peekSpaces(scnr);
+    scnr.skipToPeek();
+    return buf;
+  }
+  __name(skipSpaces, "skipSpaces");
+  function isIdentifierStart(ch) {
+    if (ch === EOF) {
+      return false;
+    }
+    const cc = ch.charCodeAt(0);
+    return cc >= 97 && cc <= 122 || // a-z
+    cc >= 65 && cc <= 90 || // A-Z
+    cc === 95;
+  }
+  __name(isIdentifierStart, "isIdentifierStart");
+  function isNumberStart(ch) {
+    if (ch === EOF) {
+      return false;
+    }
+    const cc = ch.charCodeAt(0);
+    return cc >= 48 && cc <= 57;
+  }
+  __name(isNumberStart, "isNumberStart");
+  function isNamedIdentifierStart(scnr, context2) {
+    const { currentType } = context2;
+    if (currentType !== 2) {
+      return false;
+    }
+    peekSpaces(scnr);
+    const ret = isIdentifierStart(scnr.currentPeek());
+    scnr.resetPeek();
+    return ret;
+  }
+  __name(isNamedIdentifierStart, "isNamedIdentifierStart");
+  function isListIdentifierStart(scnr, context2) {
+    const { currentType } = context2;
+    if (currentType !== 2) {
+      return false;
+    }
+    peekSpaces(scnr);
+    const ch = scnr.currentPeek() === "-" ? scnr.peek() : scnr.currentPeek();
+    const ret = isNumberStart(ch);
+    scnr.resetPeek();
+    return ret;
+  }
+  __name(isListIdentifierStart, "isListIdentifierStart");
+  function isLiteralStart(scnr, context2) {
+    const { currentType } = context2;
+    if (currentType !== 2) {
+      return false;
+    }
+    peekSpaces(scnr);
+    const ret = scnr.currentPeek() === LITERAL_DELIMITER;
+    scnr.resetPeek();
+    return ret;
+  }
+  __name(isLiteralStart, "isLiteralStart");
+  function isLinkedDotStart(scnr, context2) {
+    const { currentType } = context2;
+    if (currentType !== 8) {
+      return false;
+    }
+    peekSpaces(scnr);
+    const ret = scnr.currentPeek() === ".";
+    scnr.resetPeek();
+    return ret;
+  }
+  __name(isLinkedDotStart, "isLinkedDotStart");
+  function isLinkedModifierStart(scnr, context2) {
+    const { currentType } = context2;
+    if (currentType !== 9) {
+      return false;
+    }
+    peekSpaces(scnr);
+    const ret = isIdentifierStart(scnr.currentPeek());
+    scnr.resetPeek();
+    return ret;
+  }
+  __name(isLinkedModifierStart, "isLinkedModifierStart");
+  function isLinkedDelimiterStart(scnr, context2) {
+    const { currentType } = context2;
+    if (!(currentType === 8 || currentType === 12)) {
+      return false;
+    }
+    peekSpaces(scnr);
+    const ret = scnr.currentPeek() === ":";
+    scnr.resetPeek();
+    return ret;
+  }
+  __name(isLinkedDelimiterStart, "isLinkedDelimiterStart");
+  function isLinkedReferStart(scnr, context2) {
+    const { currentType } = context2;
+    if (currentType !== 10) {
+      return false;
+    }
+    const fn = /* @__PURE__ */ __name(() => {
+      const ch = scnr.currentPeek();
+      if (ch === "{") {
+        return isIdentifierStart(scnr.peek());
+      } else if (ch === "@" || ch === "%" || ch === "|" || ch === ":" || ch === "." || ch === CHAR_SP || !ch) {
+        return false;
+      } else if (ch === CHAR_LF) {
+        scnr.peek();
+        return fn();
+      } else {
+        return isTextStart(scnr, false);
+      }
+    }, "fn");
+    const ret = fn();
+    scnr.resetPeek();
+    return ret;
+  }
+  __name(isLinkedReferStart, "isLinkedReferStart");
+  function isPluralStart(scnr) {
+    peekSpaces(scnr);
+    const ret = scnr.currentPeek() === "|";
+    scnr.resetPeek();
+    return ret;
+  }
+  __name(isPluralStart, "isPluralStart");
+  function detectModuloStart(scnr) {
+    const spaces = peekSpaces(scnr);
+    const ret = scnr.currentPeek() === "%" && scnr.peek() === "{";
+    scnr.resetPeek();
+    return {
+      isModulo: ret,
+      hasSpace: spaces.length > 0
+    };
+  }
+  __name(detectModuloStart, "detectModuloStart");
+  function isTextStart(scnr, reset = true) {
+    const fn = /* @__PURE__ */ __name((hasSpace = false, prev2 = "", detectModulo = false) => {
+      const ch = scnr.currentPeek();
+      if (ch === "{") {
+        return prev2 === "%" ? false : hasSpace;
+      } else if (ch === "@" || !ch) {
+        return prev2 === "%" ? true : hasSpace;
+      } else if (ch === "%") {
+        scnr.peek();
+        return fn(hasSpace, "%", true);
+      } else if (ch === "|") {
+        return prev2 === "%" || detectModulo ? true : !(prev2 === CHAR_SP || prev2 === CHAR_LF);
+      } else if (ch === CHAR_SP) {
+        scnr.peek();
+        return fn(true, CHAR_SP, detectModulo);
+      } else if (ch === CHAR_LF) {
+        scnr.peek();
+        return fn(true, CHAR_LF, detectModulo);
+      } else {
+        return true;
+      }
+    }, "fn");
+    const ret = fn();
+    reset && scnr.resetPeek();
+    return ret;
+  }
+  __name(isTextStart, "isTextStart");
+  function takeChar(scnr, fn) {
+    const ch = scnr.currentChar();
+    if (ch === EOF) {
+      return EOF;
+    }
+    if (fn(ch)) {
+      scnr.next();
+      return ch;
+    }
+    return null;
+  }
+  __name(takeChar, "takeChar");
+  function isIdentifier(ch) {
+    const cc = ch.charCodeAt(0);
+    return cc >= 97 && cc <= 122 || // a-z
+    cc >= 65 && cc <= 90 || // A-Z
+    cc >= 48 && cc <= 57 || // 0-9
+    cc === 95 || // _
+    cc === 36;
+  }
+  __name(isIdentifier, "isIdentifier");
+  function takeIdentifierChar(scnr) {
+    return takeChar(scnr, isIdentifier);
+  }
+  __name(takeIdentifierChar, "takeIdentifierChar");
+  function isNamedIdentifier(ch) {
+    const cc = ch.charCodeAt(0);
+    return cc >= 97 && cc <= 122 || // a-z
+    cc >= 65 && cc <= 90 || // A-Z
+    cc >= 48 && cc <= 57 || // 0-9
+    cc === 95 || // _
+    cc === 36 || // $
+    cc === 45;
+  }
+  __name(isNamedIdentifier, "isNamedIdentifier");
+  function takeNamedIdentifierChar(scnr) {
+    return takeChar(scnr, isNamedIdentifier);
+  }
+  __name(takeNamedIdentifierChar, "takeNamedIdentifierChar");
+  function isDigit(ch) {
+    const cc = ch.charCodeAt(0);
+    return cc >= 48 && cc <= 57;
+  }
+  __name(isDigit, "isDigit");
+  function takeDigit(scnr) {
+    return takeChar(scnr, isDigit);
+  }
+  __name(takeDigit, "takeDigit");
+  function isHexDigit(ch) {
+    const cc = ch.charCodeAt(0);
+    return cc >= 48 && cc <= 57 || // 0-9
+    cc >= 65 && cc <= 70 || // A-F
+    cc >= 97 && cc <= 102;
+  }
+  __name(isHexDigit, "isHexDigit");
+  function takeHexDigit(scnr) {
+    return takeChar(scnr, isHexDigit);
+  }
+  __name(takeHexDigit, "takeHexDigit");
+  function getDigits(scnr) {
+    let ch = "";
+    let num = "";
+    while (ch = takeDigit(scnr)) {
+      num += ch;
+    }
+    return num;
+  }
+  __name(getDigits, "getDigits");
+  function readModulo(scnr) {
+    skipSpaces(scnr);
+    const ch = scnr.currentChar();
+    if (ch !== "%") {
+      emitError(CompileErrorCodes.EXPECTED_TOKEN, currentPosition(), 0, ch);
+    }
+    scnr.next();
+    return "%";
+  }
+  __name(readModulo, "readModulo");
+  function readText(scnr) {
+    let buf = "";
+    while (true) {
+      const ch = scnr.currentChar();
+      if (ch === "{" || ch === "}" || ch === "@" || ch === "|" || !ch) {
+        break;
+      } else if (ch === "%") {
+        if (isTextStart(scnr)) {
+          buf += ch;
+          scnr.next();
+        } else {
+          break;
+        }
+      } else if (ch === CHAR_SP || ch === CHAR_LF) {
+        if (isTextStart(scnr)) {
+          buf += ch;
+          scnr.next();
+        } else if (isPluralStart(scnr)) {
+          break;
+        } else {
+          buf += ch;
+          scnr.next();
+        }
+      } else {
+        buf += ch;
+        scnr.next();
+      }
+    }
+    return buf;
+  }
+  __name(readText, "readText");
+  function readNamedIdentifier(scnr) {
+    skipSpaces(scnr);
+    let ch = "";
+    let name = "";
+    while (ch = takeNamedIdentifierChar(scnr)) {
+      name += ch;
+    }
+    if (scnr.currentChar() === EOF) {
+      emitError(CompileErrorCodes.UNTERMINATED_CLOSING_BRACE, currentPosition(), 0);
+    }
+    return name;
+  }
+  __name(readNamedIdentifier, "readNamedIdentifier");
+  function readListIdentifier(scnr) {
+    skipSpaces(scnr);
+    let value3 = "";
+    if (scnr.currentChar() === "-") {
+      scnr.next();
+      value3 += `-${getDigits(scnr)}`;
+    } else {
+      value3 += getDigits(scnr);
+    }
+    if (scnr.currentChar() === EOF) {
+      emitError(CompileErrorCodes.UNTERMINATED_CLOSING_BRACE, currentPosition(), 0);
+    }
+    return value3;
+  }
+  __name(readListIdentifier, "readListIdentifier");
+  function isLiteral2(ch) {
+    return ch !== LITERAL_DELIMITER && ch !== CHAR_LF;
+  }
+  __name(isLiteral2, "isLiteral");
+  function readLiteral(scnr) {
+    skipSpaces(scnr);
+    eat(scnr, `'`);
+    let ch = "";
+    let literal = "";
+    while (ch = takeChar(scnr, isLiteral2)) {
+      if (ch === "\\") {
+        literal += readEscapeSequence(scnr);
+      } else {
+        literal += ch;
+      }
+    }
+    const current = scnr.currentChar();
+    if (current === CHAR_LF || current === EOF) {
+      emitError(CompileErrorCodes.UNTERMINATED_SINGLE_QUOTE_IN_PLACEHOLDER, currentPosition(), 0);
+      if (current === CHAR_LF) {
+        scnr.next();
+        eat(scnr, `'`);
+      }
+      return literal;
+    }
+    eat(scnr, `'`);
+    return literal;
+  }
+  __name(readLiteral, "readLiteral");
+  function readEscapeSequence(scnr) {
+    const ch = scnr.currentChar();
+    switch (ch) {
+      case "\\":
+      case `'`:
+        scnr.next();
+        return `\\${ch}`;
+      case "u":
+        return readUnicodeEscapeSequence(scnr, ch, 4);
+      case "U":
+        return readUnicodeEscapeSequence(scnr, ch, 6);
+      default:
+        emitError(CompileErrorCodes.UNKNOWN_ESCAPE_SEQUENCE, currentPosition(), 0, ch);
+        return "";
+    }
+  }
+  __name(readEscapeSequence, "readEscapeSequence");
+  function readUnicodeEscapeSequence(scnr, unicode, digits) {
+    eat(scnr, unicode);
+    let sequence = "";
+    for (let i2 = 0; i2 < digits; i2++) {
+      const ch = takeHexDigit(scnr);
+      if (!ch) {
+        emitError(CompileErrorCodes.INVALID_UNICODE_ESCAPE_SEQUENCE, currentPosition(), 0, `\\${unicode}${sequence}${scnr.currentChar()}`);
+        break;
+      }
+      sequence += ch;
+    }
+    return `\\${unicode}${sequence}`;
+  }
+  __name(readUnicodeEscapeSequence, "readUnicodeEscapeSequence");
+  function isInvalidIdentifier(ch) {
+    return ch !== "{" && ch !== "}" && ch !== CHAR_SP && ch !== CHAR_LF;
+  }
+  __name(isInvalidIdentifier, "isInvalidIdentifier");
+  function readInvalidIdentifier(scnr) {
+    skipSpaces(scnr);
+    let ch = "";
+    let identifiers = "";
+    while (ch = takeChar(scnr, isInvalidIdentifier)) {
+      identifiers += ch;
+    }
+    return identifiers;
+  }
+  __name(readInvalidIdentifier, "readInvalidIdentifier");
+  function readLinkedModifier(scnr) {
+    let ch = "";
+    let name = "";
+    while (ch = takeIdentifierChar(scnr)) {
+      name += ch;
+    }
+    return name;
+  }
+  __name(readLinkedModifier, "readLinkedModifier");
+  function readLinkedRefer(scnr) {
+    const fn = /* @__PURE__ */ __name((buf) => {
+      const ch = scnr.currentChar();
+      if (ch === "{" || ch === "%" || ch === "@" || ch === "|" || ch === "(" || ch === ")" || !ch) {
+        return buf;
+      } else if (ch === CHAR_SP) {
+        return buf;
+      } else if (ch === CHAR_LF || ch === DOT) {
+        buf += ch;
+        scnr.next();
+        return fn(buf);
+      } else {
+        buf += ch;
+        scnr.next();
+        return fn(buf);
+      }
+    }, "fn");
+    return fn("");
+  }
+  __name(readLinkedRefer, "readLinkedRefer");
+  function readPlural(scnr) {
+    skipSpaces(scnr);
+    const plural = eat(
+      scnr,
+      "|"
+      /* TokenChars.Pipe */
+    );
+    skipSpaces(scnr);
+    return plural;
+  }
+  __name(readPlural, "readPlural");
+  function readTokenInPlaceholder(scnr, context2) {
+    let token = null;
+    const ch = scnr.currentChar();
+    switch (ch) {
+      case "{":
+        if (context2.braceNest >= 1) {
+          emitError(CompileErrorCodes.NOT_ALLOW_NEST_PLACEHOLDER, currentPosition(), 0);
+        }
+        scnr.next();
+        token = getToken(
+          context2,
+          2,
+          "{"
+          /* TokenChars.BraceLeft */
+        );
+        skipSpaces(scnr);
+        context2.braceNest++;
+        return token;
+      case "}":
+        if (context2.braceNest > 0 && context2.currentType === 2) {
+          emitError(CompileErrorCodes.EMPTY_PLACEHOLDER, currentPosition(), 0);
+        }
+        scnr.next();
+        token = getToken(
+          context2,
+          3,
+          "}"
+          /* TokenChars.BraceRight */
+        );
+        context2.braceNest--;
+        context2.braceNest > 0 && skipSpaces(scnr);
+        if (context2.inLinked && context2.braceNest === 0) {
+          context2.inLinked = false;
+        }
+        return token;
+      case "@":
+        if (context2.braceNest > 0) {
+          emitError(CompileErrorCodes.UNTERMINATED_CLOSING_BRACE, currentPosition(), 0);
+        }
+        token = readTokenInLinked(scnr, context2) || getEndToken(context2);
+        context2.braceNest = 0;
+        return token;
+      default: {
+        let validNamedIdentifier = true;
+        let validListIdentifier = true;
+        let validLiteral = true;
+        if (isPluralStart(scnr)) {
+          if (context2.braceNest > 0) {
+            emitError(CompileErrorCodes.UNTERMINATED_CLOSING_BRACE, currentPosition(), 0);
+          }
+          token = getToken(context2, 1, readPlural(scnr));
+          context2.braceNest = 0;
+          context2.inLinked = false;
+          return token;
+        }
+        if (context2.braceNest > 0 && (context2.currentType === 5 || context2.currentType === 6 || context2.currentType === 7)) {
+          emitError(CompileErrorCodes.UNTERMINATED_CLOSING_BRACE, currentPosition(), 0);
+          context2.braceNest = 0;
+          return readToken(scnr, context2);
+        }
+        if (validNamedIdentifier = isNamedIdentifierStart(scnr, context2)) {
+          token = getToken(context2, 5, readNamedIdentifier(scnr));
+          skipSpaces(scnr);
+          return token;
+        }
+        if (validListIdentifier = isListIdentifierStart(scnr, context2)) {
+          token = getToken(context2, 6, readListIdentifier(scnr));
+          skipSpaces(scnr);
+          return token;
+        }
+        if (validLiteral = isLiteralStart(scnr, context2)) {
+          token = getToken(context2, 7, readLiteral(scnr));
+          skipSpaces(scnr);
+          return token;
+        }
+        if (!validNamedIdentifier && !validListIdentifier && !validLiteral) {
+          token = getToken(context2, 13, readInvalidIdentifier(scnr));
+          emitError(CompileErrorCodes.INVALID_TOKEN_IN_PLACEHOLDER, currentPosition(), 0, token.value);
+          skipSpaces(scnr);
+          return token;
+        }
+        break;
+      }
+    }
+    return token;
+  }
+  __name(readTokenInPlaceholder, "readTokenInPlaceholder");
+  function readTokenInLinked(scnr, context2) {
+    const { currentType } = context2;
+    let token = null;
+    const ch = scnr.currentChar();
+    if ((currentType === 8 || currentType === 9 || currentType === 12 || currentType === 10) && (ch === CHAR_LF || ch === CHAR_SP)) {
+      emitError(CompileErrorCodes.INVALID_LINKED_FORMAT, currentPosition(), 0);
+    }
+    switch (ch) {
+      case "@":
+        scnr.next();
+        token = getToken(
+          context2,
+          8,
+          "@"
+          /* TokenChars.LinkedAlias */
+        );
+        context2.inLinked = true;
+        return token;
+      case ".":
+        skipSpaces(scnr);
+        scnr.next();
+        return getToken(
+          context2,
+          9,
+          "."
+          /* TokenChars.LinkedDot */
+        );
+      case ":":
+        skipSpaces(scnr);
+        scnr.next();
+        return getToken(
+          context2,
+          10,
+          ":"
+          /* TokenChars.LinkedDelimiter */
+        );
+      default:
+        if (isPluralStart(scnr)) {
+          token = getToken(context2, 1, readPlural(scnr));
+          context2.braceNest = 0;
+          context2.inLinked = false;
+          return token;
+        }
+        if (isLinkedDotStart(scnr, context2) || isLinkedDelimiterStart(scnr, context2)) {
+          skipSpaces(scnr);
+          return readTokenInLinked(scnr, context2);
+        }
+        if (isLinkedModifierStart(scnr, context2)) {
+          skipSpaces(scnr);
+          return getToken(context2, 12, readLinkedModifier(scnr));
+        }
+        if (isLinkedReferStart(scnr, context2)) {
+          skipSpaces(scnr);
+          if (ch === "{") {
+            return readTokenInPlaceholder(scnr, context2) || token;
+          } else {
+            return getToken(context2, 11, readLinkedRefer(scnr));
+          }
+        }
+        if (currentType === 8) {
+          emitError(CompileErrorCodes.INVALID_LINKED_FORMAT, currentPosition(), 0);
+        }
+        context2.braceNest = 0;
+        context2.inLinked = false;
+        return readToken(scnr, context2);
+    }
+  }
+  __name(readTokenInLinked, "readTokenInLinked");
+  function readToken(scnr, context2) {
+    let token = {
+      type: 14
+      /* TokenTypes.EOF */
+    };
+    if (context2.braceNest > 0) {
+      return readTokenInPlaceholder(scnr, context2) || getEndToken(context2);
+    }
+    if (context2.inLinked) {
+      return readTokenInLinked(scnr, context2) || getEndToken(context2);
+    }
+    const ch = scnr.currentChar();
+    switch (ch) {
+      case "{":
+        return readTokenInPlaceholder(scnr, context2) || getEndToken(context2);
+      case "}":
+        emitError(CompileErrorCodes.UNBALANCED_CLOSING_BRACE, currentPosition(), 0);
+        scnr.next();
+        return getToken(
+          context2,
+          3,
+          "}"
+          /* TokenChars.BraceRight */
+        );
+      case "@":
+        return readTokenInLinked(scnr, context2) || getEndToken(context2);
+      default: {
+        if (isPluralStart(scnr)) {
+          token = getToken(context2, 1, readPlural(scnr));
+          context2.braceNest = 0;
+          context2.inLinked = false;
+          return token;
+        }
+        const { isModulo, hasSpace } = detectModuloStart(scnr);
+        if (isModulo) {
+          return hasSpace ? getToken(context2, 0, readText(scnr)) : getToken(context2, 4, readModulo(scnr));
+        }
+        if (isTextStart(scnr)) {
+          return getToken(context2, 0, readText(scnr));
+        }
+        break;
+      }
+    }
+    return token;
+  }
+  __name(readToken, "readToken");
+  function nextToken() {
+    const { currentType, offset, startLoc, endLoc } = _context;
+    _context.lastType = currentType;
+    _context.lastOffset = offset;
+    _context.lastStartLoc = startLoc;
+    _context.lastEndLoc = endLoc;
+    _context.offset = currentOffset();
+    _context.startLoc = currentPosition();
+    if (_scnr.currentChar() === EOF) {
+      return getToken(
+        _context,
+        14
+        /* TokenTypes.EOF */
+      );
+    }
+    return readToken(_scnr, _context);
+  }
+  __name(nextToken, "nextToken");
+  return {
+    nextToken,
+    currentOffset,
+    currentPosition,
+    context
+  };
+}
+__name(createTokenizer, "createTokenizer");
+const ERROR_DOMAIN$2 = "parser";
+const KNOWN_ESCAPES = /(?:\\\\|\\'|\\u([0-9a-fA-F]{4})|\\U([0-9a-fA-F]{6}))/g;
+function fromEscapeSequence(match, codePoint4, codePoint6) {
+  switch (match) {
+    case `\\\\`:
+      return `\\`;
+    case `\\'`:
+      return `'`;
+    default: {
+      const codePoint = parseInt(codePoint4 || codePoint6, 16);
+      if (codePoint <= 55295 || codePoint >= 57344) {
+        return String.fromCodePoint(codePoint);
+      }
+      return "�";
+    }
+  }
+}
+__name(fromEscapeSequence, "fromEscapeSequence");
+function createParser(options3 = {}) {
+  const location2 = options3.location !== false;
+  const { onError, onWarn } = options3;
+  function emitError(tokenzer, code2, start2, offset, ...args) {
+    const end = tokenzer.currentPosition();
+    end.offset += offset;
+    end.column += offset;
+    if (onError) {
+      const loc = location2 ? createLocation(start2, end) : null;
+      const err = createCompileError(code2, loc, {
+        domain: ERROR_DOMAIN$2,
+        args
+      });
+      onError(err);
+    }
+  }
+  __name(emitError, "emitError");
+  function emitWarn(tokenzer, code2, start2, offset, ...args) {
+    const end = tokenzer.currentPosition();
+    end.offset += offset;
+    end.column += offset;
+    if (onWarn) {
+      const loc = location2 ? createLocation(start2, end) : null;
+      onWarn(createCompileWarn(code2, loc, args));
+    }
+  }
+  __name(emitWarn, "emitWarn");
+  function startNode(type, offset, loc) {
+    const node3 = { type };
+    if (location2) {
+      node3.start = offset;
+      node3.end = offset;
+      node3.loc = { start: loc, end: loc };
+    }
+    return node3;
+  }
+  __name(startNode, "startNode");
+  function endNode(node3, offset, pos2, type) {
+    if (type) {
+      node3.type = type;
+    }
+    if (location2) {
+      node3.end = offset;
+      if (node3.loc) {
+        node3.loc.end = pos2;
+      }
+    }
+  }
+  __name(endNode, "endNode");
+  function parseText(tokenizer, value3) {
+    const context = tokenizer.context();
+    const node3 = startNode(3, context.offset, context.startLoc);
+    node3.value = value3;
+    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
+    return node3;
+  }
+  __name(parseText, "parseText");
+  function parseList(tokenizer, index2) {
+    const context = tokenizer.context();
+    const { lastOffset: offset, lastStartLoc: loc } = context;
+    const node3 = startNode(5, offset, loc);
+    node3.index = parseInt(index2, 10);
+    tokenizer.nextToken();
+    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
+    return node3;
+  }
+  __name(parseList, "parseList");
+  function parseNamed(tokenizer, key, modulo) {
+    const context = tokenizer.context();
+    const { lastOffset: offset, lastStartLoc: loc } = context;
+    const node3 = startNode(4, offset, loc);
+    node3.key = key;
+    if (modulo === true) {
+      node3.modulo = true;
+    }
+    tokenizer.nextToken();
+    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
+    return node3;
+  }
+  __name(parseNamed, "parseNamed");
+  function parseLiteral(tokenizer, value3) {
+    const context = tokenizer.context();
+    const { lastOffset: offset, lastStartLoc: loc } = context;
+    const node3 = startNode(9, offset, loc);
+    node3.value = value3.replace(KNOWN_ESCAPES, fromEscapeSequence);
+    tokenizer.nextToken();
+    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
+    return node3;
+  }
+  __name(parseLiteral, "parseLiteral");
+  function parseLinkedModifier(tokenizer) {
+    const token = tokenizer.nextToken();
+    const context = tokenizer.context();
+    const { lastOffset: offset, lastStartLoc: loc } = context;
+    const node3 = startNode(8, offset, loc);
+    if (token.type !== 12) {
+      emitError(tokenizer, CompileErrorCodes.UNEXPECTED_EMPTY_LINKED_MODIFIER, context.lastStartLoc, 0);
+      node3.value = "";
+      endNode(node3, offset, loc);
+      return {
+        nextConsumeToken: token,
+        node: node3
+      };
+    }
+    if (token.value == null) {
+      emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
+    }
+    node3.value = token.value || "";
+    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
+    return {
+      node: node3
+    };
+  }
+  __name(parseLinkedModifier, "parseLinkedModifier");
+  function parseLinkedKey(tokenizer, value3) {
+    const context = tokenizer.context();
+    const node3 = startNode(7, context.offset, context.startLoc);
+    node3.value = value3;
+    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
+    return node3;
+  }
+  __name(parseLinkedKey, "parseLinkedKey");
+  function parseLinked(tokenizer) {
+    const context = tokenizer.context();
+    const linkedNode = startNode(6, context.offset, context.startLoc);
+    let token = tokenizer.nextToken();
+    if (token.type === 9) {
+      const parsed = parseLinkedModifier(tokenizer);
+      linkedNode.modifier = parsed.node;
+      token = parsed.nextConsumeToken || tokenizer.nextToken();
+    }
+    if (token.type !== 10) {
+      emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
+    }
+    token = tokenizer.nextToken();
+    if (token.type === 2) {
+      token = tokenizer.nextToken();
+    }
+    switch (token.type) {
+      case 11:
+        if (token.value == null) {
+          emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
+        }
+        linkedNode.key = parseLinkedKey(tokenizer, token.value || "");
+        break;
+      case 5:
+        if (token.value == null) {
+          emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
+        }
+        linkedNode.key = parseNamed(tokenizer, token.value || "");
+        break;
+      case 6:
+        if (token.value == null) {
+          emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
+        }
+        linkedNode.key = parseList(tokenizer, token.value || "");
+        break;
+      case 7:
+        if (token.value == null) {
+          emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
+        }
+        linkedNode.key = parseLiteral(tokenizer, token.value || "");
+        break;
+      default: {
+        emitError(tokenizer, CompileErrorCodes.UNEXPECTED_EMPTY_LINKED_KEY, context.lastStartLoc, 0);
+        const nextContext = tokenizer.context();
+        const emptyLinkedKeyNode = startNode(7, nextContext.offset, nextContext.startLoc);
+        emptyLinkedKeyNode.value = "";
+        endNode(emptyLinkedKeyNode, nextContext.offset, nextContext.startLoc);
+        linkedNode.key = emptyLinkedKeyNode;
+        endNode(linkedNode, nextContext.offset, nextContext.startLoc);
+        return {
+          nextConsumeToken: token,
+          node: linkedNode
+        };
+      }
+    }
+    endNode(linkedNode, tokenizer.currentOffset(), tokenizer.currentPosition());
+    return {
+      node: linkedNode
+    };
+  }
+  __name(parseLinked, "parseLinked");
+  function parseMessage(tokenizer) {
+    const context = tokenizer.context();
+    const startOffset = context.currentType === 1 ? tokenizer.currentOffset() : context.offset;
+    const startLoc = context.currentType === 1 ? context.endLoc : context.startLoc;
+    const node3 = startNode(2, startOffset, startLoc);
+    node3.items = [];
+    let nextToken = null;
+    let modulo = null;
+    do {
+      const token = nextToken || tokenizer.nextToken();
+      nextToken = null;
+      switch (token.type) {
+        case 0:
+          if (token.value == null) {
+            emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
+          }
+          node3.items.push(parseText(tokenizer, token.value || ""));
+          break;
+        case 6:
+          if (token.value == null) {
+            emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
+          }
+          node3.items.push(parseList(tokenizer, token.value || ""));
+          break;
+        case 4:
+          modulo = true;
+          break;
+        case 5:
+          if (token.value == null) {
+            emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
+          }
+          node3.items.push(parseNamed(tokenizer, token.value || "", !!modulo));
+          if (modulo) {
+            emitWarn(tokenizer, CompileWarnCodes.USE_MODULO_SYNTAX, context.lastStartLoc, 0, getTokenCaption(token));
+            modulo = null;
+          }
+          break;
+        case 7:
+          if (token.value == null) {
+            emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, getTokenCaption(token));
+          }
+          node3.items.push(parseLiteral(tokenizer, token.value || ""));
+          break;
+        case 8: {
+          const parsed = parseLinked(tokenizer);
+          node3.items.push(parsed.node);
+          nextToken = parsed.nextConsumeToken || null;
+          break;
+        }
+      }
+    } while (context.currentType !== 14 && context.currentType !== 1);
+    const endOffset = context.currentType === 1 ? context.lastOffset : tokenizer.currentOffset();
+    const endLoc = context.currentType === 1 ? context.lastEndLoc : tokenizer.currentPosition();
+    endNode(node3, endOffset, endLoc);
+    return node3;
+  }
+  __name(parseMessage, "parseMessage");
+  function parsePlural(tokenizer, offset, loc, msgNode) {
+    const context = tokenizer.context();
+    let hasEmptyMessage = msgNode.items.length === 0;
+    const node3 = startNode(1, offset, loc);
+    node3.cases = [];
+    node3.cases.push(msgNode);
+    do {
+      const msg = parseMessage(tokenizer);
+      if (!hasEmptyMessage) {
+        hasEmptyMessage = msg.items.length === 0;
+      }
+      node3.cases.push(msg);
+    } while (context.currentType !== 14);
+    if (hasEmptyMessage) {
+      emitError(tokenizer, CompileErrorCodes.MUST_HAVE_MESSAGES_IN_PLURAL, loc, 0);
+    }
+    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
+    return node3;
+  }
+  __name(parsePlural, "parsePlural");
+  function parseResource(tokenizer) {
+    const context = tokenizer.context();
+    const { offset, startLoc } = context;
+    const msgNode = parseMessage(tokenizer);
+    if (context.currentType === 14) {
+      return msgNode;
+    } else {
+      return parsePlural(tokenizer, offset, startLoc, msgNode);
+    }
+  }
+  __name(parseResource, "parseResource");
+  function parse2(source) {
+    const tokenizer = createTokenizer(source, assign({}, options3));
+    const context = tokenizer.context();
+    const node3 = startNode(0, context.offset, context.startLoc);
+    if (location2 && node3.loc) {
+      node3.loc.source = source;
+    }
+    node3.body = parseResource(tokenizer);
+    if (options3.onCacheKey) {
+      node3.cacheKey = options3.onCacheKey(source);
+    }
+    if (context.currentType !== 14) {
+      emitError(tokenizer, CompileErrorCodes.UNEXPECTED_LEXICAL_ANALYSIS, context.lastStartLoc, 0, source[context.offset] || "");
+    }
+    endNode(node3, tokenizer.currentOffset(), tokenizer.currentPosition());
+    return node3;
+  }
+  __name(parse2, "parse");
+  return { parse: parse2 };
+}
+__name(createParser, "createParser");
+function getTokenCaption(token) {
+  if (token.type === 14) {
+    return "EOF";
+  }
+  const name = (token.value || "").replace(/\r?\n/gu, "\\n");
+  return name.length > 10 ? name.slice(0, 9) + "…" : name;
+}
+__name(getTokenCaption, "getTokenCaption");
+function createTransformer(ast, options3 = {}) {
+  const _context = {
+    ast,
+    helpers: /* @__PURE__ */ new Set()
+  };
+  const context = /* @__PURE__ */ __name(() => _context, "context");
+  const helper = /* @__PURE__ */ __name((name) => {
+    _context.helpers.add(name);
+    return name;
+  }, "helper");
+  return { context, helper };
+}
+__name(createTransformer, "createTransformer");
+function traverseNodes(nodes, transformer) {
+  for (let i2 = 0; i2 < nodes.length; i2++) {
+    traverseNode(nodes[i2], transformer);
+  }
+}
+__name(traverseNodes, "traverseNodes");
+function traverseNode(node3, transformer) {
+  switch (node3.type) {
+    case 1:
+      traverseNodes(node3.cases, transformer);
+      transformer.helper(
+        "plural"
+        /* HelperNameMap.PLURAL */
+      );
+      break;
+    case 2:
+      traverseNodes(node3.items, transformer);
+      break;
+    case 6: {
+      const linked = node3;
+      traverseNode(linked.key, transformer);
+      transformer.helper(
+        "linked"
+        /* HelperNameMap.LINKED */
+      );
+      transformer.helper(
+        "type"
+        /* HelperNameMap.TYPE */
+      );
+      break;
+    }
+    case 5:
+      transformer.helper(
+        "interpolate"
+        /* HelperNameMap.INTERPOLATE */
+      );
+      transformer.helper(
+        "list"
+        /* HelperNameMap.LIST */
+      );
+      break;
+    case 4:
+      transformer.helper(
+        "interpolate"
+        /* HelperNameMap.INTERPOLATE */
+      );
+      transformer.helper(
+        "named"
+        /* HelperNameMap.NAMED */
+      );
+      break;
+  }
+}
+__name(traverseNode, "traverseNode");
+function transform(ast, options3 = {}) {
+  const transformer = createTransformer(ast);
+  transformer.helper(
+    "normalize"
+    /* HelperNameMap.NORMALIZE */
+  );
+  ast.body && traverseNode(ast.body, transformer);
+  const context = transformer.context();
+  ast.helpers = Array.from(context.helpers);
+}
+__name(transform, "transform");
+function optimize(ast) {
+  const body = ast.body;
+  if (body.type === 2) {
+    optimizeMessageNode(body);
+  } else {
+    body.cases.forEach((c) => optimizeMessageNode(c));
+  }
+  return ast;
+}
+__name(optimize, "optimize");
+function optimizeMessageNode(message3) {
+  if (message3.items.length === 1) {
+    const item2 = message3.items[0];
+    if (item2.type === 3 || item2.type === 9) {
+      message3.static = item2.value;
+      delete item2.value;
+    }
+  } else {
+    const values2 = [];
+    for (let i2 = 0; i2 < message3.items.length; i2++) {
+      const item2 = message3.items[i2];
+      if (!(item2.type === 3 || item2.type === 9)) {
+        break;
+      }
+      if (item2.value == null) {
+        break;
+      }
+      values2.push(item2.value);
+    }
+    if (values2.length === message3.items.length) {
+      message3.static = join(values2);
+      for (let i2 = 0; i2 < message3.items.length; i2++) {
+        const item2 = message3.items[i2];
+        if (item2.type === 3 || item2.type === 9) {
+          delete item2.value;
+        }
+      }
+    }
+  }
+}
+__name(optimizeMessageNode, "optimizeMessageNode");
+const ERROR_DOMAIN$1 = "minifier";
+function minify(node3) {
+  node3.t = node3.type;
+  switch (node3.type) {
+    case 0: {
+      const resource = node3;
+      minify(resource.body);
+      resource.b = resource.body;
+      delete resource.body;
+      break;
+    }
+    case 1: {
+      const plural = node3;
+      const cases = plural.cases;
+      for (let i2 = 0; i2 < cases.length; i2++) {
+        minify(cases[i2]);
+      }
+      plural.c = cases;
+      delete plural.cases;
+      break;
+    }
+    case 2: {
+      const message3 = node3;
+      const items2 = message3.items;
+      for (let i2 = 0; i2 < items2.length; i2++) {
+        minify(items2[i2]);
+      }
+      message3.i = items2;
+      delete message3.items;
+      if (message3.static) {
+        message3.s = message3.static;
+        delete message3.static;
+      }
+      break;
+    }
+    case 3:
+    case 9:
+    case 8:
+    case 7: {
+      const valueNode = node3;
+      if (valueNode.value) {
+        valueNode.v = valueNode.value;
+        delete valueNode.value;
+      }
+      break;
+    }
+    case 6: {
+      const linked = node3;
+      minify(linked.key);
+      linked.k = linked.key;
+      delete linked.key;
+      if (linked.modifier) {
+        minify(linked.modifier);
+        linked.m = linked.modifier;
+        delete linked.modifier;
+      }
+      break;
+    }
+    case 5: {
+      const list = node3;
+      list.i = list.index;
+      delete list.index;
+      break;
+    }
+    case 4: {
+      const named = node3;
+      named.k = named.key;
+      delete named.key;
+      break;
+    }
+    default: {
+      throw createCompileError(CompileErrorCodes.UNHANDLED_MINIFIER_NODE_TYPE, null, {
+        domain: ERROR_DOMAIN$1,
+        args: [node3.type]
+      });
+    }
+  }
+  delete node3.type;
+}
+__name(minify, "minify");
+const ERROR_DOMAIN = "parser";
+function createCodeGenerator(ast, options3) {
+  const { sourceMap, filename, breakLineCode, needIndent: _needIndent } = options3;
+  const location2 = options3.location !== false;
+  const _context = {
+    filename,
+    code: "",
+    column: 1,
+    line: 1,
+    offset: 0,
+    map: void 0,
+    breakLineCode,
+    needIndent: _needIndent,
+    indentLevel: 0
+  };
+  if (location2 && ast.loc) {
+    _context.source = ast.loc.source;
+  }
+  const context = /* @__PURE__ */ __name(() => _context, "context");
+  function push(code2, node3) {
+    _context.code += code2;
+  }
+  __name(push, "push");
+  function _newline(n, withBreakLine = true) {
+    const _breakLineCode = withBreakLine ? breakLineCode : "";
+    push(_needIndent ? _breakLineCode + `  `.repeat(n) : _breakLineCode);
+  }
+  __name(_newline, "_newline");
+  function indent(withNewLine = true) {
+    const level = ++_context.indentLevel;
+    withNewLine && _newline(level);
+  }
+  __name(indent, "indent");
+  function deindent(withNewLine = true) {
+    const level = --_context.indentLevel;
+    withNewLine && _newline(level);
+  }
+  __name(deindent, "deindent");
+  function newline() {
+    _newline(_context.indentLevel);
+  }
+  __name(newline, "newline");
+  const helper = /* @__PURE__ */ __name((key) => `_${key}`, "helper");
+  const needIndent = /* @__PURE__ */ __name(() => _context.needIndent, "needIndent");
+  return {
+    context,
+    push,
+    indent,
+    deindent,
+    newline,
+    helper,
+    needIndent
+  };
+}
+__name(createCodeGenerator, "createCodeGenerator");
+function generateLinkedNode(generator, node3) {
+  const { helper } = generator;
+  generator.push(`${helper(
+    "linked"
+    /* HelperNameMap.LINKED */
+  )}(`);
+  generateNode(generator, node3.key);
+  if (node3.modifier) {
+    generator.push(`, `);
+    generateNode(generator, node3.modifier);
+    generator.push(`, _type`);
+  } else {
+    generator.push(`, undefined, _type`);
+  }
+  generator.push(`)`);
+}
+__name(generateLinkedNode, "generateLinkedNode");
+function generateMessageNode(generator, node3) {
+  const { helper, needIndent } = generator;
+  generator.push(`${helper(
+    "normalize"
+    /* HelperNameMap.NORMALIZE */
+  )}([`);
+  generator.indent(needIndent());
+  const length = node3.items.length;
+  for (let i2 = 0; i2 < length; i2++) {
+    generateNode(generator, node3.items[i2]);
+    if (i2 === length - 1) {
+      break;
+    }
+    generator.push(", ");
+  }
+  generator.deindent(needIndent());
+  generator.push("])");
+}
+__name(generateMessageNode, "generateMessageNode");
+function generatePluralNode(generator, node3) {
+  const { helper, needIndent } = generator;
+  if (node3.cases.length > 1) {
+    generator.push(`${helper(
+      "plural"
+      /* HelperNameMap.PLURAL */
+    )}([`);
+    generator.indent(needIndent());
+    const length = node3.cases.length;
+    for (let i2 = 0; i2 < length; i2++) {
+      generateNode(generator, node3.cases[i2]);
+      if (i2 === length - 1) {
+        break;
+      }
+      generator.push(", ");
+    }
+    generator.deindent(needIndent());
+    generator.push(`])`);
+  }
+}
+__name(generatePluralNode, "generatePluralNode");
+function generateResource(generator, node3) {
+  if (node3.body) {
+    generateNode(generator, node3.body);
+  } else {
+    generator.push("null");
+  }
+}
+__name(generateResource, "generateResource");
+function generateNode(generator, node3) {
+  const { helper } = generator;
+  switch (node3.type) {
+    case 0:
+      generateResource(generator, node3);
+      break;
+    case 1:
+      generatePluralNode(generator, node3);
+      break;
+    case 2:
+      generateMessageNode(generator, node3);
+      break;
+    case 6:
+      generateLinkedNode(generator, node3);
+      break;
+    case 8:
+      generator.push(JSON.stringify(node3.value), node3);
+      break;
+    case 7:
+      generator.push(JSON.stringify(node3.value), node3);
+      break;
+    case 5:
+      generator.push(`${helper(
+        "interpolate"
+        /* HelperNameMap.INTERPOLATE */
+      )}(${helper(
+        "list"
+        /* HelperNameMap.LIST */
+      )}(${node3.index}))`, node3);
+      break;
+    case 4:
+      generator.push(`${helper(
+        "interpolate"
+        /* HelperNameMap.INTERPOLATE */
+      )}(${helper(
+        "named"
+        /* HelperNameMap.NAMED */
+      )}(${JSON.stringify(node3.key)}))`, node3);
+      break;
+    case 9:
+      generator.push(JSON.stringify(node3.value), node3);
+      break;
+    case 3:
+      generator.push(JSON.stringify(node3.value), node3);
+      break;
+    default: {
+      throw createCompileError(CompileErrorCodes.UNHANDLED_CODEGEN_NODE_TYPE, null, {
+        domain: ERROR_DOMAIN,
+        args: [node3.type]
+      });
+    }
+  }
+}
+__name(generateNode, "generateNode");
+const generate = /* @__PURE__ */ __name((ast, options3 = {}) => {
+  const mode2 = isString(options3.mode) ? options3.mode : "normal";
+  const filename = isString(options3.filename) ? options3.filename : "message.intl";
+  const sourceMap = !!options3.sourceMap;
+  const breakLineCode = options3.breakLineCode != null ? options3.breakLineCode : mode2 === "arrow" ? ";" : "\n";
+  const needIndent = options3.needIndent ? options3.needIndent : mode2 !== "arrow";
+  const helpers = ast.helpers || [];
+  const generator = createCodeGenerator(ast, {
+    mode: mode2,
+    filename,
+    sourceMap,
+    breakLineCode,
+    needIndent
+  });
+  generator.push(mode2 === "normal" ? `function __msg__ (ctx) {` : `(ctx) => {`);
+  generator.indent(needIndent);
+  if (helpers.length > 0) {
+    generator.push(`const { ${join(helpers.map((s) => `${s}: _${s}`), ", ")} } = ctx`);
+    generator.newline();
+  }
+  generator.push(`return `);
+  generateNode(generator, ast);
+  generator.deindent(needIndent);
+  generator.push(`}`);
+  delete ast.helpers;
+  const { code: code2, map: map2 } = generator.context();
+  return {
+    ast,
+    code: code2,
+    map: map2 ? map2.toJSON() : void 0
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+  };
+}, "generate");
+function baseCompile$1(source, options3 = {}) {
+  const assignedOptions = assign({}, options3);
+  const jit = !!assignedOptions.jit;
+  const enalbeMinify = !!assignedOptions.minify;
+  const enambeOptimize = assignedOptions.optimize == null ? true : assignedOptions.optimize;
+  const parser = createParser(assignedOptions);
+  const ast = parser.parse(source);
+  if (!jit) {
+    transform(ast, assignedOptions);
+    return generate(ast, assignedOptions);
+  } else {
+    enambeOptimize && optimize(ast);
+    enalbeMinify && minify(ast);
+    return { ast, code: "" };
+  }
+}
+__name(baseCompile$1, "baseCompile$1");
+/*!
+  * core-base v9.13.1
+  * (c) 2024 kazuya kawaguchi
+  * Released under the MIT License.
+  */
+function initFeatureFlags$1() {
+  if (typeof __INTLIFY_PROD_DEVTOOLS__ !== "boolean") {
+    getGlobalThis().__INTLIFY_PROD_DEVTOOLS__ = false;
+  }
+  if (typeof __INTLIFY_JIT_COMPILATION__ !== "boolean") {
+    getGlobalThis().__INTLIFY_JIT_COMPILATION__ = false;
+  }
+  if (typeof __INTLIFY_DROP_MESSAGE_COMPILER__ !== "boolean") {
+    getGlobalThis().__INTLIFY_DROP_MESSAGE_COMPILER__ = false;
+  }
+}
+__name(initFeatureFlags$1, "initFeatureFlags$1");
+const pathStateMachine = [];
+pathStateMachine[
+  0
+  /* States.BEFORE_PATH */
+] = {
+  [
+    "w"
+    /* PathCharTypes.WORKSPACE */
+  ]: [
+    0
+    /* States.BEFORE_PATH */
+  ],
+  [
+    "i"
+    /* PathCharTypes.IDENT */
+  ]: [
+    3,
+    0
+    /* Actions.APPEND */
+  ],
+  [
+    "["
+    /* PathCharTypes.LEFT_BRACKET */
+  ]: [
+    4
+    /* States.IN_SUB_PATH */
+  ],
+  [
+    "o"
+    /* PathCharTypes.END_OF_FAIL */
+  ]: [
+    7
+    /* States.AFTER_PATH */
+  ]
+};
+pathStateMachine[
+  1
+  /* States.IN_PATH */
+] = {
+  [
+    "w"
+    /* PathCharTypes.WORKSPACE */
+  ]: [
+    1
+    /* States.IN_PATH */
+  ],
+  [
+    "."
+    /* PathCharTypes.DOT */
+  ]: [
+    2
+    /* States.BEFORE_IDENT */
+  ],
+  [
+    "["
+    /* PathCharTypes.LEFT_BRACKET */
+  ]: [
+    4
+    /* States.IN_SUB_PATH */
+  ],
+  [
+    "o"
+    /* PathCharTypes.END_OF_FAIL */
+  ]: [
+    7
+    /* States.AFTER_PATH */
+  ]
+};
+pathStateMachine[
+  2
+  /* States.BEFORE_IDENT */
+] = {
+  [
+    "w"
+    /* PathCharTypes.WORKSPACE */
+  ]: [
+    2
+    /* States.BEFORE_IDENT */
+  ],
+  [
+    "i"
+    /* PathCharTypes.IDENT */
+  ]: [
+    3,
+    0
+    /* Actions.APPEND */
+  ],
+  [
+    "0"
+    /* PathCharTypes.ZERO */
+  ]: [
+    3,
+    0
+    /* Actions.APPEND */
+  ]
+};
+pathStateMachine[
+  3
+  /* States.IN_IDENT */
+] = {
+  [
+    "i"
+    /* PathCharTypes.IDENT */
+  ]: [
+    3,
+    0
+    /* Actions.APPEND */
+  ],
+  [
+    "0"
+    /* PathCharTypes.ZERO */
+  ]: [
+    3,
+    0
+    /* Actions.APPEND */
+  ],
+  [
+    "w"
+    /* PathCharTypes.WORKSPACE */
+  ]: [
+    1,
+    1
+    /* Actions.PUSH */
+  ],
+  [
+    "."
+    /* PathCharTypes.DOT */
+  ]: [
+    2,
+    1
+    /* Actions.PUSH */
+  ],
+  [
+    "["
+    /* PathCharTypes.LEFT_BRACKET */
+  ]: [
+    4,
+    1
+    /* Actions.PUSH */
+  ],
+  [
+    "o"
+    /* PathCharTypes.END_OF_FAIL */
+  ]: [
+    7,
+    1
+    /* Actions.PUSH */
+  ]
+};
+pathStateMachine[
+  4
+  /* States.IN_SUB_PATH */
+] = {
+  [
+    "'"
+    /* PathCharTypes.SINGLE_QUOTE */
+  ]: [
+    5,
+    0
+    /* Actions.APPEND */
+  ],
+  [
+    '"'
+    /* PathCharTypes.DOUBLE_QUOTE */
+  ]: [
+    6,
+    0
+    /* Actions.APPEND */
+  ],
+  [
+    "["
+    /* PathCharTypes.LEFT_BRACKET */
+  ]: [
+    4,
+    2
+    /* Actions.INC_SUB_PATH_DEPTH */
+  ],
+  [
+    "]"
+    /* PathCharTypes.RIGHT_BRACKET */
+  ]: [
+    1,
+    3
+    /* Actions.PUSH_SUB_PATH */
+  ],
+  [
+    "o"
+    /* PathCharTypes.END_OF_FAIL */
+  ]: 8,
+  [
+    "l"
+    /* PathCharTypes.ELSE */
+  ]: [
+    4,
+    0
+    /* Actions.APPEND */
+  ]
+};
+pathStateMachine[
+  5
+  /* States.IN_SINGLE_QUOTE */
+] = {
+  [
+    "'"
+    /* PathCharTypes.SINGLE_QUOTE */
+  ]: [
+    4,
+    0
+    /* Actions.APPEND */
+  ],
+  [
+    "o"
+    /* PathCharTypes.END_OF_FAIL */
+  ]: 8,
+  [
+    "l"
+    /* PathCharTypes.ELSE */
+  ]: [
+    5,
+    0
+    /* Actions.APPEND */
+  ]
+};
+pathStateMachine[
+  6
+  /* States.IN_DOUBLE_QUOTE */
+] = {
+  [
+    '"'
+    /* PathCharTypes.DOUBLE_QUOTE */
+  ]: [
+    4,
+    0
+    /* Actions.APPEND */
+  ],
+  [
+    "o"
+    /* PathCharTypes.END_OF_FAIL */
+  ]: 8,
+  [
+    "l"
+    /* PathCharTypes.ELSE */
+  ]: [
+    6,
+    0
+    /* Actions.APPEND */
+  ]
+};
+const literalValueRE = /^\s?(?:true|false|-?[\d.]+|'[^']*'|"[^"]*")\s?$/;
+function isLiteral(exp) {
+  return literalValueRE.test(exp);
+}
+__name(isLiteral, "isLiteral");
+function stripQuotes(str) {
+  const a = str.charCodeAt(0);
+  const b = str.charCodeAt(str.length - 1);
+  return a === b && (a === 34 || a === 39) ? str.slice(1, -1) : str;
+}
+__name(stripQuotes, "stripQuotes");
+function getPathCharType(ch) {
+  if (ch === void 0 || ch === null) {
+    return "o";
+  }
+  const code2 = ch.charCodeAt(0);
+  switch (code2) {
+    case 91:
+    case 93:
+    case 46:
+    case 34:
+    case 39:
+      return ch;
+    case 95:
+    case 36:
+    case 45:
+      return "i";
+    case 9:
+    case 10:
+    case 13:
+    case 160:
+    case 65279:
+    case 8232:
+    case 8233:
+      return "w";
+  }
+  return "i";
+}
+__name(getPathCharType, "getPathCharType");
+function formatSubPath(path) {
+  const trimmed = path.trim();
+  if (path.charAt(0) === "0" && isNaN(parseInt(path))) {
+    return false;
+  }
+  return isLiteral(trimmed) ? stripQuotes(trimmed) : "*" + trimmed;
+}
+__name(formatSubPath, "formatSubPath");
+function parse(path) {
+  const keys2 = [];
+  let index2 = -1;
+  let mode2 = 0;
+  let subPathDepth = 0;
+  let c;
+  let key;
+  let newChar;
+  let type;
+  let transition;
+  let action;
+  let typeMap;
+  const actions = [];
+  actions[
+    0
+    /* Actions.APPEND */
+  ] = () => {
+    if (key === void 0) {
+      key = newChar;
+    } else {
+      key += newChar;
+    }
+  };
+  actions[
+    1
+    /* Actions.PUSH */
+  ] = () => {
+    if (key !== void 0) {
+      keys2.push(key);
+      key = void 0;
+    }
+  };
+  actions[
+    2
+    /* Actions.INC_SUB_PATH_DEPTH */
+  ] = () => {
+    actions[
+      0
+      /* Actions.APPEND */
+    ]();
+    subPathDepth++;
+  };
+  actions[
+    3
+    /* Actions.PUSH_SUB_PATH */
+  ] = () => {
+    if (subPathDepth > 0) {
+      subPathDepth--;
+      mode2 = 4;
+      actions[
+        0
+        /* Actions.APPEND */
+      ]();
+    } else {
+      subPathDepth = 0;
+      if (key === void 0) {
+        return false;
+      }
+      key = formatSubPath(key);
+      if (key === false) {
+        return false;
+      } else {
+        actions[
+          1
+          /* Actions.PUSH */
+        ]();
+      }
+    }
+  };
+  function maybeUnescapeQuote() {
+    const nextChar = path[index2 + 1];
+    if (mode2 === 5 && nextChar === "'" || mode2 === 6 && nextChar === '"') {
+      index2++;
+      newChar = "\\" + nextChar;
+      actions[
+        0
+        /* Actions.APPEND */
+      ]();
+      return true;
+    }
+  }
+  __name(maybeUnescapeQuote, "maybeUnescapeQuote");
+  while (mode2 !== null) {
+    index2++;
+    c = path[index2];
+    if (c === "\\" && maybeUnescapeQuote()) {
+      continue;
+    }
+    type = getPathCharType(c);
+    typeMap = pathStateMachine[mode2];
+    transition = typeMap[type] || typeMap[
+      "l"
+      /* PathCharTypes.ELSE */
+    ] || 8;
+    if (transition === 8) {
+      return;
+    }
+    mode2 = transition[0];
+    if (transition[1] !== void 0) {
+      action = actions[transition[1]];
+      if (action) {
+        newChar = c;
+        if (action() === false) {
+          return;
+        }
+      }
+    }
+    if (mode2 === 7) {
+      return keys2;
+    }
+  }
+}
+__name(parse, "parse");
+const cache = /* @__PURE__ */ new Map();
+function resolveWithKeyValue(obj, path) {
+  return isObject$1(obj) ? obj[path] : null;
+}
+__name(resolveWithKeyValue, "resolveWithKeyValue");
+function resolveValue(obj, path) {
+  if (!isObject$1(obj)) {
+    return null;
+  }
+  let hit = cache.get(path);
+  if (!hit) {
+    hit = parse(path);
+    if (hit) {
+      cache.set(path, hit);
+    }
+  }
+  if (!hit) {
+    return null;
+  }
+  const len = hit.length;
+  let last = obj;
+  let i2 = 0;
+  while (i2 < len) {
+    const val = last[hit[i2]];
+    if (val === void 0) {
+      return null;
+    }
+    if (isFunction$1(last)) {
+      return null;
+    }
+    last = val;
+    i2++;
+  }
+  return last;
+}
+__name(resolveValue, "resolveValue");
+const DEFAULT_MODIFIER = /* @__PURE__ */ __name((str) => str, "DEFAULT_MODIFIER");
+const DEFAULT_MESSAGE = /* @__PURE__ */ __name((ctx) => "", "DEFAULT_MESSAGE");
+const DEFAULT_MESSAGE_DATA_TYPE = "text";
+const DEFAULT_NORMALIZE = /* @__PURE__ */ __name((values2) => values2.length === 0 ? "" : join$1(values2), "DEFAULT_NORMALIZE");
+const DEFAULT_INTERPOLATE = toDisplayString;
+function pluralDefault(choice, choicesLength) {
+  choice = Math.abs(choice);
+  if (choicesLength === 2) {
+    return choice ? choice > 1 ? 1 : 0 : 1;
+  }
+  return choice ? Math.min(choice, 2) : 0;
+}
+__name(pluralDefault, "pluralDefault");
+function getPluralIndex(options3) {
+  const index2 = isNumber(options3.pluralIndex) ? options3.pluralIndex : -1;
+  return options3.named && (isNumber(options3.named.count) || isNumber(options3.named.n)) ? isNumber(options3.named.count) ? options3.named.count : isNumber(options3.named.n) ? options3.named.n : index2 : index2;
+}
+__name(getPluralIndex, "getPluralIndex");
+function normalizeNamed(pluralIndex, props) {
+  if (!props.count) {
+    props.count = pluralIndex;
+  }
+  if (!props.n) {
+    props.n = pluralIndex;
+  }
+}
+__name(normalizeNamed, "normalizeNamed");
+function createMessageContext(options3 = {}) {
+  const locale2 = options3.locale;
+  const pluralIndex = getPluralIndex(options3);
+  const pluralRule = isObject$1(options3.pluralRules) && isString$1(locale2) && isFunction$1(options3.pluralRules[locale2]) ? options3.pluralRules[locale2] : pluralDefault;
+  const orgPluralRule = isObject$1(options3.pluralRules) && isString$1(locale2) && isFunction$1(options3.pluralRules[locale2]) ? pluralDefault : void 0;
+  const plural = /* @__PURE__ */ __name((messages2) => {
+    return messages2[pluralRule(pluralIndex, messages2.length, orgPluralRule)];
+  }, "plural");
+  const _list = options3.list || [];
+  const list = /* @__PURE__ */ __name((index2) => _list[index2], "list");
+  const _named = options3.named || {};
+  isNumber(options3.pluralIndex) && normalizeNamed(pluralIndex, _named);
+  const named = /* @__PURE__ */ __name((key) => _named[key], "named");
+  function message3(key) {
+    const msg = isFunction$1(options3.messages) ? options3.messages(key) : isObject$1(options3.messages) ? options3.messages[key] : false;
+    return !msg ? options3.parent ? options3.parent.message(key) : DEFAULT_MESSAGE : msg;
+  }
+  __name(message3, "message");
+  const _modifier = /* @__PURE__ */ __name((name) => options3.modifiers ? options3.modifiers[name] : DEFAULT_MODIFIER, "_modifier");
+  const normalize = isPlainObject(options3.processor) && isFunction$1(options3.processor.normalize) ? options3.processor.normalize : DEFAULT_NORMALIZE;
+  const interpolate = isPlainObject(options3.processor) && isFunction$1(options3.processor.interpolate) ? options3.processor.interpolate : DEFAULT_INTERPOLATE;
+  const type = isPlainObject(options3.processor) && isString$1(options3.processor.type) ? options3.processor.type : DEFAULT_MESSAGE_DATA_TYPE;
+  const linked = /* @__PURE__ */ __name((key, ...args) => {
+    const [arg1, arg2] = args;
+    let type2 = "text";
+    let modifier = "";
+    if (args.length === 1) {
+      if (isObject$1(arg1)) {
+        modifier = arg1.modifier || modifier;
+        type2 = arg1.type || type2;
+      } else if (isString$1(arg1)) {
+        modifier = arg1 || modifier;
+      }
+    } else if (args.length === 2) {
+      if (isString$1(arg1)) {
+        modifier = arg1 || modifier;
+      }
+      if (isString$1(arg2)) {
+        type2 = arg2 || type2;
+      }
+    }
+    const ret = message3(key)(ctx);
+    const msg = (
+      // The message in vnode resolved with linked are returned as an array by processor.nomalize
+      type2 === "vnode" && isArray(ret) && modifier ? ret[0] : ret
+    );
+    return modifier ? _modifier(modifier)(msg, type2) : msg;
+  }, "linked");
+  const ctx = {
+    [
+      "list"
+      /* HelperNameMap.LIST */
+    ]: list,
+    [
+      "named"
+      /* HelperNameMap.NAMED */
+    ]: named,
+    [
+      "plural"
+      /* HelperNameMap.PLURAL */
+    ]: plural,
+    [
+      "linked"
+      /* HelperNameMap.LINKED */
+    ]: linked,
+    [
+      "message"
+      /* HelperNameMap.MESSAGE */
+    ]: message3,
+    [
+      "type"
+      /* HelperNameMap.TYPE */
+    ]: type,
+    [
+      "interpolate"
+      /* HelperNameMap.INTERPOLATE */
+    ]: interpolate,
+    [
+      "normalize"
+      /* HelperNameMap.NORMALIZE */
+    ]: normalize,
+    [
+      "values"
+      /* HelperNameMap.VALUES */
+    ]: assign$1({}, _list, _named)
+  };
+  return ctx;
+}
+__name(createMessageContext, "createMessageContext");
+let devtools = null;
+function setDevToolsHook(hook) {
+  devtools = hook;
+}
+__name(setDevToolsHook, "setDevToolsHook");
+function getDevToolsHook() {
+  return devtools;
+}
+__name(getDevToolsHook, "getDevToolsHook");
+function initI18nDevTools(i18n2, version2, meta) {
+  devtools && devtools.emit("i18n:init", {
+    timestamp: Date.now(),
+    i18n: i18n2,
+    version: version2,
+    meta
+  });
+}
+__name(initI18nDevTools, "initI18nDevTools");
+const translateDevTools = /* @__PURE__ */ createDevToolsHook(
+  "function:translate"
+  /* IntlifyDevToolsHooks.FunctionTranslate */
+);
+function createDevToolsHook(hook) {
+  return (payloads) => devtools && devtools.emit(hook, payloads);
+}
+__name(createDevToolsHook, "createDevToolsHook");
+const code$1$1 = CompileWarnCodes.__EXTEND_POINT__;
+const inc$1$1 = incrementer(code$1$1);
+const CoreWarnCodes = {
+  NOT_FOUND_KEY: code$1$1,
+  // 2
+  FALLBACK_TO_TRANSLATE: inc$1$1(),
+  // 3
+  CANNOT_FORMAT_NUMBER: inc$1$1(),
+  // 4
+  FALLBACK_TO_NUMBER_FORMAT: inc$1$1(),
+  // 5
+  CANNOT_FORMAT_DATE: inc$1$1(),
+  // 6
+  FALLBACK_TO_DATE_FORMAT: inc$1$1(),
+  // 7
+  EXPERIMENTAL_CUSTOM_MESSAGE_COMPILER: inc$1$1(),
+  // 8
+  __EXTEND_POINT__: inc$1$1()
+  // 9
+};
+const warnMessages$1 = {
+  [CoreWarnCodes.NOT_FOUND_KEY]: `Not found '{key}' key in '{locale}' locale messages.`,
+  [CoreWarnCodes.FALLBACK_TO_TRANSLATE]: `Fall back to translate '{key}' key with '{target}' locale.`,
+  [CoreWarnCodes.CANNOT_FORMAT_NUMBER]: `Cannot format a number value due to not supported Intl.NumberFormat.`,
+  [CoreWarnCodes.FALLBACK_TO_NUMBER_FORMAT]: `Fall back to number format '{key}' key with '{target}' locale.`,
+  [CoreWarnCodes.CANNOT_FORMAT_DATE]: `Cannot format a date value due to not supported Intl.DateTimeFormat.`,
+  [CoreWarnCodes.FALLBACK_TO_DATE_FORMAT]: `Fall back to datetime format '{key}' key with '{target}' locale.`,
+  [CoreWarnCodes.EXPERIMENTAL_CUSTOM_MESSAGE_COMPILER]: `This project is using Custom Message Compiler, which is an experimental feature. It may receive breaking changes or be removed in the future.`
+};
+function getWarnMessage$1(code2, ...args) {
+  return format$2(warnMessages$1[code2], ...args);
+}
+__name(getWarnMessage$1, "getWarnMessage$1");
+const code$2 = CompileErrorCodes.__EXTEND_POINT__;
+const inc$2 = incrementer(code$2);
+const CoreErrorCodes = {
+  INVALID_ARGUMENT: code$2,
+  // 17
+  INVALID_DATE_ARGUMENT: inc$2(),
+  // 18
+  INVALID_ISO_DATE_ARGUMENT: inc$2(),
+  // 19
+  NOT_SUPPORT_NON_STRING_MESSAGE: inc$2(),
+  // 20
+  NOT_SUPPORT_LOCALE_PROMISE_VALUE: inc$2(),
+  // 21
+  NOT_SUPPORT_LOCALE_ASYNC_FUNCTION: inc$2(),
+  // 22
+  NOT_SUPPORT_LOCALE_TYPE: inc$2(),
+  // 23
+  __EXTEND_POINT__: inc$2()
+  // 24
+};
+function createCoreError(code2) {
+  return createCompileError(code2, null, false ? { messages: errorMessages$1 } : void 0);
+}
+__name(createCoreError, "createCoreError");
+const errorMessages$1 = {
+  [CoreErrorCodes.INVALID_ARGUMENT]: "Invalid arguments",
+  [CoreErrorCodes.INVALID_DATE_ARGUMENT]: "The date provided is an invalid Date object.Make sure your Date represents a valid date.",
+  [CoreErrorCodes.INVALID_ISO_DATE_ARGUMENT]: "The argument provided is not a valid ISO date string",
+  [CoreErrorCodes.NOT_SUPPORT_NON_STRING_MESSAGE]: "Not support non-string message",
+  [CoreErrorCodes.NOT_SUPPORT_LOCALE_PROMISE_VALUE]: "cannot support promise value",
+  [CoreErrorCodes.NOT_SUPPORT_LOCALE_ASYNC_FUNCTION]: "cannot support async function",
+  [CoreErrorCodes.NOT_SUPPORT_LOCALE_TYPE]: "cannot support locale type"
+};
+function getLocale(context, options3) {
+  return options3.locale != null ? resolveLocale(options3.locale) : resolveLocale(context.locale);
+}
+__name(getLocale, "getLocale");
+let _resolveLocale;
+function resolveLocale(locale2) {
+  if (isString$1(locale2)) {
+    return locale2;
+  } else {
+    if (isFunction$1(locale2)) {
+      if (locale2.resolvedOnce && _resolveLocale != null) {
+        return _resolveLocale;
+      } else if (locale2.constructor.name === "Function") {
+        const resolve8 = locale2();
+        if (isPromise(resolve8)) {
+          throw createCoreError(CoreErrorCodes.NOT_SUPPORT_LOCALE_PROMISE_VALUE);
+        }
+        return _resolveLocale = resolve8;
+      } else {
+        throw createCoreError(CoreErrorCodes.NOT_SUPPORT_LOCALE_ASYNC_FUNCTION);
+      }
+    } else {
+      throw createCoreError(CoreErrorCodes.NOT_SUPPORT_LOCALE_TYPE);
+    }
+  }
+}
+__name(resolveLocale, "resolveLocale");
+function fallbackWithSimple(ctx, fallback, start2) {
+  return [.../* @__PURE__ */ new Set([
+    start2,
+    ...isArray(fallback) ? fallback : isObject$1(fallback) ? Object.keys(fallback) : isString$1(fallback) ? [fallback] : [start2]
+  ])];
+}
+__name(fallbackWithSimple, "fallbackWithSimple");
+function fallbackWithLocaleChain(ctx, fallback, start2) {
+  const startLocale = isString$1(start2) ? start2 : DEFAULT_LOCALE;
+  const context = ctx;
+  if (!context.__localeChainCache) {
+    context.__localeChainCache = /* @__PURE__ */ new Map();
+  }
+  let chain = context.__localeChainCache.get(startLocale);
+  if (!chain) {
+    chain = [];
+    let block2 = [start2];
+    while (isArray(block2)) {
+      block2 = appendBlockToChain(chain, block2, fallback);
+    }
+    const defaults2 = isArray(fallback) || !isPlainObject(fallback) ? fallback : fallback["default"] ? fallback["default"] : null;
+    block2 = isString$1(defaults2) ? [defaults2] : defaults2;
+    if (isArray(block2)) {
+      appendBlockToChain(chain, block2, false);
+    }
+    context.__localeChainCache.set(startLocale, chain);
+  }
+  return chain;
+}
+__name(fallbackWithLocaleChain, "fallbackWithLocaleChain");
+function appendBlockToChain(chain, block2, blocks) {
+  let follow = true;
+  for (let i2 = 0; i2 < block2.length && isBoolean(follow); i2++) {
+    const locale2 = block2[i2];
+    if (isString$1(locale2)) {
+      follow = appendLocaleToChain(chain, block2[i2], blocks);
+    }
+  }
+  return follow;
+}
+__name(appendBlockToChain, "appendBlockToChain");
+function appendLocaleToChain(chain, locale2, blocks) {
+  let follow;
+  const tokens = locale2.split("-");
+  do {
+    const target = tokens.join("-");
+    follow = appendItemToChain(chain, target, blocks);
+    tokens.splice(-1, 1);
+  } while (tokens.length && follow === true);
+  return follow;
+}
+__name(appendLocaleToChain, "appendLocaleToChain");
+function appendItemToChain(chain, target, blocks) {
+  let follow = false;
+  if (!chain.includes(target)) {
+    follow = true;
+    if (target) {
+      follow = target[target.length - 1] !== "!";
+      const locale2 = target.replace(/!/g, "");
+      chain.push(locale2);
+      if ((isArray(blocks) || isPlainObject(blocks)) && blocks[locale2]) {
+        follow = blocks[locale2];
+      }
+    }
+  }
+  return follow;
+}
+__name(appendItemToChain, "appendItemToChain");
+const VERSION$1 = "9.13.1";
+const NOT_REOSLVED = -1;
+const DEFAULT_LOCALE = "en-US";
+const MISSING_RESOLVE_VALUE = "";
+const capitalize = /* @__PURE__ */ __name((str) => `${str.charAt(0).toLocaleUpperCase()}${str.substr(1)}`, "capitalize");
+function getDefaultLinkedModifiers() {
+  return {
+    upper: /* @__PURE__ */ __name((val, type) => {
+      return type === "text" && isString$1(val) ? val.toUpperCase() : type === "vnode" && isObject$1(val) && "__v_isVNode" in val ? val.children.toUpperCase() : val;
+    }, "upper"),
+    lower: /* @__PURE__ */ __name((val, type) => {
+      return type === "text" && isString$1(val) ? val.toLowerCase() : type === "vnode" && isObject$1(val) && "__v_isVNode" in val ? val.children.toLowerCase() : val;
+    }, "lower"),
+    capitalize: /* @__PURE__ */ __name((val, type) => {
+      return type === "text" && isString$1(val) ? capitalize(val) : type === "vnode" && isObject$1(val) && "__v_isVNode" in val ? capitalize(val.children) : val;
+    }, "capitalize")
+  };
+}
+__name(getDefaultLinkedModifiers, "getDefaultLinkedModifiers");
+let _compiler;
+function registerMessageCompiler(compiler) {
+  _compiler = compiler;
+}
+__name(registerMessageCompiler, "registerMessageCompiler");
+let _resolver;
+function registerMessageResolver(resolver) {
+  _resolver = resolver;
+}
+__name(registerMessageResolver, "registerMessageResolver");
+let _fallbacker;
+function registerLocaleFallbacker(fallbacker) {
+  _fallbacker = fallbacker;
+}
+__name(registerLocaleFallbacker, "registerLocaleFallbacker");
+let _additionalMeta = null;
+const setAdditionalMeta = /* @__PURE__ */ __name(/* @__NO_SIDE_EFFECTS__ */ (meta) => {
+  _additionalMeta = meta;
+}, "setAdditionalMeta");
+const getAdditionalMeta = /* @__PURE__ */ __name(/* @__NO_SIDE_EFFECTS__ */ () => _additionalMeta, "getAdditionalMeta");
+let _fallbackContext = null;
+const setFallbackContext = /* @__PURE__ */ __name((context) => {
+  _fallbackContext = context;
+}, "setFallbackContext");
+const getFallbackContext = /* @__PURE__ */ __name(() => _fallbackContext, "getFallbackContext");
+let _cid = 0;
+function createCoreContext(options3 = {}) {
+  const onWarn = isFunction$1(options3.onWarn) ? options3.onWarn : warn;
+  const version2 = isString$1(options3.version) ? options3.version : VERSION$1;
+  const locale2 = isString$1(options3.locale) || isFunction$1(options3.locale) ? options3.locale : DEFAULT_LOCALE;
+  const _locale = isFunction$1(locale2) ? DEFAULT_LOCALE : locale2;
+  const fallbackLocale = isArray(options3.fallbackLocale) || isPlainObject(options3.fallbackLocale) || isString$1(options3.fallbackLocale) || options3.fallbackLocale === false ? options3.fallbackLocale : _locale;
+  const messages2 = isPlainObject(options3.messages) ? options3.messages : { [_locale]: {} };
+  const datetimeFormats = isPlainObject(options3.datetimeFormats) ? options3.datetimeFormats : { [_locale]: {} };
+  const numberFormats = isPlainObject(options3.numberFormats) ? options3.numberFormats : { [_locale]: {} };
+  const modifiers = assign$1({}, options3.modifiers || {}, getDefaultLinkedModifiers());
+  const pluralRules = options3.pluralRules || {};
+  const missing = isFunction$1(options3.missing) ? options3.missing : null;
+  const missingWarn = isBoolean(options3.missingWarn) || isRegExp(options3.missingWarn) ? options3.missingWarn : true;
+  const fallbackWarn = isBoolean(options3.fallbackWarn) || isRegExp(options3.fallbackWarn) ? options3.fallbackWarn : true;
+  const fallbackFormat = !!options3.fallbackFormat;
+  const unresolving = !!options3.unresolving;
+  const postTranslation = isFunction$1(options3.postTranslation) ? options3.postTranslation : null;
+  const processor = isPlainObject(options3.processor) ? options3.processor : null;
+  const warnHtmlMessage = isBoolean(options3.warnHtmlMessage) ? options3.warnHtmlMessage : true;
+  const escapeParameter = !!options3.escapeParameter;
+  const messageCompiler = isFunction$1(options3.messageCompiler) ? options3.messageCompiler : _compiler;
+  if (false) {
+    warnOnce(getWarnMessage$1(CoreWarnCodes.EXPERIMENTAL_CUSTOM_MESSAGE_COMPILER));
+  }
+  const messageResolver = isFunction$1(options3.messageResolver) ? options3.messageResolver : _resolver || resolveWithKeyValue;
+  const localeFallbacker = isFunction$1(options3.localeFallbacker) ? options3.localeFallbacker : _fallbacker || fallbackWithSimple;
+  const fallbackContext = isObject$1(options3.fallbackContext) ? options3.fallbackContext : void 0;
+  const internalOptions = options3;
+  const __datetimeFormatters = isObject$1(internalOptions.__datetimeFormatters) ? internalOptions.__datetimeFormatters : /* @__PURE__ */ new Map();
+  const __numberFormatters = isObject$1(internalOptions.__numberFormatters) ? internalOptions.__numberFormatters : /* @__PURE__ */ new Map();
+  const __meta = isObject$1(internalOptions.__meta) ? internalOptions.__meta : {};
+  _cid++;
+  const context = {
+    version: version2,
+    cid: _cid,
+    locale: locale2,
+    fallbackLocale,
+    messages: messages2,
+    modifiers,
+    pluralRules,
+    missing,
+    missingWarn,
+    fallbackWarn,
+    fallbackFormat,
+    unresolving,
+    postTranslation,
+    processor,
+    warnHtmlMessage,
+    escapeParameter,
+    messageCompiler,
+    messageResolver,
+    localeFallbacker,
+    fallbackContext,
+    onWarn,
+    __meta
+  };
+  {
+    context.datetimeFormats = datetimeFormats;
+    context.numberFormats = numberFormats;
+    context.__datetimeFormatters = __datetimeFormatters;
+    context.__numberFormatters = __numberFormatters;
+  }
+  if (false) {
+    context.__v_emitter = internalOptions.__v_emitter != null ? internalOptions.__v_emitter : void 0;
+  }
+  if (__INTLIFY_PROD_DEVTOOLS__) {
+    initI18nDevTools(context, version2, __meta);
+  }
+  return context;
+}
+__name(createCoreContext, "createCoreContext");
+function isTranslateFallbackWarn(fallback, key) {
+  return fallback instanceof RegExp ? fallback.test(key) : fallback;
+}
+__name(isTranslateFallbackWarn, "isTranslateFallbackWarn");
+function isTranslateMissingWarn(missing, key) {
+  return missing instanceof RegExp ? missing.test(key) : missing;
+}
+__name(isTranslateMissingWarn, "isTranslateMissingWarn");
+function handleMissing(context, key, locale2, missingWarn, type) {
+  const { missing, onWarn } = context;
+  if (false) {
+    const emitter = context.__v_emitter;
+    if (emitter) {
+      emitter.emit("missing", {
+        locale: locale2,
+        key,
+        type,
+        groupId: `${type}:${key}`
+      });
+    }
+  }
+  if (missing !== null) {
+    const ret = missing(context, locale2, key, type);
+    return isString$1(ret) ? ret : key;
+  } else {
+    if (false) {
+      onWarn(getWarnMessage$1(CoreWarnCodes.NOT_FOUND_KEY, { key, locale: locale2 }));
+    }
+    return key;
+  }
+}
+__name(handleMissing, "handleMissing");
+function updateFallbackLocale(ctx, locale2, fallback) {
+  const context = ctx;
+  context.__localeChainCache = /* @__PURE__ */ new Map();
+  ctx.localeFallbacker(ctx, fallback, locale2);
+}
+__name(updateFallbackLocale, "updateFallbackLocale");
+function isAlmostSameLocale(locale2, compareLocale) {
+  if (locale2 === compareLocale)
+    return false;
+  return locale2.split("-")[0] === compareLocale.split("-")[0];
+}
+__name(isAlmostSameLocale, "isAlmostSameLocale");
+function isImplicitFallback(targetLocale, locales) {
+  const index2 = locales.indexOf(targetLocale);
+  if (index2 === -1) {
+    return false;
+  }
+  for (let i2 = index2 + 1; i2 < locales.length; i2++) {
+    if (isAlmostSameLocale(targetLocale, locales[i2])) {
+      return true;
+    }
+  }
+  return false;
+}
+__name(isImplicitFallback, "isImplicitFallback");
+function format(ast) {
+  const msg = /* @__PURE__ */ __name((ctx) => formatParts(ctx, ast), "msg");
+  return msg;
+}
+__name(format, "format");
+function formatParts(ctx, ast) {
+  const body = ast.b || ast.body;
+  if ((body.t || body.type) === 1) {
+    const plural = body;
+    const cases = plural.c || plural.cases;
+    return ctx.plural(cases.reduce((messages2, c) => [
+      ...messages2,
+      formatMessageParts(ctx, c)
+    ], []));
+  } else {
+    return formatMessageParts(ctx, body);
+  }
+}
+__name(formatParts, "formatParts");
+function formatMessageParts(ctx, node3) {
+  const _static = node3.s || node3.static;
+  if (_static) {
+    return ctx.type === "text" ? _static : ctx.normalize([_static]);
+  } else {
+    const messages2 = (node3.i || node3.items).reduce((acm, c) => [...acm, formatMessagePart(ctx, c)], []);
+    return ctx.normalize(messages2);
+  }
+}
+__name(formatMessageParts, "formatMessageParts");
+function formatMessagePart(ctx, node3) {
+  const type = node3.t || node3.type;
+  switch (type) {
+    case 3: {
+      const text = node3;
+      return text.v || text.value;
+    }
+    case 9: {
+      const literal = node3;
+      return literal.v || literal.value;
+    }
+    case 4: {
+      const named = node3;
+      return ctx.interpolate(ctx.named(named.k || named.key));
+    }
+    case 5: {
+      const list = node3;
+      return ctx.interpolate(ctx.list(list.i != null ? list.i : list.index));
+    }
+    case 6: {
+      const linked = node3;
+      const modifier = linked.m || linked.modifier;
+      return ctx.linked(formatMessagePart(ctx, linked.k || linked.key), modifier ? formatMessagePart(ctx, modifier) : void 0, ctx.type);
+    }
+    case 7: {
+      const linkedKey = node3;
+      return linkedKey.v || linkedKey.value;
+    }
+    case 8: {
+      const linkedModifier = node3;
+      return linkedModifier.v || linkedModifier.value;
+    }
+    default:
+      throw new Error(`unhandled node type on format message part: ${type}`);
+  }
+}
+__name(formatMessagePart, "formatMessagePart");
+const WARN_MESSAGE = `Detected HTML in '{source}' message. Recommend not using HTML messages to avoid XSS.`;
+function checkHtmlMessage(source, warnHtmlMessage) {
+  if (warnHtmlMessage && detectHtmlTag(source)) {
+    warn(format$2(WARN_MESSAGE, { source }));
+  }
+}
+__name(checkHtmlMessage, "checkHtmlMessage");
+const defaultOnCacheKey = /* @__PURE__ */ __name((message3) => message3, "defaultOnCacheKey");
+let compileCache = /* @__PURE__ */ Object.create(null);
+function onCompileWarn(_warn) {
+  if (_warn.code === CompileWarnCodes.USE_MODULO_SYNTAX) {
+    warn(`The use of named interpolation with modulo syntax is deprecated. It will be removed in v10.
+reference: https://vue-i18n.intlify.dev/guide/essentials/syntax#rails-i18n-format 
+(message compiler warning message: ${_warn.message})`);
+  }
+}
+__name(onCompileWarn, "onCompileWarn");
+function clearCompileCache() {
+  compileCache = /* @__PURE__ */ Object.create(null);
+}
+__name(clearCompileCache, "clearCompileCache");
+const isMessageAST = /* @__PURE__ */ __name((val) => isObject$1(val) && (val.t === 0 || val.type === 0) && ("b" in val || "body" in val), "isMessageAST");
+function baseCompile(message3, options3 = {}) {
+  let detectError = false;
+  const onError = options3.onError || defaultOnError;
+  options3.onError = (err) => {
+    detectError = true;
+    onError(err);
+  };
+  return { ...baseCompile$1(message3, options3), detectError };
+}
+__name(baseCompile, "baseCompile");
+const compileToFunction = /* @__PURE__ */ __name(/* @__NO_SIDE_EFFECTS__ */ (message3, context) => {
+  if (!isString$1(message3)) {
+    throw createCoreError(CoreErrorCodes.NOT_SUPPORT_NON_STRING_MESSAGE);
+  }
+  if (false) {
+    context.onWarn = onCompileWarn;
+  }
+  {
+    const warnHtmlMessage = isBoolean(context.warnHtmlMessage) ? context.warnHtmlMessage : true;
+    const onCacheKey = context.onCacheKey || defaultOnCacheKey;
+    const cacheKey = onCacheKey(message3);
+    const cached = compileCache[cacheKey];
+    if (cached) {
+      return cached;
+    }
+    const { code: code2, detectError } = baseCompile(message3, context);
+    const msg = new Function(`return ${code2}`)();
+    return !detectError ? compileCache[cacheKey] = msg : msg;
+  }
+}, "compileToFunction");
+function compile(message3, context) {
+  if (false) {
+    context.onWarn = onCompileWarn;
+  }
+  if (__INTLIFY_JIT_COMPILATION__ && !__INTLIFY_DROP_MESSAGE_COMPILER__ && isString$1(message3)) {
+    const warnHtmlMessage = isBoolean(context.warnHtmlMessage) ? context.warnHtmlMessage : true;
+    const onCacheKey = context.onCacheKey || defaultOnCacheKey;
+    const cacheKey = onCacheKey(message3);
+    const cached = compileCache[cacheKey];
+    if (cached) {
+      return cached;
+    }
+    const { ast, detectError } = baseCompile(message3, {
+      ...context,
+      location: false,
+      jit: true
+    });
+    const msg = format(ast);
+    return !detectError ? compileCache[cacheKey] = msg : msg;
+  } else {
+    if (false) {
+      warn(`the message that is resolve with key '${context.key}' is not supported for jit compilation`);
+      return () => message3;
+    }
+    const cacheKey = message3.cacheKey;
+    if (cacheKey) {
+      const cached = compileCache[cacheKey];
+      if (cached) {
+        return cached;
+      }
+      return compileCache[cacheKey] = format(message3);
+    } else {
+      return format(message3);
+    }
+  }
+}
+__name(compile, "compile");
+const NOOP_MESSAGE_FUNCTION = /* @__PURE__ */ __name(() => "", "NOOP_MESSAGE_FUNCTION");
+const isMessageFunction = /* @__PURE__ */ __name((val) => isFunction$1(val), "isMessageFunction");
+function translate(context, ...args) {
+  const { fallbackFormat, postTranslation, unresolving, messageCompiler, fallbackLocale, messages: messages2 } = context;
+  const [key, options3] = parseTranslateArgs(...args);
+  const missingWarn = isBoolean(options3.missingWarn) ? options3.missingWarn : context.missingWarn;
+  const fallbackWarn = isBoolean(options3.fallbackWarn) ? options3.fallbackWarn : context.fallbackWarn;
+  const escapeParameter = isBoolean(options3.escapeParameter) ? options3.escapeParameter : context.escapeParameter;
+  const resolvedMessage = !!options3.resolvedMessage;
+  const defaultMsgOrKey = isString$1(options3.default) || isBoolean(options3.default) ? !isBoolean(options3.default) ? options3.default : !messageCompiler ? () => key : key : fallbackFormat ? !messageCompiler ? () => key : key : "";
+  const enableDefaultMsg = fallbackFormat || defaultMsgOrKey !== "";
+  const locale2 = getLocale(context, options3);
+  escapeParameter && escapeParams(options3);
+  let [formatScope, targetLocale, message3] = !resolvedMessage ? resolveMessageFormat(context, key, locale2, fallbackLocale, fallbackWarn, missingWarn) : [
+    key,
+    locale2,
+    messages2[locale2] || {}
+  ];
+  let format2 = formatScope;
+  let cacheBaseKey = key;
+  if (!resolvedMessage && !(isString$1(format2) || isMessageAST(format2) || isMessageFunction(format2))) {
+    if (enableDefaultMsg) {
+      format2 = defaultMsgOrKey;
+      cacheBaseKey = format2;
+    }
+  }
+  if (!resolvedMessage && (!(isString$1(format2) || isMessageAST(format2) || isMessageFunction(format2)) || !isString$1(targetLocale))) {
+    return unresolving ? NOT_REOSLVED : key;
+  }
+  if (false) {
+    warn(`The message format compilation is not supported in this build. Because message compiler isn't included. You need to pre-compilation all message format. So translate function return '${key}'.`);
+    return key;
+  }
+  let occurred = false;
+  const onError = /* @__PURE__ */ __name(() => {
+    occurred = true;
+  }, "onError");
+  const msg = !isMessageFunction(format2) ? compileMessageFormat(context, key, targetLocale, format2, cacheBaseKey, onError) : format2;
+  if (occurred) {
+    return format2;
+  }
+  const ctxOptions = getMessageContextOptions(context, targetLocale, message3, options3);
+  const msgContext = createMessageContext(ctxOptions);
+  const messaged = evaluateMessage(context, msg, msgContext);
+  const ret = postTranslation ? postTranslation(messaged, key) : messaged;
+  if (__INTLIFY_PROD_DEVTOOLS__) {
+    const payloads = {
+      timestamp: Date.now(),
+      key: isString$1(key) ? key : isMessageFunction(format2) ? format2.key : "",
+      locale: targetLocale || (isMessageFunction(format2) ? format2.locale : ""),
+      format: isString$1(format2) ? format2 : isMessageFunction(format2) ? format2.source : "",
+      message: ret
+    };
+    payloads.meta = assign$1({}, context.__meta, /* @__PURE__ */ getAdditionalMeta() || {});
+    translateDevTools(payloads);
+  }
+  return ret;
+}
+__name(translate, "translate");
+function escapeParams(options3) {
+  if (isArray(options3.list)) {
+    options3.list = options3.list.map((item2) => isString$1(item2) ? escapeHtml(item2) : item2);
+  } else if (isObject$1(options3.named)) {
+    Object.keys(options3.named).forEach((key) => {
+      if (isString$1(options3.named[key])) {
+        options3.named[key] = escapeHtml(options3.named[key]);
+      }
+    });
+  }
+}
+__name(escapeParams, "escapeParams");
+function resolveMessageFormat(context, key, locale2, fallbackLocale, fallbackWarn, missingWarn) {
+  const { messages: messages2, onWarn, messageResolver: resolveValue2, localeFallbacker } = context;
+  const locales = localeFallbacker(context, fallbackLocale, locale2);
+  let message3 = {};
+  let targetLocale;
+  let format2 = null;
+  let from = locale2;
+  let to = null;
+  const type = "translate";
+  for (let i2 = 0; i2 < locales.length; i2++) {
+    targetLocale = to = locales[i2];
+    if (false) {
+      onWarn(getWarnMessage$1(CoreWarnCodes.FALLBACK_TO_TRANSLATE, {
+        key,
+        target: targetLocale
+      }));
+    }
+    if (false) {
+      const emitter = context.__v_emitter;
+      if (emitter) {
+        emitter.emit("fallback", {
+          type,
+          key,
+          from,
+          to,
+          groupId: `${type}:${key}`
+        });
+      }
+    }
+    message3 = messages2[targetLocale] || {};
+    let start2 = null;
+    let startTag;
+    let endTag;
+    if (false) {
+      start2 = window.performance.now();
+      startTag = "intlify-message-resolve-start";
+      endTag = "intlify-message-resolve-end";
+      mark && mark(startTag);
+    }
+    if ((format2 = resolveValue2(message3, key)) === null) {
+      format2 = message3[key];
+    }
+    if (false) {
+      const end = window.performance.now();
+      const emitter = context.__v_emitter;
+      if (emitter && start2 && format2) {
+        emitter.emit("message-resolve", {
+          type: "message-resolve",
+          key,
+          message: format2,
+          time: end - start2,
+          groupId: `${type}:${key}`
+        });
+      }
+      if (startTag && endTag && mark && measure) {
+        mark(endTag);
+        measure("intlify message resolve", startTag, endTag);
+      }
+    }
+    if (isString$1(format2) || isMessageAST(format2) || isMessageFunction(format2)) {
+      break;
+    }
+    if (!isImplicitFallback(targetLocale, locales)) {
+      const missingRet = handleMissing(
+        context,
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        key,
+        targetLocale,
+        missingWarn,
+        type
+      );
+      if (missingRet !== key) {
+        format2 = missingRet;
+      }
+    }
+    from = to;
+  }
+  return [format2, targetLocale, message3];
+}
+__name(resolveMessageFormat, "resolveMessageFormat");
+function compileMessageFormat(context, key, targetLocale, format2, cacheBaseKey, onError) {
+  const { messageCompiler, warnHtmlMessage } = context;
+  if (isMessageFunction(format2)) {
+    const msg2 = format2;
+    msg2.locale = msg2.locale || targetLocale;
+    msg2.key = msg2.key || key;
+    return msg2;
+  }
+  if (messageCompiler == null) {
+    const msg2 = /* @__PURE__ */ __name(() => format2, "msg2");
+    msg2.locale = targetLocale;
+    msg2.key = key;
+    return msg2;
+  }
+  let start2 = null;
+  let startTag;
+  let endTag;
+  if (false) {
+    start2 = window.performance.now();
+    startTag = "intlify-message-compilation-start";
+    endTag = "intlify-message-compilation-end";
+    mark && mark(startTag);
+  }
+  const msg = messageCompiler(format2, getCompileContext(context, targetLocale, cacheBaseKey, format2, warnHtmlMessage, onError));
+  if (false) {
+    const end = window.performance.now();
+    const emitter = context.__v_emitter;
+    if (emitter && start2) {
+      emitter.emit("message-compilation", {
+        type: "message-compilation",
+        message: format2,
+        time: end - start2,
+        groupId: `${"translate"}:${key}`
+      });
+    }
+    if (startTag && endTag && mark && measure) {
+      mark(endTag);
+      measure("intlify message compilation", startTag, endTag);
+    }
+  }
+  msg.locale = targetLocale;
+  msg.key = key;
+  msg.source = format2;
+  return msg;
+}
+__name(compileMessageFormat, "compileMessageFormat");
+function evaluateMessage(context, msg, msgCtx) {
+  let start2 = null;
+  let startTag;
+  let endTag;
+  if (false) {
+    start2 = window.performance.now();
+    startTag = "intlify-message-evaluation-start";
+    endTag = "intlify-message-evaluation-end";
+    mark && mark(startTag);
+  }
+  const messaged = msg(msgCtx);
+  if (false) {
+    const end = window.performance.now();
+    const emitter = context.__v_emitter;
+    if (emitter && start2) {
+      emitter.emit("message-evaluation", {
+        type: "message-evaluation",
+        value: messaged,
+        time: end - start2,
+        groupId: `${"translate"}:${msg.key}`
+      });
+    }
+    if (startTag && endTag && mark && measure) {
+      mark(endTag);
+      measure("intlify message evaluation", startTag, endTag);
+    }
+  }
+  return messaged;
+}
+__name(evaluateMessage, "evaluateMessage");
+function parseTranslateArgs(...args) {
+  const [arg1, arg2, arg3] = args;
+  const options3 = {};
+  if (!isString$1(arg1) && !isNumber(arg1) && !isMessageFunction(arg1) && !isMessageAST(arg1)) {
+    throw createCoreError(CoreErrorCodes.INVALID_ARGUMENT);
+  }
+  const key = isNumber(arg1) ? String(arg1) : isMessageFunction(arg1) ? arg1 : arg1;
+  if (isNumber(arg2)) {
+    options3.plural = arg2;
+  } else if (isString$1(arg2)) {
+    options3.default = arg2;
+  } else if (isPlainObject(arg2) && !isEmptyObject(arg2)) {
+    options3.named = arg2;
+  } else if (isArray(arg2)) {
+    options3.list = arg2;
+  }
+  if (isNumber(arg3)) {
+    options3.plural = arg3;
+  } else if (isString$1(arg3)) {
+    options3.default = arg3;
+  } else if (isPlainObject(arg3)) {
+    assign$1(options3, arg3);
+  }
+  return [key, options3];
+}
+__name(parseTranslateArgs, "parseTranslateArgs");
+function getCompileContext(context, locale2, key, source, warnHtmlMessage, onError) {
+  return {
+    locale: locale2,
+    key,
+    warnHtmlMessage,
+    onError: /* @__PURE__ */ __name((err) => {
+      onError && onError(err);
+      if (false) {
+        const _source = getSourceForCodeFrame(source);
+        const message3 = `Message compilation error: ${err.message}`;
+        const codeFrame = err.location && _source && generateCodeFrame(_source, err.location.start.offset, err.location.end.offset);
+        const emitter = context.__v_emitter;
+        if (emitter && _source) {
+          emitter.emit("compile-error", {
+            message: _source,
+            error: err.message,
+            start: err.location && err.location.start.offset,
+            end: err.location && err.location.end.offset,
+            groupId: `${"translate"}:${key}`
+          });
+        }
+        console.error(codeFrame ? `${message3}
+${codeFrame}` : message3);
+      } else {
+        throw err;
+      }
+    }, "onError"),
+    onCacheKey: /* @__PURE__ */ __name((source2) => generateFormatCacheKey(locale2, key, source2), "onCacheKey")
+  };
+}
+__name(getCompileContext, "getCompileContext");
+function getSourceForCodeFrame(source) {
+  if (isString$1(source)) {
+    return source;
+  } else {
+    if (source.loc && source.loc.source) {
+      return source.loc.source;
+    }
+  }
+}
+__name(getSourceForCodeFrame, "getSourceForCodeFrame");
+function getMessageContextOptions(context, locale2, message3, options3) {
+  const { modifiers, pluralRules, messageResolver: resolveValue2, fallbackLocale, fallbackWarn, missingWarn, fallbackContext } = context;
+  const resolveMessage = /* @__PURE__ */ __name((key) => {
+    let val = resolveValue2(message3, key);
+    if (val == null && fallbackContext) {
+      const [, , message22] = resolveMessageFormat(fallbackContext, key, locale2, fallbackLocale, fallbackWarn, missingWarn);
+      val = resolveValue2(message22, key);
+    }
+    if (isString$1(val) || isMessageAST(val)) {
+      let occurred = false;
+      const onError = /* @__PURE__ */ __name(() => {
+        occurred = true;
+      }, "onError");
+      const msg = compileMessageFormat(context, key, locale2, val, key, onError);
+      return !occurred ? msg : NOOP_MESSAGE_FUNCTION;
+    } else if (isMessageFunction(val)) {
+      return val;
+    } else {
+      return NOOP_MESSAGE_FUNCTION;
+    }
+  }, "resolveMessage");
+  const ctxOptions = {
+    locale: locale2,
+    modifiers,
+    pluralRules,
+    messages: resolveMessage
+  };
+  if (context.processor) {
+    ctxOptions.processor = context.processor;
+  }
+  if (options3.list) {
+    ctxOptions.list = options3.list;
+  }
+  if (options3.named) {
+    ctxOptions.named = options3.named;
+  }
+  if (isNumber(options3.plural)) {
+    ctxOptions.pluralIndex = options3.plural;
+  }
+  return ctxOptions;
+}
+__name(getMessageContextOptions, "getMessageContextOptions");
+const intlDefined = typeof Intl !== "undefined";
+const Availabilities = {
+  dateTimeFormat: intlDefined && typeof Intl.DateTimeFormat !== "undefined",
+  numberFormat: intlDefined && typeof Intl.NumberFormat !== "undefined"
+};
+function datetime(context, ...args) {
+  const { datetimeFormats, unresolving, fallbackLocale, onWarn, localeFallbacker } = context;
+  const { __datetimeFormatters } = context;
+  if (false) {
+    onWarn(getWarnMessage$1(CoreWarnCodes.CANNOT_FORMAT_DATE));
+    return MISSING_RESOLVE_VALUE;
+  }
+  const [key, value3, options3, overrides] = parseDateTimeArgs(...args);
+  const missingWarn = isBoolean(options3.missingWarn) ? options3.missingWarn : context.missingWarn;
+  const fallbackWarn = isBoolean(options3.fallbackWarn) ? options3.fallbackWarn : context.fallbackWarn;
+  const part = !!options3.part;
+  const locale2 = getLocale(context, options3);
+  const locales = localeFallbacker(
+    context,
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    fallbackLocale,
+    locale2
+  );
+  if (!isString$1(key) || key === "") {
+    return new Intl.DateTimeFormat(locale2, overrides).format(value3);
+  }
+  let datetimeFormat = {};
+  let targetLocale;
+  let format2 = null;
+  let from = locale2;
+  let to = null;
+  const type = "datetime format";
+  for (let i2 = 0; i2 < locales.length; i2++) {
+    targetLocale = to = locales[i2];
+    if (false) {
+      onWarn(getWarnMessage$1(CoreWarnCodes.FALLBACK_TO_DATE_FORMAT, {
+        key,
+        target: targetLocale
+      }));
+    }
+    if (false) {
+      const emitter = context.__v_emitter;
+      if (emitter) {
+        emitter.emit("fallback", {
+          type,
+          key,
+          from,
+          to,
+          groupId: `${type}:${key}`
+        });
+      }
+    }
+    datetimeFormat = datetimeFormats[targetLocale] || {};
+    format2 = datetimeFormat[key];
+    if (isPlainObject(format2))
+      break;
+    handleMissing(context, key, targetLocale, missingWarn, type);
+    from = to;
+  }
+  if (!isPlainObject(format2) || !isString$1(targetLocale)) {
+    return unresolving ? NOT_REOSLVED : key;
+  }
+  let id2 = `${targetLocale}__${key}`;
+  if (!isEmptyObject(overrides)) {
+    id2 = `${id2}__${JSON.stringify(overrides)}`;
+  }
+  let formatter = __datetimeFormatters.get(id2);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(targetLocale, assign$1({}, format2, overrides));
+    __datetimeFormatters.set(id2, formatter);
+  }
+  return !part ? formatter.format(value3) : formatter.formatToParts(value3);
+}
+__name(datetime, "datetime");
+const DATETIME_FORMAT_OPTIONS_KEYS = [
+  "localeMatcher",
+  "weekday",
+  "era",
+  "year",
+  "month",
+  "day",
+  "hour",
+  "minute",
+  "second",
+  "timeZoneName",
+  "formatMatcher",
+  "hour12",
+  "timeZone",
+  "dateStyle",
+  "timeStyle",
+  "calendar",
+  "dayPeriod",
+  "numberingSystem",
+  "hourCycle",
+  "fractionalSecondDigits"
+];
+function parseDateTimeArgs(...args) {
+  const [arg1, arg2, arg3, arg4] = args;
+  const options3 = {};
+  let overrides = {};
+  let value3;
+  if (isString$1(arg1)) {
+    const matches2 = arg1.match(/(\d{4}-\d{2}-\d{2})(T|\s)?(.*)/);
+    if (!matches2) {
+      throw createCoreError(CoreErrorCodes.INVALID_ISO_DATE_ARGUMENT);
+    }
+    const dateTime = matches2[3] ? matches2[3].trim().startsWith("T") ? `${matches2[1].trim()}${matches2[3].trim()}` : `${matches2[1].trim()}T${matches2[3].trim()}` : matches2[1].trim();
+    value3 = new Date(dateTime);
+    try {
+      value3.toISOString();
+    } catch (e) {
+      throw createCoreError(CoreErrorCodes.INVALID_ISO_DATE_ARGUMENT);
+    }
+  } else if (isDate(arg1)) {
+    if (isNaN(arg1.getTime())) {
+      throw createCoreError(CoreErrorCodes.INVALID_DATE_ARGUMENT);
+    }
+    value3 = arg1;
+  } else if (isNumber(arg1)) {
+    value3 = arg1;
+  } else {
+    throw createCoreError(CoreErrorCodes.INVALID_ARGUMENT);
+  }
+  if (isString$1(arg2)) {
+    options3.key = arg2;
+  } else if (isPlainObject(arg2)) {
+    Object.keys(arg2).forEach((key) => {
+      if (DATETIME_FORMAT_OPTIONS_KEYS.includes(key)) {
+        overrides[key] = arg2[key];
+      } else {
+        options3[key] = arg2[key];
+      }
+    });
+  }
+  if (isString$1(arg3)) {
+    options3.locale = arg3;
+  } else if (isPlainObject(arg3)) {
+    overrides = arg3;
+  }
+  if (isPlainObject(arg4)) {
+    overrides = arg4;
+  }
+  return [options3.key || "", value3, options3, overrides];
+}
+__name(parseDateTimeArgs, "parseDateTimeArgs");
+function clearDateTimeFormat(ctx, locale2, format2) {
+  const context = ctx;
+  for (const key in format2) {
+    const id2 = `${locale2}__${key}`;
+    if (!context.__datetimeFormatters.has(id2)) {
+      continue;
+    }
+    context.__datetimeFormatters.delete(id2);
+  }
+}
+__name(clearDateTimeFormat, "clearDateTimeFormat");
+function number(context, ...args) {
+  const { numberFormats, unresolving, fallbackLocale, onWarn, localeFallbacker } = context;
+  const { __numberFormatters } = context;
+  if (false) {
+    onWarn(getWarnMessage$1(CoreWarnCodes.CANNOT_FORMAT_NUMBER));
+    return MISSING_RESOLVE_VALUE;
+  }
+  const [key, value3, options3, overrides] = parseNumberArgs(...args);
+  const missingWarn = isBoolean(options3.missingWarn) ? options3.missingWarn : context.missingWarn;
+  const fallbackWarn = isBoolean(options3.fallbackWarn) ? options3.fallbackWarn : context.fallbackWarn;
+  const part = !!options3.part;
+  const locale2 = getLocale(context, options3);
+  const locales = localeFallbacker(
+    context,
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    fallbackLocale,
+    locale2
+  );
+  if (!isString$1(key) || key === "") {
+    return new Intl.NumberFormat(locale2, overrides).format(value3);
+  }
+  let numberFormat = {};
+  let targetLocale;
+  let format2 = null;
+  let from = locale2;
+  let to = null;
+  const type = "number format";
+  for (let i2 = 0; i2 < locales.length; i2++) {
+    targetLocale = to = locales[i2];
+    if (false) {
+      onWarn(getWarnMessage$1(CoreWarnCodes.FALLBACK_TO_NUMBER_FORMAT, {
+        key,
+        target: targetLocale
+      }));
+    }
+    if (false) {
+      const emitter = context.__v_emitter;
+      if (emitter) {
+        emitter.emit("fallback", {
+          type,
+          key,
+          from,
+          to,
+          groupId: `${type}:${key}`
+        });
+      }
+    }
+    numberFormat = numberFormats[targetLocale] || {};
+    format2 = numberFormat[key];
+    if (isPlainObject(format2))
+      break;
+    handleMissing(context, key, targetLocale, missingWarn, type);
+    from = to;
+  }
+  if (!isPlainObject(format2) || !isString$1(targetLocale)) {
+    return unresolving ? NOT_REOSLVED : key;
+  }
+  let id2 = `${targetLocale}__${key}`;
+  if (!isEmptyObject(overrides)) {
+    id2 = `${id2}__${JSON.stringify(overrides)}`;
+  }
+  let formatter = __numberFormatters.get(id2);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(targetLocale, assign$1({}, format2, overrides));
+    __numberFormatters.set(id2, formatter);
+  }
+  return !part ? formatter.format(value3) : formatter.formatToParts(value3);
+}
+__name(number, "number");
+const NUMBER_FORMAT_OPTIONS_KEYS = [
+  "localeMatcher",
+  "style",
+  "currency",
+  "currencyDisplay",
+  "currencySign",
+  "useGrouping",
+  "minimumIntegerDigits",
+  "minimumFractionDigits",
+  "maximumFractionDigits",
+  "minimumSignificantDigits",
+  "maximumSignificantDigits",
+  "compactDisplay",
+  "notation",
+  "signDisplay",
+  "unit",
+  "unitDisplay",
+  "roundingMode",
+  "roundingPriority",
+  "roundingIncrement",
+  "trailingZeroDisplay"
+];
+function parseNumberArgs(...args) {
+  const [arg1, arg2, arg3, arg4] = args;
+  const options3 = {};
+  let overrides = {};
+  if (!isNumber(arg1)) {
+    throw createCoreError(CoreErrorCodes.INVALID_ARGUMENT);
+  }
+  const value3 = arg1;
+  if (isString$1(arg2)) {
+    options3.key = arg2;
+  } else if (isPlainObject(arg2)) {
+    Object.keys(arg2).forEach((key) => {
+      if (NUMBER_FORMAT_OPTIONS_KEYS.includes(key)) {
+        overrides[key] = arg2[key];
+      } else {
+        options3[key] = arg2[key];
+      }
+    });
+  }
+  if (isString$1(arg3)) {
+    options3.locale = arg3;
+  } else if (isPlainObject(arg3)) {
+    overrides = arg3;
+  }
+  if (isPlainObject(arg4)) {
+    overrides = arg4;
+  }
+  return [options3.key || "", value3, options3, overrides];
+}
+__name(parseNumberArgs, "parseNumberArgs");
+function clearNumberFormat(ctx, locale2, format2) {
+  const context = ctx;
+  for (const key in format2) {
+    const id2 = `${locale2}__${key}`;
+    if (!context.__numberFormatters.has(id2)) {
+      continue;
+    }
+    context.__numberFormatters.delete(id2);
+  }
+}
+__name(clearNumberFormat, "clearNumberFormat");
+{
+  initFeatureFlags$1();
+}
+/*!
+  * vue-i18n v9.13.1
+  * (c) 2024 kazuya kawaguchi
+  * Released under the MIT License.
+  */
+const VERSION = "9.13.1";
+function initFeatureFlags() {
+  if (typeof __VUE_I18N_FULL_INSTALL__ !== "boolean") {
+    getGlobalThis().__VUE_I18N_FULL_INSTALL__ = true;
+  }
+  if (typeof __VUE_I18N_LEGACY_API__ !== "boolean") {
+    getGlobalThis().__VUE_I18N_LEGACY_API__ = true;
+  }
+  if (typeof __INTLIFY_JIT_COMPILATION__ !== "boolean") {
+    getGlobalThis().__INTLIFY_JIT_COMPILATION__ = false;
+  }
+  if (typeof __INTLIFY_DROP_MESSAGE_COMPILER__ !== "boolean") {
+    getGlobalThis().__INTLIFY_DROP_MESSAGE_COMPILER__ = false;
+  }
+  if (typeof __INTLIFY_PROD_DEVTOOLS__ !== "boolean") {
+    getGlobalThis().__INTLIFY_PROD_DEVTOOLS__ = false;
+  }
+}
+__name(initFeatureFlags, "initFeatureFlags");
+const code$1 = CoreWarnCodes.__EXTEND_POINT__;
+const inc$1 = incrementer(code$1);
+const I18nWarnCodes = {
+  FALLBACK_TO_ROOT: code$1,
+  // 9
+  NOT_SUPPORTED_PRESERVE: inc$1(),
+  // 10
+  NOT_SUPPORTED_FORMATTER: inc$1(),
+  // 11
+  NOT_SUPPORTED_PRESERVE_DIRECTIVE: inc$1(),
+  // 12
+  NOT_SUPPORTED_GET_CHOICE_INDEX: inc$1(),
+  // 13
+  COMPONENT_NAME_LEGACY_COMPATIBLE: inc$1(),
+  // 14
+  NOT_FOUND_PARENT_SCOPE: inc$1(),
+  // 15
+  IGNORE_OBJ_FLATTEN: inc$1(),
+  // 16
+  NOTICE_DROP_ALLOW_COMPOSITION: inc$1(),
+  // 17
+  NOTICE_DROP_TRANSLATE_EXIST_COMPATIBLE_FLAG: inc$1()
+  // 18
+};
+const warnMessages = {
+  [I18nWarnCodes.FALLBACK_TO_ROOT]: `Fall back to {type} '{key}' with root locale.`,
+  [I18nWarnCodes.NOT_SUPPORTED_PRESERVE]: `Not supported 'preserve'.`,
+  [I18nWarnCodes.NOT_SUPPORTED_FORMATTER]: `Not supported 'formatter'.`,
+  [I18nWarnCodes.NOT_SUPPORTED_PRESERVE_DIRECTIVE]: `Not supported 'preserveDirectiveContent'.`,
+  [I18nWarnCodes.NOT_SUPPORTED_GET_CHOICE_INDEX]: `Not supported 'getChoiceIndex'.`,
+  [I18nWarnCodes.COMPONENT_NAME_LEGACY_COMPATIBLE]: `Component name legacy compatible: '{name}' -> 'i18n'`,
+  [I18nWarnCodes.NOT_FOUND_PARENT_SCOPE]: `Not found parent scope. use the global scope.`,
+  [I18nWarnCodes.IGNORE_OBJ_FLATTEN]: `Ignore object flatten: '{key}' key has an string value`,
+  [I18nWarnCodes.NOTICE_DROP_ALLOW_COMPOSITION]: `'allowComposition' option will be dropped in the next major version. For more information, please see 👉 https://tinyurl.com/2p97mcze`,
+  [I18nWarnCodes.NOTICE_DROP_TRANSLATE_EXIST_COMPATIBLE_FLAG]: `'translateExistCompatible' option will be dropped in the next major version.`
+};
+function getWarnMessage(code2, ...args) {
+  return format$2(warnMessages[code2], ...args);
+}
+__name(getWarnMessage, "getWarnMessage");
+const code = CoreErrorCodes.__EXTEND_POINT__;
+const inc = incrementer(code);
+const I18nErrorCodes = {
+  // composer module errors
+  UNEXPECTED_RETURN_TYPE: code,
+  // 24
+  // legacy module errors
+  INVALID_ARGUMENT: inc(),
+  // 25
+  // i18n module errors
+  MUST_BE_CALL_SETUP_TOP: inc(),
+  // 26
+  NOT_INSTALLED: inc(),
+  // 27
+  NOT_AVAILABLE_IN_LEGACY_MODE: inc(),
+  // 28
+  // directive module errors
+  REQUIRED_VALUE: inc(),
+  // 29
+  INVALID_VALUE: inc(),
+  // 30
+  // vue-devtools errors
+  CANNOT_SETUP_VUE_DEVTOOLS_PLUGIN: inc(),
+  // 31
+  NOT_INSTALLED_WITH_PROVIDE: inc(),
+  // 32
+  // unexpected error
+  UNEXPECTED_ERROR: inc(),
+  // 33
+  // not compatible legacy vue-i18n constructor
+  NOT_COMPATIBLE_LEGACY_VUE_I18N: inc(),
+  // 34
+  // bridge support vue 2.x only
+  BRIDGE_SUPPORT_VUE_2_ONLY: inc(),
+  // 35
+  // need to define `i18n` option in `allowComposition: true` and `useScope: 'local' at `useI18n``
+  MUST_DEFINE_I18N_OPTION_IN_ALLOW_COMPOSITION: inc(),
+  // 36
+  // Not available Compostion API in Legacy API mode. Please make sure that the legacy API mode is working properly
+  NOT_AVAILABLE_COMPOSITION_IN_LEGACY: inc(),
+  // 37
+  // for enhancement
+  __EXTEND_POINT__: inc()
+  // 38
+};
+function createI18nError(code2, ...args) {
+  return createCompileError(code2, null, false ? { messages: errorMessages, args } : void 0);
+}
+__name(createI18nError, "createI18nError");
+const errorMessages = {
+  [I18nErrorCodes.UNEXPECTED_RETURN_TYPE]: "Unexpected return type in composer",
+  [I18nErrorCodes.INVALID_ARGUMENT]: "Invalid argument",
+  [I18nErrorCodes.MUST_BE_CALL_SETUP_TOP]: "Must be called at the top of a `setup` function",
+  [I18nErrorCodes.NOT_INSTALLED]: "Need to install with `app.use` function",
+  [I18nErrorCodes.UNEXPECTED_ERROR]: "Unexpected error",
+  [I18nErrorCodes.NOT_AVAILABLE_IN_LEGACY_MODE]: "Not available in legacy mode",
+  [I18nErrorCodes.REQUIRED_VALUE]: `Required in value: {0}`,
+  [I18nErrorCodes.INVALID_VALUE]: `Invalid value`,
+  [I18nErrorCodes.CANNOT_SETUP_VUE_DEVTOOLS_PLUGIN]: `Cannot setup vue-devtools plugin`,
+  [I18nErrorCodes.NOT_INSTALLED_WITH_PROVIDE]: "Need to install with `provide` function",
+  [I18nErrorCodes.NOT_COMPATIBLE_LEGACY_VUE_I18N]: "Not compatible legacy VueI18n.",
+  [I18nErrorCodes.BRIDGE_SUPPORT_VUE_2_ONLY]: "vue-i18n-bridge support Vue 2.x only",
+  [I18nErrorCodes.MUST_DEFINE_I18N_OPTION_IN_ALLOW_COMPOSITION]: "Must define ‘i18n’ option or custom block in Composition API with using local scope in Legacy API mode",
+  [I18nErrorCodes.NOT_AVAILABLE_COMPOSITION_IN_LEGACY]: "Not available Compostion API in Legacy API mode. Please make sure that the legacy API mode is working properly"
+};
+const TranslateVNodeSymbol = /* @__PURE__ */ makeSymbol("__translateVNode");
+const DatetimePartsSymbol = /* @__PURE__ */ makeSymbol("__datetimeParts");
+const NumberPartsSymbol = /* @__PURE__ */ makeSymbol("__numberParts");
+const EnableEmitter = /* @__PURE__ */ makeSymbol("__enableEmitter");
+const DisableEmitter = /* @__PURE__ */ makeSymbol("__disableEmitter");
+const SetPluralRulesSymbol = makeSymbol("__setPluralRules");
+makeSymbol("__intlifyMeta");
+const InejctWithOptionSymbol = /* @__PURE__ */ makeSymbol("__injectWithOption");
+const DisposeSymbol = /* @__PURE__ */ makeSymbol("__dispose");
+const __VUE_I18N_BRIDGE__ = "__VUE_I18N_BRIDGE__";
+function handleFlatJson(obj) {
+  if (!isObject$1(obj)) {
+    return obj;
+  }
+  for (const key in obj) {
+    if (!hasOwn(obj, key)) {
+      continue;
+    }
+    if (!key.includes(".")) {
+      if (isObject$1(obj[key])) {
+        handleFlatJson(obj[key]);
+      }
+    } else {
+      const subKeys = key.split(".");
+      const lastIndex = subKeys.length - 1;
+      let currentObj = obj;
+      let hasStringValue = false;
+      for (let i2 = 0; i2 < lastIndex; i2++) {
+        if (!(subKeys[i2] in currentObj)) {
+          currentObj[subKeys[i2]] = {};
+        }
+        if (!isObject$1(currentObj[subKeys[i2]])) {
+          hasStringValue = true;
+          break;
+        }
+        currentObj = currentObj[subKeys[i2]];
+      }
+      if (!hasStringValue) {
+        currentObj[subKeys[lastIndex]] = obj[key];
+        delete obj[key];
+      }
+      if (isObject$1(currentObj[subKeys[lastIndex]])) {
+        handleFlatJson(currentObj[subKeys[lastIndex]]);
+      }
+    }
+  }
+  return obj;
+}
+__name(handleFlatJson, "handleFlatJson");
+function getLocaleMessages(locale2, options3) {
+  const { messages: messages2, __i18n, messageResolver, flatJson } = options3;
+  const ret = isPlainObject(messages2) ? messages2 : isArray(__i18n) ? {} : { [locale2]: {} };
+  if (isArray(__i18n)) {
+    __i18n.forEach((custom2) => {
+      if ("locale" in custom2 && "resource" in custom2) {
+        const { locale: locale22, resource } = custom2;
+        if (locale22) {
+          ret[locale22] = ret[locale22] || {};
+          deepCopy(resource, ret[locale22]);
+        } else {
+          deepCopy(resource, ret);
+        }
+      } else {
+        isString$1(custom2) && deepCopy(JSON.parse(custom2), ret);
+      }
+    });
+  }
+  if (messageResolver == null && flatJson) {
+    for (const key in ret) {
+      if (hasOwn(ret, key)) {
+        handleFlatJson(ret[key]);
+      }
+    }
+  }
+  return ret;
+}
+__name(getLocaleMessages, "getLocaleMessages");
+function getComponentOptions(instance) {
+  return instance.type;
+}
+__name(getComponentOptions, "getComponentOptions");
+function adjustI18nResources(gl, options3, componentOptions) {
+  let messages2 = isObject$1(options3.messages) ? options3.messages : {};
+  if ("__i18nGlobal" in componentOptions) {
+    messages2 = getLocaleMessages(gl.locale.value, {
+      messages: messages2,
+      __i18n: componentOptions.__i18nGlobal
+    });
+  }
+  const locales = Object.keys(messages2);
+  if (locales.length) {
+    locales.forEach((locale2) => {
+      gl.mergeLocaleMessage(locale2, messages2[locale2]);
+    });
+  }
+  {
+    if (isObject$1(options3.datetimeFormats)) {
+      const locales2 = Object.keys(options3.datetimeFormats);
+      if (locales2.length) {
+        locales2.forEach((locale2) => {
+          gl.mergeDateTimeFormat(locale2, options3.datetimeFormats[locale2]);
+        });
+      }
+    }
+    if (isObject$1(options3.numberFormats)) {
+      const locales2 = Object.keys(options3.numberFormats);
+      if (locales2.length) {
+        locales2.forEach((locale2) => {
+          gl.mergeNumberFormat(locale2, options3.numberFormats[locale2]);
+        });
+      }
+    }
+  }
+}
+__name(adjustI18nResources, "adjustI18nResources");
+function createTextNode(key) {
+  return createVNode(Text, null, key, 0);
+}
+__name(createTextNode, "createTextNode");
+const DEVTOOLS_META = "__INTLIFY_META__";
+const NOOP_RETURN_ARRAY = /* @__PURE__ */ __name(() => [], "NOOP_RETURN_ARRAY");
+const NOOP_RETURN_FALSE = /* @__PURE__ */ __name(() => false, "NOOP_RETURN_FALSE");
+let composerID = 0;
+function defineCoreMissingHandler(missing) {
+  return (ctx, locale2, key, type) => {
+    return missing(locale2, key, getCurrentInstance() || void 0, type);
+  };
+}
+__name(defineCoreMissingHandler, "defineCoreMissingHandler");
+const getMetaInfo = /* @__PURE__ */ __name(/* @__NO_SIDE_EFFECTS__ */ () => {
+  const instance = getCurrentInstance();
+  let meta = null;
+  return instance && (meta = getComponentOptions(instance)[DEVTOOLS_META]) ? { [DEVTOOLS_META]: meta } : null;
+}, "getMetaInfo");
+function createComposer(options3 = {}, VueI18nLegacy) {
+  const { __root, __injectWithOption } = options3;
+  const _isGlobal = __root === void 0;
+  const flatJson = options3.flatJson;
+  const _ref = inBrowser ? ref : shallowRef;
+  const translateExistCompatible = !!options3.translateExistCompatible;
+  if (false) {
+    if (translateExistCompatible && true) {
+      warnOnce(getWarnMessage(I18nWarnCodes.NOTICE_DROP_TRANSLATE_EXIST_COMPATIBLE_FLAG));
+    }
+  }
+  let _inheritLocale = isBoolean(options3.inheritLocale) ? options3.inheritLocale : true;
+  const _locale = _ref(
+    // prettier-ignore
+    __root && _inheritLocale ? __root.locale.value : isString$1(options3.locale) ? options3.locale : DEFAULT_LOCALE
+  );
+  const _fallbackLocale = _ref(
+    // prettier-ignore
+    __root && _inheritLocale ? __root.fallbackLocale.value : isString$1(options3.fallbackLocale) || isArray(options3.fallbackLocale) || isPlainObject(options3.fallbackLocale) || options3.fallbackLocale === false ? options3.fallbackLocale : _locale.value
+  );
+  const _messages = _ref(getLocaleMessages(_locale.value, options3));
+  const _datetimeFormats = _ref(isPlainObject(options3.datetimeFormats) ? options3.datetimeFormats : { [_locale.value]: {} });
+  const _numberFormats = _ref(isPlainObject(options3.numberFormats) ? options3.numberFormats : { [_locale.value]: {} });
+  let _missingWarn = __root ? __root.missingWarn : isBoolean(options3.missingWarn) || isRegExp(options3.missingWarn) ? options3.missingWarn : true;
+  let _fallbackWarn = __root ? __root.fallbackWarn : isBoolean(options3.fallbackWarn) || isRegExp(options3.fallbackWarn) ? options3.fallbackWarn : true;
+  let _fallbackRoot = __root ? __root.fallbackRoot : isBoolean(options3.fallbackRoot) ? options3.fallbackRoot : true;
+  let _fallbackFormat = !!options3.fallbackFormat;
+  let _missing = isFunction$1(options3.missing) ? options3.missing : null;
+  let _runtimeMissing = isFunction$1(options3.missing) ? defineCoreMissingHandler(options3.missing) : null;
+  let _postTranslation = isFunction$1(options3.postTranslation) ? options3.postTranslation : null;
+  let _warnHtmlMessage = __root ? __root.warnHtmlMessage : isBoolean(options3.warnHtmlMessage) ? options3.warnHtmlMessage : true;
+  let _escapeParameter = !!options3.escapeParameter;
+  const _modifiers = __root ? __root.modifiers : isPlainObject(options3.modifiers) ? options3.modifiers : {};
+  let _pluralRules = options3.pluralRules || __root && __root.pluralRules;
+  let _context;
+  const getCoreContext = /* @__PURE__ */ __name(() => {
+    _isGlobal && setFallbackContext(null);
+    const ctxOptions = {
+      version: VERSION,
+      locale: _locale.value,
+      fallbackLocale: _fallbackLocale.value,
+      messages: _messages.value,
+      modifiers: _modifiers,
+      pluralRules: _pluralRules,
+      missing: _runtimeMissing === null ? void 0 : _runtimeMissing,
+      missingWarn: _missingWarn,
+      fallbackWarn: _fallbackWarn,
+      fallbackFormat: _fallbackFormat,
+      unresolving: true,
+      postTranslation: _postTranslation === null ? void 0 : _postTranslation,
+      warnHtmlMessage: _warnHtmlMessage,
+      escapeParameter: _escapeParameter,
+      messageResolver: options3.messageResolver,
+      messageCompiler: options3.messageCompiler,
+      __meta: { framework: "vue" }
+    };
+    {
+      ctxOptions.datetimeFormats = _datetimeFormats.value;
+      ctxOptions.numberFormats = _numberFormats.value;
+      ctxOptions.__datetimeFormatters = isPlainObject(_context) ? _context.__datetimeFormatters : void 0;
+      ctxOptions.__numberFormatters = isPlainObject(_context) ? _context.__numberFormatters : void 0;
+    }
+    if (false) {
+      ctxOptions.__v_emitter = isPlainObject(_context) ? _context.__v_emitter : void 0;
+    }
+    const ctx = createCoreContext(ctxOptions);
+    _isGlobal && setFallbackContext(ctx);
+    return ctx;
+  }, "getCoreContext");
+  _context = getCoreContext();
+  updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
+  function trackReactivityValues() {
+    return [
+      _locale.value,
+      _fallbackLocale.value,
+      _messages.value,
+      _datetimeFormats.value,
+      _numberFormats.value
+    ];
+  }
+  __name(trackReactivityValues, "trackReactivityValues");
+  const locale2 = computed({
+    get: /* @__PURE__ */ __name(() => _locale.value, "get"),
+    set: /* @__PURE__ */ __name((val) => {
+      _locale.value = val;
+      _context.locale = _locale.value;
+    }, "set")
+  });
+  const fallbackLocale = computed({
+    get: /* @__PURE__ */ __name(() => _fallbackLocale.value, "get"),
+    set: /* @__PURE__ */ __name((val) => {
+      _fallbackLocale.value = val;
+      _context.fallbackLocale = _fallbackLocale.value;
+      updateFallbackLocale(_context, _locale.value, val);
+    }, "set")
+  });
+  const messages2 = computed(() => _messages.value);
+  const datetimeFormats = /* @__PURE__ */ computed(() => _datetimeFormats.value);
+  const numberFormats = /* @__PURE__ */ computed(() => _numberFormats.value);
+  function getPostTranslationHandler() {
+    return isFunction$1(_postTranslation) ? _postTranslation : null;
+  }
+  __name(getPostTranslationHandler, "getPostTranslationHandler");
+  function setPostTranslationHandler(handler6) {
+    _postTranslation = handler6;
+    _context.postTranslation = handler6;
+  }
+  __name(setPostTranslationHandler, "setPostTranslationHandler");
+  function getMissingHandler() {
+    return _missing;
+  }
+  __name(getMissingHandler, "getMissingHandler");
+  function setMissingHandler(handler6) {
+    if (handler6 !== null) {
+      _runtimeMissing = defineCoreMissingHandler(handler6);
+    }
+    _missing = handler6;
+    _context.missing = _runtimeMissing;
+  }
+  __name(setMissingHandler, "setMissingHandler");
+  function isResolvedTranslateMessage(type, arg) {
+    return type !== "translate" || !arg.resolvedMessage;
+  }
+  __name(isResolvedTranslateMessage, "isResolvedTranslateMessage");
+  const wrapWithDeps = /* @__PURE__ */ __name((fn, argumentParser, warnType, fallbackSuccess, fallbackFail, successCondition) => {
+    trackReactivityValues();
+    let ret;
+    try {
+      if (__INTLIFY_PROD_DEVTOOLS__) {
+        /* @__PURE__ */ setAdditionalMeta(/* @__PURE__ */ getMetaInfo());
+      }
+      if (!_isGlobal) {
+        _context.fallbackContext = __root ? getFallbackContext() : void 0;
+      }
+      ret = fn(_context);
+    } finally {
+      if (__INTLIFY_PROD_DEVTOOLS__) {
+        /* @__PURE__ */ setAdditionalMeta(null);
+      }
+      if (!_isGlobal) {
+        _context.fallbackContext = void 0;
+      }
+    }
+    if (warnType !== "translate exists" && // for not `te` (e.g `t`)
+    isNumber(ret) && ret === NOT_REOSLVED || warnType === "translate exists" && !ret) {
+      const [key, arg2] = argumentParser();
+      if (false) {
+        if (_fallbackRoot && (isTranslateFallbackWarn(_fallbackWarn, key) || isTranslateMissingWarn(_missingWarn, key))) {
+          warn(getWarnMessage(I18nWarnCodes.FALLBACK_TO_ROOT, {
+            key,
+            type: warnType
+          }));
+        }
+        if (false) {
+          const { __v_emitter: emitter } = _context;
+          if (emitter && _fallbackRoot) {
+            emitter.emit("fallback", {
+              type: warnType,
+              key,
+              to: "global",
+              groupId: `${warnType}:${key}`
+            });
+          }
+        }
+      }
+      return __root && _fallbackRoot ? fallbackSuccess(__root) : fallbackFail(key);
+    } else if (successCondition(ret)) {
+      return ret;
+    } else {
+      throw createI18nError(I18nErrorCodes.UNEXPECTED_RETURN_TYPE);
+    }
+  }, "wrapWithDeps");
+  function t(...args) {
+    return wrapWithDeps((context) => Reflect.apply(translate, null, [context, ...args]), () => parseTranslateArgs(...args), "translate", (root26) => Reflect.apply(root26.t, root26, [...args]), (key) => key, (val) => isString$1(val));
+  }
+  __name(t, "t");
+  function rt(...args) {
+    const [arg1, arg2, arg3] = args;
+    if (arg3 && !isObject$1(arg3)) {
+      throw createI18nError(I18nErrorCodes.INVALID_ARGUMENT);
+    }
+    return t(...[arg1, arg2, assign$1({ resolvedMessage: true }, arg3 || {})]);
+  }
+  __name(rt, "rt");
+  function d(...args) {
+    return wrapWithDeps((context) => Reflect.apply(datetime, null, [context, ...args]), () => parseDateTimeArgs(...args), "datetime format", (root26) => Reflect.apply(root26.d, root26, [...args]), () => MISSING_RESOLVE_VALUE, (val) => isString$1(val));
+  }
+  __name(d, "d");
+  function n(...args) {
+    return wrapWithDeps((context) => Reflect.apply(number, null, [context, ...args]), () => parseNumberArgs(...args), "number format", (root26) => Reflect.apply(root26.n, root26, [...args]), () => MISSING_RESOLVE_VALUE, (val) => isString$1(val));
+  }
+  __name(n, "n");
+  function normalize(values2) {
+    return values2.map((val) => isString$1(val) || isNumber(val) || isBoolean(val) ? createTextNode(String(val)) : val);
+  }
+  __name(normalize, "normalize");
+  const interpolate = /* @__PURE__ */ __name((val) => val, "interpolate");
+  const processor = {
+    normalize,
+    interpolate,
+    type: "vnode"
+  };
+  function translateVNode(...args) {
+    return wrapWithDeps(
+      (context) => {
+        let ret;
+        const _context2 = context;
+        try {
+          _context2.processor = processor;
+          ret = Reflect.apply(translate, null, [_context2, ...args]);
+        } finally {
+          _context2.processor = null;
+        }
+        return ret;
+      },
+      () => parseTranslateArgs(...args),
+      "translate",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (root26) => root26[TranslateVNodeSymbol](...args),
+      (key) => [createTextNode(key)],
+      (val) => isArray(val)
+    );
+  }
+  __name(translateVNode, "translateVNode");
+  function numberParts(...args) {
+    return wrapWithDeps(
+      (context) => Reflect.apply(number, null, [context, ...args]),
+      () => parseNumberArgs(...args),
+      "number format",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (root26) => root26[NumberPartsSymbol](...args),
+      NOOP_RETURN_ARRAY,
+      (val) => isString$1(val) || isArray(val)
+    );
+  }
+  __name(numberParts, "numberParts");
+  function datetimeParts(...args) {
+    return wrapWithDeps(
+      (context) => Reflect.apply(datetime, null, [context, ...args]),
+      () => parseDateTimeArgs(...args),
+      "datetime format",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (root26) => root26[DatetimePartsSymbol](...args),
+      NOOP_RETURN_ARRAY,
+      (val) => isString$1(val) || isArray(val)
+    );
+  }
+  __name(datetimeParts, "datetimeParts");
+  function setPluralRules(rules) {
+    _pluralRules = rules;
+    _context.pluralRules = _pluralRules;
+  }
+  __name(setPluralRules, "setPluralRules");
+  function te(key, locale22) {
+    return wrapWithDeps(() => {
+      if (!key) {
+        return false;
+      }
+      const targetLocale = isString$1(locale22) ? locale22 : _locale.value;
+      const message3 = getLocaleMessage(targetLocale);
+      const resolved = _context.messageResolver(message3, key);
+      return !translateExistCompatible ? isMessageAST(resolved) || isMessageFunction(resolved) || isString$1(resolved) : resolved != null;
+    }, () => [key], "translate exists", (root26) => {
+      return Reflect.apply(root26.te, root26, [key, locale22]);
+    }, NOOP_RETURN_FALSE, (val) => isBoolean(val));
+  }
+  __name(te, "te");
+  function resolveMessages(key) {
+    let messages22 = null;
+    const locales = fallbackWithLocaleChain(_context, _fallbackLocale.value, _locale.value);
+    for (let i2 = 0; i2 < locales.length; i2++) {
+      const targetLocaleMessages = _messages.value[locales[i2]] || {};
+      const messageValue = _context.messageResolver(targetLocaleMessages, key);
+      if (messageValue != null) {
+        messages22 = messageValue;
+        break;
+      }
+    }
+    return messages22;
+  }
+  __name(resolveMessages, "resolveMessages");
+  function tm(key) {
+    const messages22 = resolveMessages(key);
+    return messages22 != null ? messages22 : __root ? __root.tm(key) || {} : {};
+  }
+  __name(tm, "tm");
+  function getLocaleMessage(locale22) {
+    return _messages.value[locale22] || {};
+  }
+  __name(getLocaleMessage, "getLocaleMessage");
+  function setLocaleMessage(locale22, message3) {
+    if (flatJson) {
+      const _message = { [locale22]: message3 };
+      for (const key in _message) {
+        if (hasOwn(_message, key)) {
+          handleFlatJson(_message[key]);
+        }
+      }
+      message3 = _message[locale22];
+    }
+    _messages.value[locale22] = message3;
+    _context.messages = _messages.value;
+  }
+  __name(setLocaleMessage, "setLocaleMessage");
+  function mergeLocaleMessage(locale22, message3) {
+    _messages.value[locale22] = _messages.value[locale22] || {};
+    const _message = { [locale22]: message3 };
+    if (flatJson) {
+      for (const key in _message) {
+        if (hasOwn(_message, key)) {
+          handleFlatJson(_message[key]);
+        }
+      }
+    }
+    message3 = _message[locale22];
+    deepCopy(message3, _messages.value[locale22]);
+    _context.messages = _messages.value;
+  }
+  __name(mergeLocaleMessage, "mergeLocaleMessage");
+  function getDateTimeFormat(locale22) {
+    return _datetimeFormats.value[locale22] || {};
+  }
+  __name(getDateTimeFormat, "getDateTimeFormat");
+  function setDateTimeFormat(locale22, format2) {
+    _datetimeFormats.value[locale22] = format2;
+    _context.datetimeFormats = _datetimeFormats.value;
+    clearDateTimeFormat(_context, locale22, format2);
+  }
+  __name(setDateTimeFormat, "setDateTimeFormat");
+  function mergeDateTimeFormat(locale22, format2) {
+    _datetimeFormats.value[locale22] = assign$1(_datetimeFormats.value[locale22] || {}, format2);
+    _context.datetimeFormats = _datetimeFormats.value;
+    clearDateTimeFormat(_context, locale22, format2);
+  }
+  __name(mergeDateTimeFormat, "mergeDateTimeFormat");
+  function getNumberFormat(locale22) {
+    return _numberFormats.value[locale22] || {};
+  }
+  __name(getNumberFormat, "getNumberFormat");
+  function setNumberFormat(locale22, format2) {
+    _numberFormats.value[locale22] = format2;
+    _context.numberFormats = _numberFormats.value;
+    clearNumberFormat(_context, locale22, format2);
+  }
+  __name(setNumberFormat, "setNumberFormat");
+  function mergeNumberFormat(locale22, format2) {
+    _numberFormats.value[locale22] = assign$1(_numberFormats.value[locale22] || {}, format2);
+    _context.numberFormats = _numberFormats.value;
+    clearNumberFormat(_context, locale22, format2);
+  }
+  __name(mergeNumberFormat, "mergeNumberFormat");
+  composerID++;
+  if (__root && inBrowser) {
+    watch(__root.locale, (val) => {
+      if (_inheritLocale) {
+        _locale.value = val;
+        _context.locale = val;
+        updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
+      }
+    });
+    watch(__root.fallbackLocale, (val) => {
+      if (_inheritLocale) {
+        _fallbackLocale.value = val;
+        _context.fallbackLocale = val;
+        updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
+      }
+    });
+  }
+  const composer = {
+    id: composerID,
+    locale: locale2,
+    fallbackLocale,
+    get inheritLocale() {
+      return _inheritLocale;
+    },
+    set inheritLocale(val) {
+      _inheritLocale = val;
+      if (val && __root) {
+        _locale.value = __root.locale.value;
+        _fallbackLocale.value = __root.fallbackLocale.value;
+        updateFallbackLocale(_context, _locale.value, _fallbackLocale.value);
+      }
+    },
+    get availableLocales() {
+      return Object.keys(_messages.value).sort();
+    },
+    messages: messages2,
+    get modifiers() {
+      return _modifiers;
+    },
+    get pluralRules() {
+      return _pluralRules || {};
+    },
+    get isGlobal() {
+      return _isGlobal;
+    },
+    get missingWarn() {
+      return _missingWarn;
+    },
+    set missingWarn(val) {
+      _missingWarn = val;
+      _context.missingWarn = _missingWarn;
+    },
+    get fallbackWarn() {
+      return _fallbackWarn;
+    },
+    set fallbackWarn(val) {
+      _fallbackWarn = val;
+      _context.fallbackWarn = _fallbackWarn;
+    },
+    get fallbackRoot() {
+      return _fallbackRoot;
+    },
+    set fallbackRoot(val) {
+      _fallbackRoot = val;
+    },
+    get fallbackFormat() {
+      return _fallbackFormat;
+    },
+    set fallbackFormat(val) {
+      _fallbackFormat = val;
+      _context.fallbackFormat = _fallbackFormat;
+    },
+    get warnHtmlMessage() {
+      return _warnHtmlMessage;
+    },
+    set warnHtmlMessage(val) {
+      _warnHtmlMessage = val;
+      _context.warnHtmlMessage = val;
+    },
+    get escapeParameter() {
+      return _escapeParameter;
+    },
+    set escapeParameter(val) {
+      _escapeParameter = val;
+      _context.escapeParameter = val;
+    },
+    t,
+    getLocaleMessage,
+    setLocaleMessage,
+    mergeLocaleMessage,
+    getPostTranslationHandler,
+    setPostTranslationHandler,
+    getMissingHandler,
+    setMissingHandler,
+    [SetPluralRulesSymbol]: setPluralRules
+  };
+  {
+    composer.datetimeFormats = datetimeFormats;
+    composer.numberFormats = numberFormats;
+    composer.rt = rt;
+    composer.te = te;
+    composer.tm = tm;
+    composer.d = d;
+    composer.n = n;
+    composer.getDateTimeFormat = getDateTimeFormat;
+    composer.setDateTimeFormat = setDateTimeFormat;
+    composer.mergeDateTimeFormat = mergeDateTimeFormat;
+    composer.getNumberFormat = getNumberFormat;
+    composer.setNumberFormat = setNumberFormat;
+    composer.mergeNumberFormat = mergeNumberFormat;
+    composer[InejctWithOptionSymbol] = __injectWithOption;
+    composer[TranslateVNodeSymbol] = translateVNode;
+    composer[DatetimePartsSymbol] = datetimeParts;
+    composer[NumberPartsSymbol] = numberParts;
+  }
+  if (false) {
+    composer[EnableEmitter] = (emitter) => {
+      _context.__v_emitter = emitter;
+    };
+    composer[DisableEmitter] = () => {
+      _context.__v_emitter = void 0;
+    };
+  }
+  return composer;
+}
+__name(createComposer, "createComposer");
+function convertComposerOptions(options3) {
+  const locale2 = isString$1(options3.locale) ? options3.locale : DEFAULT_LOCALE;
+  const fallbackLocale = isString$1(options3.fallbackLocale) || isArray(options3.fallbackLocale) || isPlainObject(options3.fallbackLocale) || options3.fallbackLocale === false ? options3.fallbackLocale : locale2;
+  const missing = isFunction$1(options3.missing) ? options3.missing : void 0;
+  const missingWarn = isBoolean(options3.silentTranslationWarn) || isRegExp(options3.silentTranslationWarn) ? !options3.silentTranslationWarn : true;
+  const fallbackWarn = isBoolean(options3.silentFallbackWarn) || isRegExp(options3.silentFallbackWarn) ? !options3.silentFallbackWarn : true;
+  const fallbackRoot = isBoolean(options3.fallbackRoot) ? options3.fallbackRoot : true;
+  const fallbackFormat = !!options3.formatFallbackMessages;
+  const modifiers = isPlainObject(options3.modifiers) ? options3.modifiers : {};
+  const pluralizationRules = options3.pluralizationRules;
+  const postTranslation = isFunction$1(options3.postTranslation) ? options3.postTranslation : void 0;
+  const warnHtmlMessage = isString$1(options3.warnHtmlInMessage) ? options3.warnHtmlInMessage !== "off" : true;
+  const escapeParameter = !!options3.escapeParameterHtml;
+  const inheritLocale = isBoolean(options3.sync) ? options3.sync : true;
+  if (false) {
+    warn(getWarnMessage(I18nWarnCodes.NOT_SUPPORTED_FORMATTER));
+  }
+  if (false) {
+    warn(getWarnMessage(I18nWarnCodes.NOT_SUPPORTED_PRESERVE_DIRECTIVE));
+  }
+  let messages2 = options3.messages;
+  if (isPlainObject(options3.sharedMessages)) {
+    const sharedMessages = options3.sharedMessages;
+    const locales = Object.keys(sharedMessages);
+    messages2 = locales.reduce((messages22, locale22) => {
+      const message3 = messages22[locale22] || (messages22[locale22] = {});
+      assign$1(message3, sharedMessages[locale22]);
+      return messages22;
+    }, messages2 || {});
+  }
+  const { __i18n, __root, __injectWithOption } = options3;
+  const datetimeFormats = options3.datetimeFormats;
+  const numberFormats = options3.numberFormats;
+  const flatJson = options3.flatJson;
+  const translateExistCompatible = options3.translateExistCompatible;
+  return {
+    locale: locale2,
+    fallbackLocale,
+    messages: messages2,
+    flatJson,
+    datetimeFormats,
+    numberFormats,
+    missing,
+    missingWarn,
+    fallbackWarn,
+    fallbackRoot,
+    fallbackFormat,
+    modifiers,
+    pluralRules: pluralizationRules,
+    postTranslation,
+    warnHtmlMessage,
+    escapeParameter,
+    messageResolver: options3.messageResolver,
+    inheritLocale,
+    translateExistCompatible,
+    __i18n,
+    __root,
+    __injectWithOption
+  };
+}
+__name(convertComposerOptions, "convertComposerOptions");
+function createVueI18n(options3 = {}, VueI18nLegacy) {
+  {
+    const composer = createComposer(convertComposerOptions(options3));
+    const { __extender } = options3;
+    const vueI18n = {
+      // id
+      id: composer.id,
+      // locale
+      get locale() {
+        return composer.locale.value;
+      },
+      set locale(val) {
+        composer.locale.value = val;
+      },
+      // fallbackLocale
+      get fallbackLocale() {
+        return composer.fallbackLocale.value;
+      },
+      set fallbackLocale(val) {
+        composer.fallbackLocale.value = val;
+      },
+      // messages
+      get messages() {
+        return composer.messages.value;
+      },
+      // datetimeFormats
+      get datetimeFormats() {
+        return composer.datetimeFormats.value;
+      },
+      // numberFormats
+      get numberFormats() {
+        return composer.numberFormats.value;
+      },
+      // availableLocales
+      get availableLocales() {
+        return composer.availableLocales;
+      },
+      // formatter
+      get formatter() {
+        return {
+          interpolate() {
+            return [];
+          }
+        };
+      },
+      set formatter(val) {
+      },
+      // missing
+      get missing() {
+        return composer.getMissingHandler();
+      },
+      set missing(handler6) {
+        composer.setMissingHandler(handler6);
+      },
+      // silentTranslationWarn
+      get silentTranslationWarn() {
+        return isBoolean(composer.missingWarn) ? !composer.missingWarn : composer.missingWarn;
+      },
+      set silentTranslationWarn(val) {
+        composer.missingWarn = isBoolean(val) ? !val : val;
+      },
+      // silentFallbackWarn
+      get silentFallbackWarn() {
+        return isBoolean(composer.fallbackWarn) ? !composer.fallbackWarn : composer.fallbackWarn;
+      },
+      set silentFallbackWarn(val) {
+        composer.fallbackWarn = isBoolean(val) ? !val : val;
+      },
+      // modifiers
+      get modifiers() {
+        return composer.modifiers;
+      },
+      // formatFallbackMessages
+      get formatFallbackMessages() {
+        return composer.fallbackFormat;
+      },
+      set formatFallbackMessages(val) {
+        composer.fallbackFormat = val;
+      },
+      // postTranslation
+      get postTranslation() {
+        return composer.getPostTranslationHandler();
+      },
+      set postTranslation(handler6) {
+        composer.setPostTranslationHandler(handler6);
+      },
+      // sync
+      get sync() {
+        return composer.inheritLocale;
+      },
+      set sync(val) {
+        composer.inheritLocale = val;
+      },
+      // warnInHtmlMessage
+      get warnHtmlInMessage() {
+        return composer.warnHtmlMessage ? "warn" : "off";
+      },
+      set warnHtmlInMessage(val) {
+        composer.warnHtmlMessage = val !== "off";
+      },
+      // escapeParameterHtml
+      get escapeParameterHtml() {
+        return composer.escapeParameter;
+      },
+      set escapeParameterHtml(val) {
+        composer.escapeParameter = val;
+      },
+      // preserveDirectiveContent
+      get preserveDirectiveContent() {
+        return true;
+      },
+      set preserveDirectiveContent(val) {
+      },
+      // pluralizationRules
+      get pluralizationRules() {
+        return composer.pluralRules || {};
+      },
+      // for internal
+      __composer: composer,
+      // t
+      t(...args) {
+        const [arg1, arg2, arg3] = args;
+        const options22 = {};
+        let list = null;
+        let named = null;
+        if (!isString$1(arg1)) {
+          throw createI18nError(I18nErrorCodes.INVALID_ARGUMENT);
+        }
+        const key = arg1;
+        if (isString$1(arg2)) {
+          options22.locale = arg2;
+        } else if (isArray(arg2)) {
+          list = arg2;
+        } else if (isPlainObject(arg2)) {
+          named = arg2;
+        }
+        if (isArray(arg3)) {
+          list = arg3;
+        } else if (isPlainObject(arg3)) {
+          named = arg3;
+        }
+        return Reflect.apply(composer.t, composer, [
+          key,
+          list || named || {},
+          options22
+        ]);
+      },
+      rt(...args) {
+        return Reflect.apply(composer.rt, composer, [...args]);
+      },
+      // tc
+      tc(...args) {
+        const [arg1, arg2, arg3] = args;
+        const options22 = { plural: 1 };
+        let list = null;
+        let named = null;
+        if (!isString$1(arg1)) {
+          throw createI18nError(I18nErrorCodes.INVALID_ARGUMENT);
+        }
+        const key = arg1;
+        if (isString$1(arg2)) {
+          options22.locale = arg2;
+        } else if (isNumber(arg2)) {
+          options22.plural = arg2;
+        } else if (isArray(arg2)) {
+          list = arg2;
+        } else if (isPlainObject(arg2)) {
+          named = arg2;
+        }
+        if (isString$1(arg3)) {
+          options22.locale = arg3;
+        } else if (isArray(arg3)) {
+          list = arg3;
+        } else if (isPlainObject(arg3)) {
+          named = arg3;
+        }
+        return Reflect.apply(composer.t, composer, [
+          key,
+          list || named || {},
+          options22
+        ]);
+      },
+      // te
+      te(key, locale2) {
+        return composer.te(key, locale2);
+      },
+      // tm
+      tm(key) {
+        return composer.tm(key);
+      },
+      // getLocaleMessage
+      getLocaleMessage(locale2) {
+        return composer.getLocaleMessage(locale2);
+      },
+      // setLocaleMessage
+      setLocaleMessage(locale2, message3) {
+        composer.setLocaleMessage(locale2, message3);
+      },
+      // mergeLocaleMessage
+      mergeLocaleMessage(locale2, message3) {
+        composer.mergeLocaleMessage(locale2, message3);
+      },
+      // d
+      d(...args) {
+        return Reflect.apply(composer.d, composer, [...args]);
+      },
+      // getDateTimeFormat
+      getDateTimeFormat(locale2) {
+        return composer.getDateTimeFormat(locale2);
+      },
+      // setDateTimeFormat
+      setDateTimeFormat(locale2, format2) {
+        composer.setDateTimeFormat(locale2, format2);
+      },
+      // mergeDateTimeFormat
+      mergeDateTimeFormat(locale2, format2) {
+        composer.mergeDateTimeFormat(locale2, format2);
+      },
+      // n
+      n(...args) {
+        return Reflect.apply(composer.n, composer, [...args]);
+      },
+      // getNumberFormat
+      getNumberFormat(locale2) {
+        return composer.getNumberFormat(locale2);
+      },
+      // setNumberFormat
+      setNumberFormat(locale2, format2) {
+        composer.setNumberFormat(locale2, format2);
+      },
+      // mergeNumberFormat
+      mergeNumberFormat(locale2, format2) {
+        composer.mergeNumberFormat(locale2, format2);
+      },
+      // getChoiceIndex
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      getChoiceIndex(choice, choicesLength) {
+        return -1;
+      }
+    };
+    vueI18n.__extender = __extender;
+    if (false) {
+      vueI18n.__enableEmitter = (emitter) => {
+        const __composer = composer;
+        __composer[EnableEmitter] && __composer[EnableEmitter](emitter);
+      };
+      vueI18n.__disableEmitter = () => {
+        const __composer = composer;
+        __composer[DisableEmitter] && __composer[DisableEmitter]();
+      };
+    }
+    return vueI18n;
+  }
+}
+__name(createVueI18n, "createVueI18n");
+const baseFormatProps = {
+  tag: {
+    type: [String, Object]
+  },
+  locale: {
+    type: String
+  },
+  scope: {
+    type: String,
+    // NOTE: avoid https://github.com/microsoft/rushstack/issues/1050
+    validator: /* @__PURE__ */ __name((val) => val === "parent" || val === "global", "validator"),
+    default: "parent"
+    /* ComponentI18nScope */
+  },
+  i18n: {
+    type: Object
+  }
+};
+function getInterpolateArg({ slots }, keys2) {
+  if (keys2.length === 1 && keys2[0] === "default") {
+    const ret = slots.default ? slots.default() : [];
+    return ret.reduce((slot, current) => {
+      return [
+        ...slot,
+        // prettier-ignore
+        ...current.type === Fragment ? current.children : [current]
+      ];
+    }, []);
+  } else {
+    return keys2.reduce((arg, key) => {
+      const slot = slots[key];
+      if (slot) {
+        arg[key] = slot();
+      }
+      return arg;
+    }, {});
+  }
+}
+__name(getInterpolateArg, "getInterpolateArg");
+function getFragmentableTag(tag) {
+  return Fragment;
+}
+__name(getFragmentableTag, "getFragmentableTag");
+const TranslationImpl = /* @__PURE__ */ defineComponent({
+  /* eslint-disable */
+  name: "i18n-t",
+  props: assign$1({
+    keypath: {
+      type: String,
+      required: true
+    },
+    plural: {
+      type: [Number, String],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      validator: /* @__PURE__ */ __name((val) => isNumber(val) || !isNaN(val), "validator")
+    }
+  }, baseFormatProps),
+  /* eslint-enable */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setup(props, context) {
+    const { slots, attrs: attrs3 } = context;
+    const i18n2 = props.i18n || useI18n({
+      useScope: props.scope,
+      __useComponent: true
+    });
+    return () => {
+      const keys2 = Object.keys(slots).filter((key) => key !== "_");
+      const options3 = {};
+      if (props.locale) {
+        options3.locale = props.locale;
+      }
+      if (props.plural !== void 0) {
+        options3.plural = isString$1(props.plural) ? +props.plural : props.plural;
+      }
+      const arg = getInterpolateArg(context, keys2);
+      const children = i18n2[TranslateVNodeSymbol](props.keypath, arg, options3);
+      const assignedAttrs = assign$1({}, attrs3);
+      const tag = isString$1(props.tag) || isObject$1(props.tag) ? props.tag : getFragmentableTag();
+      return h(tag, assignedAttrs, children);
+    };
+  }
+});
+const Translation = TranslationImpl;
+const I18nT = Translation;
+function isVNode(target) {
+  return isArray(target) && !isString$1(target[0]);
+}
+__name(isVNode, "isVNode");
+function renderFormatter(props, context, slotKeys, partFormatter) {
+  const { slots, attrs: attrs3 } = context;
+  return () => {
+    const options3 = { part: true };
+    let overrides = {};
+    if (props.locale) {
+      options3.locale = props.locale;
+    }
+    if (isString$1(props.format)) {
+      options3.key = props.format;
+    } else if (isObject$1(props.format)) {
+      if (isString$1(props.format.key)) {
+        options3.key = props.format.key;
+      }
+      overrides = Object.keys(props.format).reduce((options22, prop2) => {
+        return slotKeys.includes(prop2) ? assign$1({}, options22, { [prop2]: props.format[prop2] }) : options22;
+      }, {});
+    }
+    const parts2 = partFormatter(...[props.value, options3, overrides]);
+    let children = [options3.key];
+    if (isArray(parts2)) {
+      children = parts2.map((part, index2) => {
+        const slot = slots[part.type];
+        const node3 = slot ? slot({ [part.type]: part.value, index: index2, parts: parts2 }) : [part.value];
+        if (isVNode(node3)) {
+          node3[0].key = `${part.type}-${index2}`;
+        }
+        return node3;
+      });
+    } else if (isString$1(parts2)) {
+      children = [parts2];
+    }
+    const assignedAttrs = assign$1({}, attrs3);
+    const tag = isString$1(props.tag) || isObject$1(props.tag) ? props.tag : getFragmentableTag();
+    return h(tag, assignedAttrs, children);
+  };
+}
+__name(renderFormatter, "renderFormatter");
+const NumberFormatImpl = /* @__PURE__ */ defineComponent({
+  /* eslint-disable */
+  name: "i18n-n",
+  props: assign$1({
+    value: {
+      type: Number,
+      required: true
+    },
+    format: {
+      type: [String, Object]
+    }
+  }, baseFormatProps),
+  /* eslint-enable */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setup(props, context) {
+    const i18n2 = props.i18n || useI18n({
+      useScope: props.scope,
+      __useComponent: true
+    });
+    return renderFormatter(props, context, NUMBER_FORMAT_OPTIONS_KEYS, (...args) => (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      i18n2[NumberPartsSymbol](...args)
+    ));
+  }
+});
+const NumberFormat = NumberFormatImpl;
+const I18nN = NumberFormat;
+const DatetimeFormatImpl = /* @__PURE__ */ defineComponent({
+  /* eslint-disable */
+  name: "i18n-d",
+  props: assign$1({
+    value: {
+      type: [Number, Date],
+      required: true
+    },
+    format: {
+      type: [String, Object]
+    }
+  }, baseFormatProps),
+  /* eslint-enable */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setup(props, context) {
+    const i18n2 = props.i18n || useI18n({
+      useScope: props.scope,
+      __useComponent: true
+    });
+    return renderFormatter(props, context, DATETIME_FORMAT_OPTIONS_KEYS, (...args) => (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      i18n2[DatetimePartsSymbol](...args)
+    ));
+  }
+});
+const DatetimeFormat = DatetimeFormatImpl;
+const I18nD = DatetimeFormat;
+function getComposer$2(i18n2, instance) {
+  const i18nInternal = i18n2;
+  if (i18n2.mode === "composition") {
+    return i18nInternal.__getInstance(instance) || i18n2.global;
+  } else {
+    const vueI18n = i18nInternal.__getInstance(instance);
+    return vueI18n != null ? vueI18n.__composer : i18n2.global.__composer;
+  }
+}
+__name(getComposer$2, "getComposer$2");
+function vTDirective(i18n2) {
+  const _process = /* @__PURE__ */ __name((binding) => {
+    const { instance, modifiers, value: value3 } = binding;
+    if (!instance || !instance.$) {
+      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
+    }
+    const composer = getComposer$2(i18n2, instance.$);
+    if (false) {
+      warn(getWarnMessage(I18nWarnCodes.NOT_SUPPORTED_PRESERVE));
+    }
+    const parsedValue = parseValue(value3);
+    return [
+      Reflect.apply(composer.t, composer, [...makeParams(parsedValue)]),
+      composer
+    ];
+  }, "_process");
+  const register3 = /* @__PURE__ */ __name((el, binding) => {
+    const [textContent, composer] = _process(binding);
+    if (inBrowser && i18n2.global === composer) {
+      el.__i18nWatcher = watch(composer.locale, () => {
+        binding.instance && binding.instance.$forceUpdate();
+      });
+    }
+    el.__composer = composer;
+    el.textContent = textContent;
+  }, "register");
+  const unregister = /* @__PURE__ */ __name((el) => {
+    if (inBrowser && el.__i18nWatcher) {
+      el.__i18nWatcher();
+      el.__i18nWatcher = void 0;
+      delete el.__i18nWatcher;
+    }
+    if (el.__composer) {
+      el.__composer = void 0;
+      delete el.__composer;
+    }
+  }, "unregister");
+  const update2 = /* @__PURE__ */ __name((el, { value: value3 }) => {
+    if (el.__composer) {
+      const composer = el.__composer;
+      const parsedValue = parseValue(value3);
+      el.textContent = Reflect.apply(composer.t, composer, [
+        ...makeParams(parsedValue)
+      ]);
+    }
+  }, "update");
+  const getSSRProps = /* @__PURE__ */ __name((binding) => {
+    const [textContent] = _process(binding);
+    return { textContent };
+  }, "getSSRProps");
+  return {
+    created: register3,
+    unmounted: unregister,
+    beforeUpdate: update2,
+    getSSRProps
+  };
+}
+__name(vTDirective, "vTDirective");
+function parseValue(value3) {
+  if (isString$1(value3)) {
+    return { path: value3 };
+  } else if (isPlainObject(value3)) {
+    if (!("path" in value3)) {
+      throw createI18nError(I18nErrorCodes.REQUIRED_VALUE, "path");
+    }
+    return value3;
+  } else {
+    throw createI18nError(I18nErrorCodes.INVALID_VALUE);
+  }
+}
+__name(parseValue, "parseValue");
+function makeParams(value3) {
+  const { path, locale: locale2, args, choice, plural } = value3;
+  const options3 = {};
+  const named = args || {};
+  if (isString$1(locale2)) {
+    options3.locale = locale2;
+  }
+  if (isNumber(choice)) {
+    options3.plural = choice;
+  }
+  if (isNumber(plural)) {
+    options3.plural = plural;
+  }
+  return [path, named, options3];
+}
+__name(makeParams, "makeParams");
+function apply(app2, i18n2, ...options3) {
+  const pluginOptions = isPlainObject(options3[0]) ? options3[0] : {};
+  const useI18nComponentName = !!pluginOptions.useI18nComponentName;
+  const globalInstall = isBoolean(pluginOptions.globalInstall) ? pluginOptions.globalInstall : true;
+  if (false) {
+    warn(getWarnMessage(I18nWarnCodes.COMPONENT_NAME_LEGACY_COMPATIBLE, {
+      name: Translation.name
+    }));
+  }
+  if (globalInstall) {
+    [!useI18nComponentName ? Translation.name : "i18n", "I18nT"].forEach((name) => app2.component(name, Translation));
+    [NumberFormat.name, "I18nN"].forEach((name) => app2.component(name, NumberFormat));
+    [DatetimeFormat.name, "I18nD"].forEach((name) => app2.component(name, DatetimeFormat));
+  }
+  {
+    app2.directive("t", vTDirective(i18n2));
+  }
+}
+__name(apply, "apply");
+const VueDevToolsLabels = {
+  [
+    "vue-devtools-plugin-vue-i18n"
+    /* VueDevToolsIDs.PLUGIN */
+  ]: "Vue I18n devtools",
+  [
+    "vue-i18n-resource-inspector"
+    /* VueDevToolsIDs.CUSTOM_INSPECTOR */
+  ]: "I18n Resources",
+  [
+    "vue-i18n-timeline"
+    /* VueDevToolsIDs.TIMELINE */
+  ]: "Vue I18n"
+};
+const VueDevToolsPlaceholders = {
+  [
+    "vue-i18n-resource-inspector"
+    /* VueDevToolsIDs.CUSTOM_INSPECTOR */
+  ]: "Search for scopes ..."
+};
+const VueDevToolsTimelineColors = {
+  [
+    "vue-i18n-timeline"
+    /* VueDevToolsIDs.TIMELINE */
+  ]: 16764185
+};
+const VUE_I18N_COMPONENT_TYPES = "vue-i18n: composer properties";
+let devtoolsApi;
+async function enableDevTools(app2, i18n2) {
+  return new Promise((resolve8, reject2) => {
+    try {
+      setupDevtoolsPlugin({
+        id: "vue-devtools-plugin-vue-i18n",
+        label: VueDevToolsLabels[
+          "vue-devtools-plugin-vue-i18n"
+          /* VueDevToolsIDs.PLUGIN */
+        ],
+        packageName: "vue-i18n",
+        homepage: "https://vue-i18n.intlify.dev",
+        logo: "https://vue-i18n.intlify.dev/vue-i18n-devtools-logo.png",
+        componentStateTypes: [VUE_I18N_COMPONENT_TYPES],
+        app: app2
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+      }, (api2) => {
+        devtoolsApi = api2;
+        api2.on.visitComponentTree(({ componentInstance, treeNode }) => {
+          updateComponentTreeTags(componentInstance, treeNode, i18n2);
+        });
+        api2.on.inspectComponent(({ componentInstance, instanceData }) => {
+          if (componentInstance.vnode.el && componentInstance.vnode.el.__VUE_I18N__ && instanceData) {
+            if (i18n2.mode === "legacy") {
+              if (componentInstance.vnode.el.__VUE_I18N__ !== i18n2.global.__composer) {
+                inspectComposer(instanceData, componentInstance.vnode.el.__VUE_I18N__);
+              }
+            } else {
+              inspectComposer(instanceData, componentInstance.vnode.el.__VUE_I18N__);
+            }
+          }
+        });
+        api2.addInspector({
+          id: "vue-i18n-resource-inspector",
+          label: VueDevToolsLabels[
+            "vue-i18n-resource-inspector"
+            /* VueDevToolsIDs.CUSTOM_INSPECTOR */
+          ],
+          icon: "language",
+          treeFilterPlaceholder: VueDevToolsPlaceholders[
+            "vue-i18n-resource-inspector"
+            /* VueDevToolsIDs.CUSTOM_INSPECTOR */
+          ]
+        });
+        api2.on.getInspectorTree((payload) => {
+          if (payload.app === app2 && payload.inspectorId === "vue-i18n-resource-inspector") {
+            registerScope(payload, i18n2);
+          }
+        });
+        const roots = /* @__PURE__ */ new Map();
+        api2.on.getInspectorState(async (payload) => {
+          if (payload.app === app2 && payload.inspectorId === "vue-i18n-resource-inspector") {
+            api2.unhighlightElement();
+            inspectScope(payload, i18n2);
+            if (payload.nodeId === "global") {
+              if (!roots.has(payload.app)) {
+                const [root26] = await api2.getComponentInstances(payload.app);
+                roots.set(payload.app, root26);
+              }
+              api2.highlightElement(roots.get(payload.app));
+            } else {
+              const instance = getComponentInstance(payload.nodeId, i18n2);
+              instance && api2.highlightElement(instance);
+            }
+          }
+        });
+        api2.on.editInspectorState((payload) => {
+          if (payload.app === app2 && payload.inspectorId === "vue-i18n-resource-inspector") {
+            editScope(payload, i18n2);
+          }
+        });
+        api2.addTimelineLayer({
+          id: "vue-i18n-timeline",
+          label: VueDevToolsLabels[
+            "vue-i18n-timeline"
+            /* VueDevToolsIDs.TIMELINE */
+          ],
+          color: VueDevToolsTimelineColors[
+            "vue-i18n-timeline"
+            /* VueDevToolsIDs.TIMELINE */
+          ]
+        });
+        resolve8(true);
+      });
+    } catch (e) {
+      console.error(e);
+      reject2(false);
+    }
+  });
+}
+__name(enableDevTools, "enableDevTools");
+function getI18nScopeLable(instance) {
+  return instance.type.name || instance.type.displayName || instance.type.__file || "Anonymous";
+}
+__name(getI18nScopeLable, "getI18nScopeLable");
+function updateComponentTreeTags(instance, treeNode, i18n2) {
+  const global2 = i18n2.mode === "composition" ? i18n2.global : i18n2.global.__composer;
+  if (instance && instance.vnode.el && instance.vnode.el.__VUE_I18N__) {
+    if (instance.vnode.el.__VUE_I18N__ !== global2) {
+      const tag = {
+        label: `i18n (${getI18nScopeLable(instance)} Scope)`,
+        textColor: 0,
+        backgroundColor: 16764185
+      };
+      treeNode.tags.push(tag);
+    }
+  }
+}
+__name(updateComponentTreeTags, "updateComponentTreeTags");
+function inspectComposer(instanceData, composer) {
+  const type = VUE_I18N_COMPONENT_TYPES;
+  instanceData.state.push({
+    type,
+    key: "locale",
+    editable: true,
+    value: composer.locale.value
+  });
+  instanceData.state.push({
+    type,
+    key: "availableLocales",
+    editable: false,
+    value: composer.availableLocales
+  });
+  instanceData.state.push({
+    type,
+    key: "fallbackLocale",
+    editable: true,
+    value: composer.fallbackLocale.value
+  });
+  instanceData.state.push({
+    type,
+    key: "inheritLocale",
+    editable: true,
+    value: composer.inheritLocale
+  });
+  instanceData.state.push({
+    type,
+    key: "messages",
+    editable: false,
+    value: getLocaleMessageValue(composer.messages.value)
+  });
+  {
+    instanceData.state.push({
+      type,
+      key: "datetimeFormats",
+      editable: false,
+      value: composer.datetimeFormats.value
+    });
+    instanceData.state.push({
+      type,
+      key: "numberFormats",
+      editable: false,
+      value: composer.numberFormats.value
+    });
+  }
+}
+__name(inspectComposer, "inspectComposer");
+function getLocaleMessageValue(messages2) {
+  const value3 = {};
+  Object.keys(messages2).forEach((key) => {
+    const v2 = messages2[key];
+    if (isFunction$1(v2) && "source" in v2) {
+      value3[key] = getMessageFunctionDetails(v2);
+    } else if (isMessageAST(v2) && v2.loc && v2.loc.source) {
+      value3[key] = v2.loc.source;
+    } else if (isObject$1(v2)) {
+      value3[key] = getLocaleMessageValue(v2);
+    } else {
+      value3[key] = v2;
+    }
+  });
+  return value3;
+}
+__name(getLocaleMessageValue, "getLocaleMessageValue");
+const ESC = {
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "&": "&amp;"
+};
+function escape$1(s) {
+  return s.replace(/[<>"&]/g, escapeChar);
+}
+__name(escape$1, "escape$1");
+function escapeChar(a) {
+  return ESC[a] || a;
+}
+__name(escapeChar, "escapeChar");
+function getMessageFunctionDetails(func) {
+  const argString = func.source ? `("${escape$1(func.source)}")` : `(?)`;
+  return {
+    _custom: {
+      type: "function",
+      display: `<span>ƒ</span> ${argString}`
+    }
+  };
+}
+__name(getMessageFunctionDetails, "getMessageFunctionDetails");
+function registerScope(payload, i18n2) {
+  payload.rootNodes.push({
+    id: "global",
+    label: "Global Scope"
+  });
+  const global2 = i18n2.mode === "composition" ? i18n2.global : i18n2.global.__composer;
+  for (const [keyInstance, instance] of i18n2.__instances) {
+    const composer = i18n2.mode === "composition" ? instance : instance.__composer;
+    if (global2 === composer) {
+      continue;
+    }
+    payload.rootNodes.push({
+      id: composer.id.toString(),
+      label: `${getI18nScopeLable(keyInstance)} Scope`
+    });
+  }
+}
+__name(registerScope, "registerScope");
+function getComponentInstance(nodeId, i18n2) {
+  let instance = null;
+  if (nodeId !== "global") {
+    for (const [component, composer] of i18n2.__instances.entries()) {
+      if (composer.id.toString() === nodeId) {
+        instance = component;
+        break;
+      }
+    }
+  }
+  return instance;
+}
+__name(getComponentInstance, "getComponentInstance");
+function getComposer$1(nodeId, i18n2) {
+  if (nodeId === "global") {
+    return i18n2.mode === "composition" ? i18n2.global : i18n2.global.__composer;
+  } else {
+    const instance = Array.from(i18n2.__instances.values()).find((item2) => item2.id.toString() === nodeId);
+    if (instance) {
+      return i18n2.mode === "composition" ? instance : instance.__composer;
+    } else {
+      return null;
+    }
+  }
+}
+__name(getComposer$1, "getComposer$1");
+function inspectScope(payload, i18n2) {
+  const composer = getComposer$1(payload.nodeId, i18n2);
+  if (composer) {
+    payload.state = makeScopeInspectState(composer);
+  }
+  return null;
+}
+__name(inspectScope, "inspectScope");
+function makeScopeInspectState(composer) {
+  const state = {};
+  const localeType = "Locale related info";
+  const localeStates = [
+    {
+      type: localeType,
+      key: "locale",
+      editable: true,
+      value: composer.locale.value
+    },
+    {
+      type: localeType,
+      key: "fallbackLocale",
+      editable: true,
+      value: composer.fallbackLocale.value
+    },
+    {
+      type: localeType,
+      key: "availableLocales",
+      editable: false,
+      value: composer.availableLocales
+    },
+    {
+      type: localeType,
+      key: "inheritLocale",
+      editable: true,
+      value: composer.inheritLocale
+    }
+  ];
+  state[localeType] = localeStates;
+  const localeMessagesType = "Locale messages info";
+  const localeMessagesStates = [
+    {
+      type: localeMessagesType,
+      key: "messages",
+      editable: false,
+      value: getLocaleMessageValue(composer.messages.value)
+    }
+  ];
+  state[localeMessagesType] = localeMessagesStates;
+  {
+    const datetimeFormatsType = "Datetime formats info";
+    const datetimeFormatsStates = [
+      {
+        type: datetimeFormatsType,
+        key: "datetimeFormats",
+        editable: false,
+        value: composer.datetimeFormats.value
+      }
+    ];
+    state[datetimeFormatsType] = datetimeFormatsStates;
+    const numberFormatsType = "Datetime formats info";
+    const numberFormatsStates = [
+      {
+        type: numberFormatsType,
+        key: "numberFormats",
+        editable: false,
+        value: composer.numberFormats.value
+      }
+    ];
+    state[numberFormatsType] = numberFormatsStates;
+  }
+  return state;
+}
+__name(makeScopeInspectState, "makeScopeInspectState");
+function addTimelineEvent(event2, payload) {
+  if (devtoolsApi) {
+    let groupId;
+    if (payload && "groupId" in payload) {
+      groupId = payload.groupId;
+      delete payload.groupId;
+    }
+    devtoolsApi.addTimelineEvent({
+      layerId: "vue-i18n-timeline",
+      event: {
+        title: event2,
+        groupId,
+        time: Date.now(),
+        meta: {},
+        data: payload || {},
+        logType: event2 === "compile-error" ? "error" : event2 === "fallback" || event2 === "missing" ? "warning" : "default"
+      }
+    });
+  }
+}
+__name(addTimelineEvent, "addTimelineEvent");
+function editScope(payload, i18n2) {
+  const composer = getComposer$1(payload.nodeId, i18n2);
+  if (composer) {
+    const [field] = payload.path;
+    if (field === "locale" && isString$1(payload.state.value)) {
+      composer.locale.value = payload.state.value;
+    } else if (field === "fallbackLocale" && (isString$1(payload.state.value) || isArray(payload.state.value) || isObject$1(payload.state.value))) {
+      composer.fallbackLocale.value = payload.state.value;
+    } else if (field === "inheritLocale" && isBoolean(payload.state.value)) {
+      composer.inheritLocale = payload.state.value;
+    }
+  }
+}
+__name(editScope, "editScope");
+function defineMixin(vuei18n, composer, i18n2) {
+  return {
+    beforeCreate() {
+      const instance = getCurrentInstance();
+      if (!instance) {
+        throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
+      }
+      const options3 = this.$options;
+      if (options3.i18n) {
+        const optionsI18n = options3.i18n;
+        if (options3.__i18n) {
+          optionsI18n.__i18n = options3.__i18n;
+        }
+        optionsI18n.__root = composer;
+        if (this === this.$root) {
+          this.$i18n = mergeToGlobal(vuei18n, optionsI18n);
+        } else {
+          optionsI18n.__injectWithOption = true;
+          optionsI18n.__extender = i18n2.__vueI18nExtend;
+          this.$i18n = createVueI18n(optionsI18n);
+          const _vueI18n = this.$i18n;
+          if (_vueI18n.__extender) {
+            _vueI18n.__disposer = _vueI18n.__extender(this.$i18n);
+          }
+        }
+      } else if (options3.__i18n) {
+        if (this === this.$root) {
+          this.$i18n = mergeToGlobal(vuei18n, options3);
+        } else {
+          this.$i18n = createVueI18n({
+            __i18n: options3.__i18n,
+            __injectWithOption: true,
+            __extender: i18n2.__vueI18nExtend,
+            __root: composer
+          });
+          const _vueI18n = this.$i18n;
+          if (_vueI18n.__extender) {
+            _vueI18n.__disposer = _vueI18n.__extender(this.$i18n);
+          }
+        }
+      } else {
+        this.$i18n = vuei18n;
+      }
+      if (options3.__i18nGlobal) {
+        adjustI18nResources(composer, options3, options3);
+      }
+      this.$t = (...args) => this.$i18n.t(...args);
+      this.$rt = (...args) => this.$i18n.rt(...args);
+      this.$tc = (...args) => this.$i18n.tc(...args);
+      this.$te = (key, locale2) => this.$i18n.te(key, locale2);
+      this.$d = (...args) => this.$i18n.d(...args);
+      this.$n = (...args) => this.$i18n.n(...args);
+      this.$tm = (key) => this.$i18n.tm(key);
+      i18n2.__setInstance(instance, this.$i18n);
+    },
+    mounted() {
+      if (false) {
+        const _vueI18n = this.$i18n;
+        this.$el.__VUE_I18N__ = _vueI18n.__composer;
+        const emitter = this.__v_emitter = createEmitter();
+        _vueI18n.__enableEmitter && _vueI18n.__enableEmitter(emitter);
+        emitter.on("*", addTimelineEvent);
+      }
+    },
+    unmounted() {
+      const instance = getCurrentInstance();
+      if (!instance) {
+        throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
+      }
+      const _vueI18n = this.$i18n;
+      if (false) {
+        if (this.__v_emitter) {
+          this.__v_emitter.off("*", addTimelineEvent);
+          delete this.__v_emitter;
+        }
+        if (this.$i18n) {
+          _vueI18n.__disableEmitter && _vueI18n.__disableEmitter();
+          delete this.$el.__VUE_I18N__;
+        }
+      }
+      delete this.$t;
+      delete this.$rt;
+      delete this.$tc;
+      delete this.$te;
+      delete this.$d;
+      delete this.$n;
+      delete this.$tm;
+      if (_vueI18n.__disposer) {
+        _vueI18n.__disposer();
+        delete _vueI18n.__disposer;
+        delete _vueI18n.__extender;
+      }
+      i18n2.__deleteInstance(instance);
+      delete this.$i18n;
+    }
+  };
+}
+__name(defineMixin, "defineMixin");
+function mergeToGlobal(g, options3) {
+  g.locale = options3.locale || g.locale;
+  g.fallbackLocale = options3.fallbackLocale || g.fallbackLocale;
+  g.missing = options3.missing || g.missing;
+  g.silentTranslationWarn = options3.silentTranslationWarn || g.silentFallbackWarn;
+  g.silentFallbackWarn = options3.silentFallbackWarn || g.silentFallbackWarn;
+  g.formatFallbackMessages = options3.formatFallbackMessages || g.formatFallbackMessages;
+  g.postTranslation = options3.postTranslation || g.postTranslation;
+  g.warnHtmlInMessage = options3.warnHtmlInMessage || g.warnHtmlInMessage;
+  g.escapeParameterHtml = options3.escapeParameterHtml || g.escapeParameterHtml;
+  g.sync = options3.sync || g.sync;
+  g.__composer[SetPluralRulesSymbol](options3.pluralizationRules || g.pluralizationRules);
+  const messages2 = getLocaleMessages(g.locale, {
+    messages: options3.messages,
+    __i18n: options3.__i18n
+  });
+  Object.keys(messages2).forEach((locale2) => g.mergeLocaleMessage(locale2, messages2[locale2]));
+  if (options3.datetimeFormats) {
+    Object.keys(options3.datetimeFormats).forEach((locale2) => g.mergeDateTimeFormat(locale2, options3.datetimeFormats[locale2]));
+  }
+  if (options3.numberFormats) {
+    Object.keys(options3.numberFormats).forEach((locale2) => g.mergeNumberFormat(locale2, options3.numberFormats[locale2]));
+  }
+  return g;
+}
+__name(mergeToGlobal, "mergeToGlobal");
+const I18nInjectionKey = /* @__PURE__ */ makeSymbol("global-vue-i18n");
+function createI18n(options3 = {}, VueI18nLegacy) {
+  const __legacyMode = __VUE_I18N_LEGACY_API__ && isBoolean(options3.legacy) ? options3.legacy : __VUE_I18N_LEGACY_API__;
+  const __globalInjection = isBoolean(options3.globalInjection) ? options3.globalInjection : true;
+  const __allowComposition = __VUE_I18N_LEGACY_API__ && __legacyMode ? !!options3.allowComposition : true;
+  const __instances = /* @__PURE__ */ new Map();
+  const [globalScope, __global] = createGlobal(options3, __legacyMode);
+  const symbol = /* @__PURE__ */ makeSymbol(false ? "vue-i18n" : "");
+  if (false) {
+    if (__legacyMode && __allowComposition && true) {
+      warn(getWarnMessage(I18nWarnCodes.NOTICE_DROP_ALLOW_COMPOSITION));
+    }
+  }
+  function __getInstance(component) {
+    return __instances.get(component) || null;
+  }
+  __name(__getInstance, "__getInstance");
+  function __setInstance(component, instance) {
+    __instances.set(component, instance);
+  }
+  __name(__setInstance, "__setInstance");
+  function __deleteInstance(component) {
+    __instances.delete(component);
+  }
+  __name(__deleteInstance, "__deleteInstance");
+  {
+    const i18n2 = {
+      // mode
+      get mode() {
+        return __VUE_I18N_LEGACY_API__ && __legacyMode ? "legacy" : "composition";
+      },
+      // allowComposition
+      get allowComposition() {
+        return __allowComposition;
+      },
+      // install plugin
+      async install(app2, ...options22) {
+        if (false) {
+          app2.__VUE_I18N__ = i18n2;
+        }
+        app2.__VUE_I18N_SYMBOL__ = symbol;
+        app2.provide(app2.__VUE_I18N_SYMBOL__, i18n2);
+        if (isPlainObject(options22[0])) {
+          const opts = options22[0];
+          i18n2.__composerExtend = opts.__composerExtend;
+          i18n2.__vueI18nExtend = opts.__vueI18nExtend;
+        }
+        let globalReleaseHandler = null;
+        if (!__legacyMode && __globalInjection) {
+          globalReleaseHandler = injectGlobalFields(app2, i18n2.global);
+        }
+        if (__VUE_I18N_FULL_INSTALL__) {
+          apply(app2, i18n2, ...options22);
+        }
+        if (__VUE_I18N_LEGACY_API__ && __legacyMode) {
+          app2.mixin(defineMixin(__global, __global.__composer, i18n2));
+        }
+        const unmountApp = app2.unmount;
+        app2.unmount = () => {
+          globalReleaseHandler && globalReleaseHandler();
+          i18n2.dispose();
+          unmountApp();
+        };
+        if (false) {
+          const ret = await enableDevTools(app2, i18n2);
+          if (!ret) {
+            throw createI18nError(I18nErrorCodes.CANNOT_SETUP_VUE_DEVTOOLS_PLUGIN);
+          }
+          const emitter = createEmitter();
+          if (__legacyMode) {
+            const _vueI18n = __global;
+            _vueI18n.__enableEmitter && _vueI18n.__enableEmitter(emitter);
+          } else {
+            const _composer = __global;
+            _composer[EnableEmitter] && _composer[EnableEmitter](emitter);
+          }
+          emitter.on("*", addTimelineEvent);
+        }
+      },
+      // global accessor
+      get global() {
+        return __global;
+      },
+      dispose() {
+        globalScope.stop();
+      },
+      // @internal
+      __instances,
+      // @internal
+      __getInstance,
+      // @internal
+      __setInstance,
+      // @internal
+      __deleteInstance
+    };
+    return i18n2;
+  }
+}
+__name(createI18n, "createI18n");
+function useI18n(options3 = {}) {
+  const instance = getCurrentInstance();
+  if (instance == null) {
+    throw createI18nError(I18nErrorCodes.MUST_BE_CALL_SETUP_TOP);
+  }
+  if (!instance.isCE && instance.appContext.app != null && !instance.appContext.app.__VUE_I18N_SYMBOL__) {
+    throw createI18nError(I18nErrorCodes.NOT_INSTALLED);
+  }
+  const i18n2 = getI18nInstance(instance);
+  const gl = getGlobalComposer(i18n2);
+  const componentOptions = getComponentOptions(instance);
+  const scope = getScope(options3, componentOptions);
+  if (__VUE_I18N_LEGACY_API__) {
+    if (i18n2.mode === "legacy" && !options3.__useComponent) {
+      if (!i18n2.allowComposition) {
+        throw createI18nError(I18nErrorCodes.NOT_AVAILABLE_IN_LEGACY_MODE);
+      }
+      return useI18nForLegacy(instance, scope, gl, options3);
+    }
+  }
+  if (scope === "global") {
+    adjustI18nResources(gl, options3, componentOptions);
+    return gl;
+  }
+  if (scope === "parent") {
+    let composer2 = getComposer(i18n2, instance, options3.__useComponent);
+    if (composer2 == null) {
+      if (false) {
+        warn(getWarnMessage(I18nWarnCodes.NOT_FOUND_PARENT_SCOPE));
+      }
+      composer2 = gl;
+    }
+    return composer2;
+  }
+  const i18nInternal = i18n2;
+  let composer = i18nInternal.__getInstance(instance);
+  if (composer == null) {
+    const composerOptions = assign$1({}, options3);
+    if ("__i18n" in componentOptions) {
+      composerOptions.__i18n = componentOptions.__i18n;
+    }
+    if (gl) {
+      composerOptions.__root = gl;
+    }
+    composer = createComposer(composerOptions);
+    if (i18nInternal.__composerExtend) {
+      composer[DisposeSymbol] = i18nInternal.__composerExtend(composer);
+    }
+    setupLifeCycle(i18nInternal, instance, composer);
+    i18nInternal.__setInstance(instance, composer);
+  }
+  return composer;
+}
+__name(useI18n, "useI18n");
+const castToVueI18n = /* @__PURE__ */ __name(/* @__NO_SIDE_EFFECTS__ */ (i18n2) => {
+  if (!(__VUE_I18N_BRIDGE__ in i18n2)) {
+    throw createI18nError(I18nErrorCodes.NOT_COMPATIBLE_LEGACY_VUE_I18N);
+  }
+  return i18n2;
+}, "castToVueI18n");
+function createGlobal(options3, legacyMode, VueI18nLegacy) {
+  const scope = effectScope();
+  {
+    const obj = __VUE_I18N_LEGACY_API__ && legacyMode ? scope.run(() => createVueI18n(options3)) : scope.run(() => createComposer(options3));
+    if (obj == null) {
+      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
+    }
+    return [scope, obj];
+  }
+}
+__name(createGlobal, "createGlobal");
+function getI18nInstance(instance) {
+  {
+    const i18n2 = inject(!instance.isCE ? instance.appContext.app.__VUE_I18N_SYMBOL__ : I18nInjectionKey);
+    if (!i18n2) {
+      throw createI18nError(!instance.isCE ? I18nErrorCodes.UNEXPECTED_ERROR : I18nErrorCodes.NOT_INSTALLED_WITH_PROVIDE);
+    }
+    return i18n2;
+  }
+}
+__name(getI18nInstance, "getI18nInstance");
+function getScope(options3, componentOptions) {
+  return isEmptyObject(options3) ? "__i18n" in componentOptions ? "local" : "global" : !options3.useScope ? "local" : options3.useScope;
+}
+__name(getScope, "getScope");
+function getGlobalComposer(i18n2) {
+  return i18n2.mode === "composition" ? i18n2.global : i18n2.global.__composer;
+}
+__name(getGlobalComposer, "getGlobalComposer");
+function getComposer(i18n2, target, useComponent = false) {
+  let composer = null;
+  const root26 = target.root;
+  let current = getParentComponentInstance(target, useComponent);
+  while (current != null) {
+    const i18nInternal = i18n2;
+    if (i18n2.mode === "composition") {
+      composer = i18nInternal.__getInstance(current);
+    } else {
+      if (__VUE_I18N_LEGACY_API__) {
+        const vueI18n = i18nInternal.__getInstance(current);
+        if (vueI18n != null) {
+          composer = vueI18n.__composer;
+          if (useComponent && composer && !composer[InejctWithOptionSymbol]) {
+            composer = null;
+          }
+        }
+      }
+    }
+    if (composer != null) {
+      break;
+    }
+    if (root26 === current) {
+      break;
+    }
+    current = current.parent;
+  }
+  return composer;
+}
+__name(getComposer, "getComposer");
+function getParentComponentInstance(target, useComponent = false) {
+  if (target == null) {
+    return null;
+  }
+  {
+    return !useComponent ? target.parent : target.vnode.ctx || target.parent;
+  }
+}
+__name(getParentComponentInstance, "getParentComponentInstance");
+function setupLifeCycle(i18n2, target, composer) {
+  let emitter = null;
+  {
+    onMounted(() => {
+      if (false) {
+        target.vnode.el.__VUE_I18N__ = composer;
+        emitter = createEmitter();
+        const _composer = composer;
+        _composer[EnableEmitter] && _composer[EnableEmitter](emitter);
+        emitter.on("*", addTimelineEvent);
+      }
+    }, target);
+    onUnmounted(() => {
+      const _composer = composer;
+      if (false) {
+        emitter && emitter.off("*", addTimelineEvent);
+        _composer[DisableEmitter] && _composer[DisableEmitter]();
+        delete target.vnode.el.__VUE_I18N__;
+      }
+      i18n2.__deleteInstance(target);
+      const dispose = _composer[DisposeSymbol];
+      if (dispose) {
+        dispose();
+        delete _composer[DisposeSymbol];
+      }
+    }, target);
+  }
+}
+__name(setupLifeCycle, "setupLifeCycle");
+function useI18nForLegacy(instance, scope, root26, options3 = {}) {
+  const isLocalScope = scope === "local";
+  const _composer = shallowRef(null);
+  if (isLocalScope && instance.proxy && !(instance.proxy.$options.i18n || instance.proxy.$options.__i18n)) {
+    throw createI18nError(I18nErrorCodes.MUST_DEFINE_I18N_OPTION_IN_ALLOW_COMPOSITION);
+  }
+  const _inheritLocale = isBoolean(options3.inheritLocale) ? options3.inheritLocale : !isString$1(options3.locale);
+  const _locale = ref(
+    // prettier-ignore
+    !isLocalScope || _inheritLocale ? root26.locale.value : isString$1(options3.locale) ? options3.locale : DEFAULT_LOCALE
+  );
+  const _fallbackLocale = ref(
+    // prettier-ignore
+    !isLocalScope || _inheritLocale ? root26.fallbackLocale.value : isString$1(options3.fallbackLocale) || isArray(options3.fallbackLocale) || isPlainObject(options3.fallbackLocale) || options3.fallbackLocale === false ? options3.fallbackLocale : _locale.value
+  );
+  const _messages = ref(getLocaleMessages(_locale.value, options3));
+  const _datetimeFormats = ref(isPlainObject(options3.datetimeFormats) ? options3.datetimeFormats : { [_locale.value]: {} });
+  const _numberFormats = ref(isPlainObject(options3.numberFormats) ? options3.numberFormats : { [_locale.value]: {} });
+  const _missingWarn = isLocalScope ? root26.missingWarn : isBoolean(options3.missingWarn) || isRegExp(options3.missingWarn) ? options3.missingWarn : true;
+  const _fallbackWarn = isLocalScope ? root26.fallbackWarn : isBoolean(options3.fallbackWarn) || isRegExp(options3.fallbackWarn) ? options3.fallbackWarn : true;
+  const _fallbackRoot = isLocalScope ? root26.fallbackRoot : isBoolean(options3.fallbackRoot) ? options3.fallbackRoot : true;
+  const _fallbackFormat = !!options3.fallbackFormat;
+  const _missing = isFunction$1(options3.missing) ? options3.missing : null;
+  const _postTranslation = isFunction$1(options3.postTranslation) ? options3.postTranslation : null;
+  const _warnHtmlMessage = isLocalScope ? root26.warnHtmlMessage : isBoolean(options3.warnHtmlMessage) ? options3.warnHtmlMessage : true;
+  const _escapeParameter = !!options3.escapeParameter;
+  const _modifiers = isLocalScope ? root26.modifiers : isPlainObject(options3.modifiers) ? options3.modifiers : {};
+  const _pluralRules = options3.pluralRules || isLocalScope && root26.pluralRules;
+  function trackReactivityValues() {
+    return [
+      _locale.value,
+      _fallbackLocale.value,
+      _messages.value,
+      _datetimeFormats.value,
+      _numberFormats.value
+    ];
+  }
+  __name(trackReactivityValues, "trackReactivityValues");
+  const locale2 = computed({
+    get: /* @__PURE__ */ __name(() => {
+      return _composer.value ? _composer.value.locale.value : _locale.value;
+    }, "get"),
+    set: /* @__PURE__ */ __name((val) => {
+      if (_composer.value) {
+        _composer.value.locale.value = val;
+      }
+      _locale.value = val;
+    }, "set")
+  });
+  const fallbackLocale = computed({
+    get: /* @__PURE__ */ __name(() => {
+      return _composer.value ? _composer.value.fallbackLocale.value : _fallbackLocale.value;
+    }, "get"),
+    set: /* @__PURE__ */ __name((val) => {
+      if (_composer.value) {
+        _composer.value.fallbackLocale.value = val;
+      }
+      _fallbackLocale.value = val;
+    }, "set")
+  });
+  const messages2 = computed(() => {
+    if (_composer.value) {
+      return _composer.value.messages.value;
+    } else {
+      return _messages.value;
+    }
+  });
+  const datetimeFormats = computed(() => _datetimeFormats.value);
+  const numberFormats = computed(() => _numberFormats.value);
+  function getPostTranslationHandler() {
+    return _composer.value ? _composer.value.getPostTranslationHandler() : _postTranslation;
+  }
+  __name(getPostTranslationHandler, "getPostTranslationHandler");
+  function setPostTranslationHandler(handler6) {
+    if (_composer.value) {
+      _composer.value.setPostTranslationHandler(handler6);
+    }
+  }
+  __name(setPostTranslationHandler, "setPostTranslationHandler");
+  function getMissingHandler() {
+    return _composer.value ? _composer.value.getMissingHandler() : _missing;
+  }
+  __name(getMissingHandler, "getMissingHandler");
+  function setMissingHandler(handler6) {
+    if (_composer.value) {
+      _composer.value.setMissingHandler(handler6);
+    }
+  }
+  __name(setMissingHandler, "setMissingHandler");
+  function warpWithDeps(fn) {
+    trackReactivityValues();
+    return fn();
+  }
+  __name(warpWithDeps, "warpWithDeps");
+  function t(...args) {
+    return _composer.value ? warpWithDeps(() => Reflect.apply(_composer.value.t, null, [...args])) : warpWithDeps(() => "");
+  }
+  __name(t, "t");
+  function rt(...args) {
+    return _composer.value ? Reflect.apply(_composer.value.rt, null, [...args]) : "";
+  }
+  __name(rt, "rt");
+  function d(...args) {
+    return _composer.value ? warpWithDeps(() => Reflect.apply(_composer.value.d, null, [...args])) : warpWithDeps(() => "");
+  }
+  __name(d, "d");
+  function n(...args) {
+    return _composer.value ? warpWithDeps(() => Reflect.apply(_composer.value.n, null, [...args])) : warpWithDeps(() => "");
+  }
+  __name(n, "n");
+  function tm(key) {
+    return _composer.value ? _composer.value.tm(key) : {};
+  }
+  __name(tm, "tm");
+  function te(key, locale22) {
+    return _composer.value ? _composer.value.te(key, locale22) : false;
+  }
+  __name(te, "te");
+  function getLocaleMessage(locale22) {
+    return _composer.value ? _composer.value.getLocaleMessage(locale22) : {};
+  }
+  __name(getLocaleMessage, "getLocaleMessage");
+  function setLocaleMessage(locale22, message3) {
+    if (_composer.value) {
+      _composer.value.setLocaleMessage(locale22, message3);
+      _messages.value[locale22] = message3;
+    }
+  }
+  __name(setLocaleMessage, "setLocaleMessage");
+  function mergeLocaleMessage(locale22, message3) {
+    if (_composer.value) {
+      _composer.value.mergeLocaleMessage(locale22, message3);
+    }
+  }
+  __name(mergeLocaleMessage, "mergeLocaleMessage");
+  function getDateTimeFormat(locale22) {
+    return _composer.value ? _composer.value.getDateTimeFormat(locale22) : {};
+  }
+  __name(getDateTimeFormat, "getDateTimeFormat");
+  function setDateTimeFormat(locale22, format2) {
+    if (_composer.value) {
+      _composer.value.setDateTimeFormat(locale22, format2);
+      _datetimeFormats.value[locale22] = format2;
+    }
+  }
+  __name(setDateTimeFormat, "setDateTimeFormat");
+  function mergeDateTimeFormat(locale22, format2) {
+    if (_composer.value) {
+      _composer.value.mergeDateTimeFormat(locale22, format2);
+    }
+  }
+  __name(mergeDateTimeFormat, "mergeDateTimeFormat");
+  function getNumberFormat(locale22) {
+    return _composer.value ? _composer.value.getNumberFormat(locale22) : {};
+  }
+  __name(getNumberFormat, "getNumberFormat");
+  function setNumberFormat(locale22, format2) {
+    if (_composer.value) {
+      _composer.value.setNumberFormat(locale22, format2);
+      _numberFormats.value[locale22] = format2;
+    }
+  }
+  __name(setNumberFormat, "setNumberFormat");
+  function mergeNumberFormat(locale22, format2) {
+    if (_composer.value) {
+      _composer.value.mergeNumberFormat(locale22, format2);
+    }
+  }
+  __name(mergeNumberFormat, "mergeNumberFormat");
+  const wrapper = {
+    get id() {
+      return _composer.value ? _composer.value.id : -1;
+    },
+    locale: locale2,
+    fallbackLocale,
+    messages: messages2,
+    datetimeFormats,
+    numberFormats,
+    get inheritLocale() {
+      return _composer.value ? _composer.value.inheritLocale : _inheritLocale;
+    },
+    set inheritLocale(val) {
+      if (_composer.value) {
+        _composer.value.inheritLocale = val;
+      }
+    },
+    get availableLocales() {
+      return _composer.value ? _composer.value.availableLocales : Object.keys(_messages.value);
+    },
+    get modifiers() {
+      return _composer.value ? _composer.value.modifiers : _modifiers;
+    },
+    get pluralRules() {
+      return _composer.value ? _composer.value.pluralRules : _pluralRules;
+    },
+    get isGlobal() {
+      return _composer.value ? _composer.value.isGlobal : false;
+    },
+    get missingWarn() {
+      return _composer.value ? _composer.value.missingWarn : _missingWarn;
+    },
+    set missingWarn(val) {
+      if (_composer.value) {
+        _composer.value.missingWarn = val;
+      }
+    },
+    get fallbackWarn() {
+      return _composer.value ? _composer.value.fallbackWarn : _fallbackWarn;
+    },
+    set fallbackWarn(val) {
+      if (_composer.value) {
+        _composer.value.missingWarn = val;
+      }
+    },
+    get fallbackRoot() {
+      return _composer.value ? _composer.value.fallbackRoot : _fallbackRoot;
+    },
+    set fallbackRoot(val) {
+      if (_composer.value) {
+        _composer.value.fallbackRoot = val;
+      }
+    },
+    get fallbackFormat() {
+      return _composer.value ? _composer.value.fallbackFormat : _fallbackFormat;
+    },
+    set fallbackFormat(val) {
+      if (_composer.value) {
+        _composer.value.fallbackFormat = val;
+      }
+    },
+    get warnHtmlMessage() {
+      return _composer.value ? _composer.value.warnHtmlMessage : _warnHtmlMessage;
+    },
+    set warnHtmlMessage(val) {
+      if (_composer.value) {
+        _composer.value.warnHtmlMessage = val;
+      }
+    },
+    get escapeParameter() {
+      return _composer.value ? _composer.value.escapeParameter : _escapeParameter;
+    },
+    set escapeParameter(val) {
+      if (_composer.value) {
+        _composer.value.escapeParameter = val;
+      }
+    },
+    t,
+    getPostTranslationHandler,
+    setPostTranslationHandler,
+    getMissingHandler,
+    setMissingHandler,
+    rt,
+    d,
+    n,
+    tm,
+    te,
+    getLocaleMessage,
+    setLocaleMessage,
+    mergeLocaleMessage,
+    getDateTimeFormat,
+    setDateTimeFormat,
+    mergeDateTimeFormat,
+    getNumberFormat,
+    setNumberFormat,
+    mergeNumberFormat
+  };
+  function sync(composer) {
+    composer.locale.value = _locale.value;
+    composer.fallbackLocale.value = _fallbackLocale.value;
+    Object.keys(_messages.value).forEach((locale22) => {
+      composer.mergeLocaleMessage(locale22, _messages.value[locale22]);
+    });
+    Object.keys(_datetimeFormats.value).forEach((locale22) => {
+      composer.mergeDateTimeFormat(locale22, _datetimeFormats.value[locale22]);
+    });
+    Object.keys(_numberFormats.value).forEach((locale22) => {
+      composer.mergeNumberFormat(locale22, _numberFormats.value[locale22]);
+    });
+    composer.escapeParameter = _escapeParameter;
+    composer.fallbackFormat = _fallbackFormat;
+    composer.fallbackRoot = _fallbackRoot;
+    composer.fallbackWarn = _fallbackWarn;
+    composer.missingWarn = _missingWarn;
+    composer.warnHtmlMessage = _warnHtmlMessage;
+  }
+  __name(sync, "sync");
+  onBeforeMount(() => {
+    if (instance.proxy == null || instance.proxy.$i18n == null) {
+      throw createI18nError(I18nErrorCodes.NOT_AVAILABLE_COMPOSITION_IN_LEGACY);
+    }
+    const composer = _composer.value = instance.proxy.$i18n.__composer;
+    if (scope === "global") {
+      _locale.value = composer.locale.value;
+      _fallbackLocale.value = composer.fallbackLocale.value;
+      _messages.value = composer.messages.value;
+      _datetimeFormats.value = composer.datetimeFormats.value;
+      _numberFormats.value = composer.numberFormats.value;
+    } else if (isLocalScope) {
+      sync(composer);
+    }
+  });
+  return wrapper;
+}
+__name(useI18nForLegacy, "useI18nForLegacy");
+const globalExportProps = [
+  "locale",
+  "fallbackLocale",
+  "availableLocales"
+];
+const globalExportMethods = ["t", "rt", "d", "n", "tm", "te"];
+function injectGlobalFields(app2, composer) {
+  const i18n2 = /* @__PURE__ */ Object.create(null);
+  globalExportProps.forEach((prop2) => {
+    const desc = Object.getOwnPropertyDescriptor(composer, prop2);
+    if (!desc) {
+      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
+    }
+    const wrap = isRef(desc.value) ? {
+      get() {
+        return desc.value.value;
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      set(val) {
+        desc.value.value = val;
+      }
+    } : {
+      get() {
+        return desc.get && desc.get();
+      }
+    };
+    Object.defineProperty(i18n2, prop2, wrap);
+  });
+  app2.config.globalProperties.$i18n = i18n2;
+  globalExportMethods.forEach((method) => {
+    const desc = Object.getOwnPropertyDescriptor(composer, method);
+    if (!desc || !desc.value) {
+      throw createI18nError(I18nErrorCodes.UNEXPECTED_ERROR);
+    }
+    Object.defineProperty(app2.config.globalProperties, `$${method}`, desc);
+  });
+  const dispose = /* @__PURE__ */ __name(() => {
+    delete app2.config.globalProperties.$i18n;
+    globalExportMethods.forEach((method) => {
+      delete app2.config.globalProperties[`$${method}`];
+    });
+  }, "dispose");
+  return dispose;
+}
+__name(injectGlobalFields, "injectGlobalFields");
+{
+  initFeatureFlags();
+}
+if (__INTLIFY_JIT_COMPILATION__) {
+  registerMessageCompiler(compile);
+} else {
+  registerMessageCompiler(compileToFunction);
+}
+registerMessageResolver(resolveValue);
+registerLocaleFallbacker(fallbackWithLocaleChain);
+if (__INTLIFY_PROD_DEVTOOLS__) {
+  const target = getGlobalThis();
+  target.__INTLIFY__ = true;
+  setDevToolsHook(target.__INTLIFY_DEVTOOLS_GLOBAL_HOOK__);
+}
+if (false) ;
+const _withScopeId$8 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-d28bffc4"), n = n(), popScopeId(), n), "_withScopeId$8");
 const _hoisted_1$p = { class: "comfy-vue-node-search-container" };
 const _hoisted_2$i = {
   key: 0,
   class: "comfy-vue-node-preview-container"
 };
-const _hoisted_3$9 = /* @__PURE__ */ _withScopeId$8(() => /* @__PURE__ */ createBaseVNode("h3", null, "Add node filter condition", -1));
+const _hoisted_3$a = /* @__PURE__ */ _withScopeId$8(() => /* @__PURE__ */ createBaseVNode("h3", null, "Add node filter condition", -1));
 const _hoisted_4$6 = { class: "_dialog-body" };
 const _hoisted_5$4 = { class: "option-container" };
 const _hoisted_6$3 = { class: "option-display-name" };
 const _hoisted_7$2 = ["innerHTML"];
-const _hoisted_8$1 = {
+const _hoisted_8$1 = /* @__PURE__ */ _withScopeId$8(() => /* @__PURE__ */ createBaseVNode("span", null, " ", -1));
+const _hoisted_9$1 = ["innerHTML"];
+const _hoisted_10$1 = {
   key: 0,
   class: "option-category"
 };
-const _hoisted_9$1 = { class: "option-badges" };
-const _sfc_main$g = /* @__PURE__ */ defineComponent({
+const _hoisted_11$1 = { class: "option-badges" };
+const _sfc_main$k = /* @__PURE__ */ defineComponent({
   __name: "NodeSearchBox",
   props: {
-    filters: {
-      type: Array
-    },
-    searchLimit: {
-      type: Number,
-      default: 64
-    }
+    filters: {},
+    searchLimit: { default: 64 }
   },
   emits: ["addFilter", "removeFilter", "addNode"],
   setup(__props, { emit: __emit }) {
@@ -90877,6 +91249,9 @@ const _sfc_main$g = /* @__PURE__ */ defineComponent({
     );
     const showCategory = computed(
       () => settingStore.get("Comfy.NodeSearchBoxImpl.ShowCategory")
+    );
+    const showIdName = computed(
+      () => settingStore.get("Comfy.NodeSearchBoxImpl.ShowIdName")
     );
     const props = __props;
     const nodeSearchFilterVisible = ref(false);
@@ -90948,7 +91323,7 @@ const _sfc_main$g = /* @__PURE__ */ defineComponent({
           class: "_dialog"
         }, {
           header: withCtx(() => [
-            _hoisted_3$9
+            _hoisted_3$a
           ]),
           default: withCtx(() => [
             createBaseVNode("div", _hoisted_4$6, [
@@ -90957,7 +91332,7 @@ const _sfc_main$g = /* @__PURE__ */ defineComponent({
           ]),
           _: 1
         }, 8, ["visible"]),
-        createVNode(_sfc_main$k, {
+        createVNode(_sfc_main$o, {
           "model-value": props.filters,
           class: "comfy-vue-node-search-box",
           scrollHeight: "40vh",
@@ -90978,12 +91353,26 @@ const _sfc_main$g = /* @__PURE__ */ defineComponent({
           option: withCtx(({ option: option4 }) => [
             createBaseVNode("div", _hoisted_5$4, [
               createBaseVNode("div", _hoisted_6$3, [
-                createBaseVNode("span", {
-                  innerHTML: highlightQuery(option4.display_name, currentQuery.value)
-                }, null, 8, _hoisted_7$2),
-                showCategory.value ? (openBlock(), createElementBlock("div", _hoisted_8$1, toDisplayString$1(option4.category.replaceAll("/", " > ")), 1)) : createCommentVNode("", true)
+                createBaseVNode("div", null, [
+                  createBaseVNode("span", {
+                    innerHTML: highlightQuery(option4.display_name, currentQuery.value)
+                  }, null, 8, _hoisted_7$2),
+                  _hoisted_8$1,
+                  showIdName.value ? (openBlock(), createBlock(unref(script$w), {
+                    key: 0,
+                    severity: "secondary"
+                  }, {
+                    default: withCtx(() => [
+                      createBaseVNode("span", {
+                        innerHTML: highlightQuery(option4.name, currentQuery.value)
+                      }, null, 8, _hoisted_9$1)
+                    ]),
+                    _: 2
+                  }, 1024)) : createCommentVNode("", true)
+                ]),
+                showCategory.value ? (openBlock(), createElementBlock("div", _hoisted_10$1, toDisplayString$1(option4.category.replaceAll("/", " > ")), 1)) : createCommentVNode("", true)
               ]),
-              createBaseVNode("div", _hoisted_9$1, [
+              createBaseVNode("div", _hoisted_11$1, [
                 option4.experimental ? (openBlock(), createBlock(unref(script$w), {
                   key: 0,
                   value: _ctx.$t("experimental"),
@@ -91015,7 +91404,7 @@ const _sfc_main$g = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const NodeSearchBox = /* @__PURE__ */ _export_sfc(_sfc_main$g, [["__scopeId", "data-v-077af1a9"]]);
+const NodeSearchBox = /* @__PURE__ */ _export_sfc(_sfc_main$k, [["__scopeId", "data-v-d28bffc4"]]);
 class ConnectingLinkImpl {
   static {
     __name(this, "ConnectingLinkImpl");
@@ -91071,7 +91460,7 @@ class ConnectingLinkImpl {
     }
   }
 }
-const _sfc_main$f = /* @__PURE__ */ defineComponent({
+const _sfc_main$j = /* @__PURE__ */ defineComponent({
   __name: "NodeSearchBoxPopover",
   setup(__props) {
     const settingStore = useSettingStore();
@@ -91085,18 +91474,15 @@ const _sfc_main$f = /* @__PURE__ */ defineComponent({
       const originalEvent = triggerEvent2.value.detail.originalEvent;
       return [originalEvent.canvasX, originalEvent.canvasY];
     }, "getNewNodeLocation");
-    const nodeFilters = reactive([]);
+    const nodeFilters = ref([]);
     const addFilter = /* @__PURE__ */ __name((filter4) => {
-      nodeFilters.push(filter4);
+      nodeFilters.value.push(filter4);
     }, "addFilter");
     const removeFilter = /* @__PURE__ */ __name((filter4) => {
-      const index2 = nodeFilters.findIndex((f) => f === filter4);
-      if (index2 !== -1) {
-        nodeFilters.splice(index2, 1);
-      }
+      nodeFilters.value = nodeFilters.value.filter((f) => f !== filter4);
     }, "removeFilter");
     const clearFilters = /* @__PURE__ */ __name(() => {
-      nodeFilters.splice(0, nodeFilters.length);
+      nodeFilters.value = [];
     }, "clearFilters");
     const closeDialog = /* @__PURE__ */ __name(() => {
       visible.value = false;
@@ -91113,46 +91499,105 @@ const _sfc_main$f = /* @__PURE__ */ defineComponent({
         closeDialog();
       }, 100);
     }, "addNode");
-    const linkReleaseTriggerMode = computed(() => {
-      return settingStore.get("Comfy.NodeSearchBoxImpl.LinkReleaseTrigger");
-    });
-    const canvasEventHandler = /* @__PURE__ */ __name((e) => {
-      const shiftPressed = e.detail.originalEvent.shiftKey;
-      if (e.detail.subType === "empty-release") {
-        if (linkReleaseTriggerMode.value === LinkReleaseTriggerMode.HOLD_SHIFT && !shiftPressed || linkReleaseTriggerMode.value === LinkReleaseTriggerMode.NOT_HOLD_SHIFT && shiftPressed) {
-          return;
-        }
-        const context = e.detail.linkReleaseContext;
-        if (context.links.length === 0) {
+    const newSearchBoxEnabled = computed(
+      () => settingStore.get("Comfy.NodeSearchBoxImpl") === "default"
+    );
+    const showSearchBox = /* @__PURE__ */ __name((e) => {
+      if (newSearchBoxEnabled.value) {
+        showNewSearchBox(e);
+      } else {
+        canvasStore.canvas.showSearchBox(e.detail.originalEvent);
+      }
+    }, "showSearchBox");
+    const nodeDefStore = useNodeDefStore();
+    const showNewSearchBox = /* @__PURE__ */ __name((e) => {
+      if (e.detail.linkReleaseContext) {
+        const links = e.detail.linkReleaseContext.links;
+        if (links.length === 0) {
           console.warn("Empty release with no links! This should never happen");
           return;
         }
-        const firstLink = ConnectingLinkImpl.createFromPlainObject(context.links[0]);
-        const filter4 = useNodeDefStore().nodeSearchService.getFilterById(
+        const firstLink = ConnectingLinkImpl.createFromPlainObject(links[0]);
+        const filter4 = nodeDefStore.nodeSearchService.getFilterById(
           firstLink.releaseSlotType
         );
         const dataType = firstLink.type;
         addFilter([filter4, dataType]);
       }
-      triggerEvent2.value = e;
       visible.value = true;
+      triggerEvent2.value = e;
       dismissable.value = false;
       setTimeout(() => {
         dismissable.value = true;
       }, 300);
-    }, "canvasEventHandler");
-    const handleEscapeKeyPress = /* @__PURE__ */ __name((event2) => {
-      if (event2.key === "Escape") {
-        closeDialog();
+    }, "showNewSearchBox");
+    const showContextMenu = /* @__PURE__ */ __name((e) => {
+      const links = e.detail.linkReleaseContext.links;
+      if (links.length === 0) {
+        console.warn("Empty release with no links! This should never happen");
+        return;
       }
-    }, "handleEscapeKeyPress");
+      const firstLink = ConnectingLinkImpl.createFromPlainObject(links[0]);
+      const mouseEvent = e.detail.originalEvent;
+      const commonOptions = {
+        e: mouseEvent,
+        allow_searchbox: true,
+        showSearchBox: /* @__PURE__ */ __name(() => showSearchBox(e), "showSearchBox")
+      };
+      const connectionOptions = firstLink.output ? { nodeFrom: firstLink.node, slotFrom: firstLink.output } : { nodeTo: firstLink.node, slotTo: firstLink.input };
+      canvasStore.canvas.showConnectionMenu({
+        ...connectionOptions,
+        ...commonOptions
+      });
+    }, "showContextMenu");
+    const canvasStore = useCanvasStore();
+    watchEffect(() => {
+      if (canvasStore.canvas) {
+        LiteGraph.release_link_on_empty_shows_menu = false;
+        canvasStore.canvas.allow_searchbox = false;
+      }
+    });
+    const canvasEventHandler = /* @__PURE__ */ __name((e) => {
+      if (e.detail.subType === "empty-double-click") {
+        showSearchBox(e);
+      } else if (e.detail.subType === "empty-release") {
+        handleCanvasEmptyRelease(e);
+      } else if (e.detail.subType === "group-double-click") {
+        const group = e.detail.group;
+        const [x2, y2] = group.pos;
+        const relativeY = e.detail.originalEvent.canvasY - y2;
+        if (relativeY > group.titleHeight) {
+          showSearchBox(e);
+        }
+      }
+    }, "canvasEventHandler");
+    const linkReleaseAction = computed(() => {
+      return settingStore.get("Comfy.LinkRelease.Action");
+    });
+    const linkReleaseActionShift = computed(() => {
+      return settingStore.get("Comfy.LinkRelease.ActionShift");
+    });
+    const handleCanvasEmptyRelease = /* @__PURE__ */ __name((e) => {
+      const originalEvent = e.detail.originalEvent;
+      const shiftPressed = originalEvent.shiftKey;
+      const action = shiftPressed ? linkReleaseActionShift.value : linkReleaseAction.value;
+      switch (action) {
+        case LinkReleaseTriggerAction.SEARCH_BOX:
+          showSearchBox(e);
+          break;
+        case LinkReleaseTriggerAction.CONTEXT_MENU:
+          showContextMenu(e);
+          break;
+        case LinkReleaseTriggerAction.NO_ACTION:
+        default:
+          break;
+      }
+    }, "handleCanvasEmptyRelease");
     onMounted(() => {
       document.addEventListener("litegraph:canvas", canvasEventHandler);
-      document.addEventListener("keydown", handleEscapeKeyPress);
     });
     onUnmounted(() => {
       document.removeEventListener("litegraph:canvas", canvasEventHandler);
-      document.removeEventListener("keydown", handleEscapeKeyPress);
     });
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock("div", null, [
@@ -91176,7 +91621,7 @@ const _sfc_main$f = /* @__PURE__ */ defineComponent({
         }, {
           container: withCtx(() => [
             createVNode(NodeSearchBox, {
-              filters: nodeFilters,
+              filters: nodeFilters.value,
               onAddFilter: addFilter,
               onRemoveFilter: removeFilter,
               onAddNode: addNode
@@ -91188,7 +91633,7 @@ const _sfc_main$f = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_main$e = /* @__PURE__ */ defineComponent({
+const _sfc_main$i = /* @__PURE__ */ defineComponent({
   __name: "NodeTooltip",
   setup(__props) {
     let idleTimeout;
@@ -91303,7 +91748,7 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const NodeTooltip = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["__scopeId", "data-v-e0597bf9"]]);
+const NodeTooltip = /* @__PURE__ */ _export_sfc(_sfc_main$i, [["__scopeId", "data-v-e0597bf9"]]);
 function _arrayWithHoles(r) {
   if (Array.isArray(r)) return r;
 }
@@ -93004,7 +93449,164 @@ function draggable(args) {
   );
 }
 __name(draggable, "draggable");
-const _sfc_main$d = /* @__PURE__ */ defineComponent({
+const BOOKMARK_SETTING_ID = "Comfy.NodeLibrary.Bookmarks.V2";
+const useNodeBookmarkStore = defineStore("nodeBookmark", () => {
+  const settingStore = useSettingStore();
+  const nodeDefStore = useNodeDefStore();
+  const migrateLegacyBookmarks = /* @__PURE__ */ __name(() => {
+    settingStore.get("Comfy.NodeLibrary.Bookmarks").forEach((bookmark) => {
+      if (bookmark.endsWith("/")) {
+        addBookmark(bookmark);
+        return;
+      }
+      const category = bookmark.split("/").slice(0, -1).join("/");
+      const displayName = bookmark.split("/").pop();
+      const nodeDef = nodeDefStore.nodeDefsByDisplayName[displayName];
+      if (!nodeDef) return;
+      addBookmark(`${category === "" ? "" : category + "/"}${nodeDef.name}`);
+    });
+    settingStore.set("Comfy.NodeLibrary.Bookmarks", []);
+  }, "migrateLegacyBookmarks");
+  const bookmarks = computed(
+    () => settingStore.get(BOOKMARK_SETTING_ID)
+  );
+  const bookmarksSet = computed(() => new Set(bookmarks.value));
+  const bookmarkedRoot = computed(
+    () => buildBookmarkTree(bookmarks.value)
+  );
+  const isBookmarked = /* @__PURE__ */ __name((node3) => bookmarksSet.value.has(node3.nodePath) || bookmarksSet.value.has(node3.name), "isBookmarked");
+  const toggleBookmark = /* @__PURE__ */ __name((node3) => {
+    if (isBookmarked(node3)) {
+      deleteBookmark(node3.nodePath);
+      deleteBookmark(node3.name);
+    } else {
+      addBookmark(node3.name);
+    }
+  }, "toggleBookmark");
+  const buildBookmarkTree = /* @__PURE__ */ __name((bookmarks2) => {
+    const bookmarkNodes = bookmarks2.map((bookmark) => {
+      if (bookmark.endsWith("/")) return createDummyFolderNodeDef(bookmark);
+      const parts2 = bookmark.split("/");
+      const name = parts2.pop();
+      const category = parts2.join("/");
+      const srcNodeDef = nodeDefStore.nodeDefsByName[name];
+      if (!srcNodeDef) {
+        return null;
+      }
+      const nodeDef = _.clone(srcNodeDef);
+      nodeDef.category = category;
+      return nodeDef;
+    }).filter((nodeDef) => nodeDef !== null);
+    return buildNodeDefTree(bookmarkNodes);
+  }, "buildBookmarkTree");
+  const addBookmark = /* @__PURE__ */ __name((nodePath) => {
+    settingStore.set(BOOKMARK_SETTING_ID, [...bookmarks.value, nodePath]);
+  }, "addBookmark");
+  const deleteBookmark = /* @__PURE__ */ __name((nodePath) => {
+    settingStore.set(
+      BOOKMARK_SETTING_ID,
+      bookmarks.value.filter((b) => b !== nodePath)
+    );
+  }, "deleteBookmark");
+  const addNewBookmarkFolder = /* @__PURE__ */ __name((parent) => {
+    const parentPath = parent ? parent.nodePath : "";
+    let newFolderPath = parentPath + "New Folder/";
+    let suffix2 = 1;
+    while (bookmarks.value.some((b) => b.startsWith(newFolderPath))) {
+      newFolderPath = parentPath + `New Folder ${suffix2}/`;
+      suffix2++;
+    }
+    addBookmark(newFolderPath);
+    return newFolderPath;
+  }, "addNewBookmarkFolder");
+  const renameBookmarkFolder = /* @__PURE__ */ __name((folderNode, newName) => {
+    if (!folderNode.isDummyFolder) {
+      throw new Error("Cannot rename non-folder node");
+    }
+    const newNodePath = folderNode.category.split("/").slice(0, -1).concat(newName).join("/") + "/";
+    if (newNodePath === folderNode.nodePath) {
+      return;
+    }
+    if (bookmarks.value.some((b) => b.startsWith(newNodePath))) {
+      throw new Error(`Folder name "${newNodePath}" already exists`);
+    }
+    settingStore.set(
+      BOOKMARK_SETTING_ID,
+      bookmarks.value.map(
+        (b) => b.startsWith(folderNode.nodePath) ? b.replace(folderNode.nodePath, newNodePath) : b
+      )
+    );
+    renameBookmarkCustomization(folderNode.nodePath, newNodePath);
+  }, "renameBookmarkFolder");
+  const deleteBookmarkFolder = /* @__PURE__ */ __name((folderNode) => {
+    if (!folderNode.isDummyFolder) {
+      throw new Error("Cannot delete non-folder node");
+    }
+    settingStore.set(
+      BOOKMARK_SETTING_ID,
+      bookmarks.value.filter(
+        (b) => b !== folderNode.nodePath && !b.startsWith(folderNode.nodePath)
+      )
+    );
+    deleteBookmarkCustomization(folderNode.nodePath);
+  }, "deleteBookmarkFolder");
+  const bookmarksCustomization = computed(() => settingStore.get("Comfy.NodeLibrary.BookmarksCustomization"));
+  const updateBookmarkCustomization = /* @__PURE__ */ __name((nodePath, customization) => {
+    const currentCustomization = bookmarksCustomization.value[nodePath] || {};
+    const newCustomization = { ...currentCustomization, ...customization };
+    if (newCustomization.icon === defaultBookmarkIcon) {
+      delete newCustomization.icon;
+    }
+    if (newCustomization.color === defaultBookmarkColor) {
+      delete newCustomization.color;
+    }
+    if (Object.keys(newCustomization).length === 0) {
+      deleteBookmarkCustomization(nodePath);
+    } else {
+      settingStore.set("Comfy.NodeLibrary.BookmarksCustomization", {
+        ...bookmarksCustomization.value,
+        [nodePath]: newCustomization
+      });
+    }
+  }, "updateBookmarkCustomization");
+  const deleteBookmarkCustomization = /* @__PURE__ */ __name((nodePath) => {
+    settingStore.set("Comfy.NodeLibrary.BookmarksCustomization", {
+      ...bookmarksCustomization.value,
+      [nodePath]: void 0
+    });
+  }, "deleteBookmarkCustomization");
+  const renameBookmarkCustomization = /* @__PURE__ */ __name((oldNodePath, newNodePath) => {
+    const updatedCustomization = { ...bookmarksCustomization.value };
+    if (updatedCustomization[oldNodePath]) {
+      updatedCustomization[newNodePath] = updatedCustomization[oldNodePath];
+      delete updatedCustomization[oldNodePath];
+    }
+    settingStore.set(
+      "Comfy.NodeLibrary.BookmarksCustomization",
+      updatedCustomization
+    );
+  }, "renameBookmarkCustomization");
+  const defaultBookmarkIcon = "pi-bookmark-fill";
+  const defaultBookmarkColor = "#a1a1aa";
+  return {
+    bookmarks,
+    bookmarkedRoot,
+    isBookmarked,
+    toggleBookmark,
+    addBookmark,
+    addNewBookmarkFolder,
+    renameBookmarkFolder,
+    deleteBookmarkFolder,
+    bookmarksCustomization,
+    updateBookmarkCustomization,
+    deleteBookmarkCustomization,
+    renameBookmarkCustomization,
+    defaultBookmarkIcon,
+    defaultBookmarkColor,
+    migrateLegacyBookmarks
+  };
+});
+const _sfc_main$h = /* @__PURE__ */ defineComponent({
   __name: "GraphCanvas",
   emits: ["ready"],
   setup(__props, { emit: __emit }) {
@@ -93013,38 +93615,22 @@ const _sfc_main$d = /* @__PURE__ */ defineComponent({
     const settingStore = useSettingStore();
     const nodeDefStore = useNodeDefStore();
     const workspaceStore = useWorkspaceStore();
+    const canvasStore = useCanvasStore();
     const betaMenuEnabled = computed(
       () => settingStore.get("Comfy.UseNewMenu") !== "Disabled"
     );
-    const nodeSearchEnabled = computed(
-      () => settingStore.get("Comfy.NodeSearchBoxImpl") === "default"
-    );
-    watch(
-      nodeSearchEnabled,
-      (newVal) => {
-        LiteGraph.release_link_on_empty_shows_menu = !newVal;
-        if (app$1.canvas) app$1.canvas.allow_searchbox = !newVal;
-      },
-      { immediate: true }
-    );
-    const canvasInfoEnabled = computed(
-      () => settingStore.get("Comfy.Graph.CanvasInfo")
-    );
-    watch(
-      canvasInfoEnabled,
-      (newVal) => {
-        if (app$1.canvas) app$1.canvas.show_info = newVal;
-      },
-      { immediate: true }
-    );
-    const zoomSpeed = computed(() => settingStore.get("Comfy.Graph.ZoomSpeed"));
-    watch(
-      zoomSpeed,
-      (newVal) => {
-        if (app$1.canvas) app$1.canvas["zoom_speed"] = newVal;
-      },
-      { immediate: true }
-    );
+    watchEffect(() => {
+      const canvasInfoEnabled = settingStore.get("Comfy.Graph.CanvasInfo");
+      if (canvasStore.canvas) {
+        canvasStore.canvas.show_info = canvasInfoEnabled;
+      }
+    });
+    watchEffect(() => {
+      const zoomSpeed = settingStore.get("Comfy.Graph.ZoomSpeed");
+      if (canvasStore.canvas) {
+        canvasStore.canvas.zoom_speed = zoomSpeed;
+      }
+    });
     watchEffect(() => {
       nodeDefStore.showDeprecated = settingStore.get("Comfy.Node.ShowDeprecated");
     });
@@ -93076,9 +93662,7 @@ const _sfc_main$d = /* @__PURE__ */ defineComponent({
       app$1.vueAppReady = true;
       workspaceStore.spinner = true;
       await app$1.setup(canvasRef.value);
-      app$1.canvas.allow_searchbox = !nodeSearchEnabled.value;
-      app$1.canvas.show_info = canvasInfoEnabled.value;
-      app$1.canvas["zoom_speed"] = zoomSpeed.value;
+      canvasStore.canvas = app$1.canvas;
       workspaceStore.spinner = false;
       window["app"] = app$1;
       window["graph"] = app$1.graph;
@@ -93087,16 +93671,21 @@ const _sfc_main$d = /* @__PURE__ */ defineComponent({
         onDrop: /* @__PURE__ */ __name((event2) => {
           const loc = event2.location.current.input;
           const dndData = event2.source.data;
-          if (dndData.type === "add-node") {
-            const nodeDef = dndData.data;
-            const pos2 = app$1.clientPosToCanvasPos([
-              loc.clientX - 20,
-              loc.clientY
-            ]);
-            app$1.addNodeOnGraph(nodeDef, { pos: pos2 });
+          if (dndData.type === "tree-explorer-node") {
+            const node3 = dndData.data;
+            if (node3.data instanceof ComfyNodeDefImpl) {
+              const nodeDef = node3.data;
+              const pos2 = app$1.clientPosToCanvasPos([
+                loc.clientX - 20,
+                loc.clientY
+              ]);
+              app$1.addNodeOnGraph(nodeDef, { pos: pos2 });
+            }
           }
         }, "onDrop")
       });
+      useNodeBookmarkStore().migrateLegacyBookmarks();
+      useNodeDefStore().nodeSearchService.endsWithFilterStartSequence("");
       emit2("ready");
     });
     onUnmounted(() => {
@@ -93111,7 +93700,7 @@ const _sfc_main$d = /* @__PURE__ */ defineComponent({
             ]),
             _: 1
           })) : createCommentVNode("", true),
-          createVNode(NodeTitleEditor),
+          createVNode(TitleEditor),
           createBaseVNode("canvas", {
             ref_key: "canvasRef",
             ref: canvasRef,
@@ -93119,7 +93708,7 @@ const _sfc_main$d = /* @__PURE__ */ defineComponent({
             tabindex: "1"
           }, null, 512)
         ])),
-        nodeSearchEnabled.value ? (openBlock(), createBlock(_sfc_main$f, { key: 0 })) : createCommentVNode("", true),
+        createVNode(_sfc_main$j),
         createVNode(NodeTooltip)
       ], 64);
     };
@@ -93770,7 +94359,7 @@ var script$1$7 = {
 };
 var _hoisted_1$m = ["tabindex"];
 var _hoisted_2$g = ["id", "aria-label", "aria-disabled", "aria-expanded", "aria-haspopup", "aria-level", "aria-setsize", "aria-posinset", "data-p-active", "data-p-focused", "data-p-disabled"];
-var _hoisted_3$8 = ["onClick", "onMouseenter", "onMousemove"];
+var _hoisted_3$9 = ["onClick", "onMouseenter", "onMousemove"];
 var _hoisted_4$5 = ["href", "target"];
 var _hoisted_5$3 = ["id"];
 var _hoisted_6$2 = ["id"];
@@ -93858,7 +94447,7 @@ function render$1$3(_ctx, _cache, $props, $setup, $data, $options) {
           hasSubmenu: $options.getItemProp(processedItem, "items"),
           label: $options.getItemLabel(processedItem),
           props: $options.getMenuItemProps(processedItem, index2)
-        }, null, 8, ["item", "hasSubmenu", "label", "props"]))], 16, _hoisted_3$8), $options.isItemVisible(processedItem) && $options.isItemGroup(processedItem) ? (openBlock(), createBlock(_component_ContextMenuSub, mergeProps({
+        }, null, 8, ["item", "hasSubmenu", "label", "props"]))], 16, _hoisted_3$9), $options.isItemVisible(processedItem) && $options.isItemGroup(processedItem) ? (openBlock(), createBlock(_component_ContextMenuSub, mergeProps({
           key: 0,
           id: $options.getItemId(processedItem) + "_list",
           role: "menu",
@@ -94530,12 +95119,12 @@ script$f.render = render$e;
 const _withScopeId$7 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-9bc23daf"), n = n(), popScopeId(), n), "_withScopeId$7");
 const _hoisted_1$l = ["src", "data-test"];
 const _hoisted_2$f = ["src"];
-const _hoisted_3$7 = {
+const _hoisted_3$8 = {
   key: 1,
   class: "broken-image-placeholder"
 };
 const _hoisted_4$4 = /* @__PURE__ */ _withScopeId$7(() => /* @__PURE__ */ createBaseVNode("i", { class: "pi pi-image" }, null, -1));
-const _sfc_main$c = /* @__PURE__ */ defineComponent({
+const _sfc_main$g = /* @__PURE__ */ defineComponent({
   __name: "ComfyImage",
   props: {
     src: {},
@@ -94578,7 +95167,7 @@ const _sfc_main$c = /* @__PURE__ */ defineComponent({
             class: normalizeClass(["comfy-image-main", [...classArray.value]])
           }, null, 42, _hoisted_2$f)
         ], 2)) : createCommentVNode("", true),
-        imageBroken.value ? (openBlock(), createElementBlock("div", _hoisted_3$7, [
+        imageBroken.value ? (openBlock(), createElementBlock("div", _hoisted_3$8, [
           _hoisted_4$4,
           createBaseVNode("span", null, toDisplayString$1(_ctx.$t("imageFailedToLoad")), 1)
         ])) : createCommentVNode("", true)
@@ -94586,15 +95175,15 @@ const _sfc_main$c = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const ComfyImage = /* @__PURE__ */ _export_sfc(_sfc_main$c, [["__scopeId", "data-v-9bc23daf"]]);
+const ComfyImage = /* @__PURE__ */ _export_sfc(_sfc_main$g, [["__scopeId", "data-v-9bc23daf"]]);
 const _withScopeId$6 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-d9c060ae"), n = n(), popScopeId(), n), "_withScopeId$6");
 const _hoisted_1$k = { class: "image-preview-mask" };
 const _hoisted_2$e = {
   key: 1,
   class: "task-result-preview"
 };
-const _hoisted_3$6 = /* @__PURE__ */ _withScopeId$6(() => /* @__PURE__ */ createBaseVNode("i", { class: "pi pi-file" }, null, -1));
-const _sfc_main$b = /* @__PURE__ */ defineComponent({
+const _hoisted_3$7 = /* @__PURE__ */ _withScopeId$6(() => /* @__PURE__ */ createBaseVNode("i", { class: "pi pi-file" }, null, -1));
+const _sfc_main$f = /* @__PURE__ */ defineComponent({
   __name: "ResultItem",
   props: {
     result: {}
@@ -94636,14 +95225,14 @@ const _sfc_main$b = /* @__PURE__ */ defineComponent({
             })
           ])
         ], 64)) : (openBlock(), createElementBlock("div", _hoisted_2$e, [
-          _hoisted_3$6,
+          _hoisted_3$7,
           createBaseVNode("span", null, toDisplayString$1(_ctx.result.mediaType), 1)
         ]))
       ], 512);
     };
   }
 });
-const ResultItem = /* @__PURE__ */ _export_sfc(_sfc_main$b, [["__scopeId", "data-v-d9c060ae"]]);
+const ResultItem = /* @__PURE__ */ _export_sfc(_sfc_main$f, [["__scopeId", "data-v-d9c060ae"]]);
 var TaskItemDisplayStatus = /* @__PURE__ */ ((TaskItemDisplayStatus2) => {
   TaskItemDisplayStatus2["Running"] = "Running";
   TaskItemDisplayStatus2["Pending"] = "Pending";
@@ -94926,7 +95515,7 @@ const _hoisted_2$d = {
   key: 1,
   class: "pi pi-spin pi-spinner"
 };
-const _hoisted_3$5 = { key: 2 };
+const _hoisted_3$6 = { key: 2 };
 const _hoisted_4$3 = {
   key: 3,
   class: "pi pi-exclamation-triangle"
@@ -94948,7 +95537,7 @@ const _hoisted_10 = {
 };
 const _hoisted_11 = { class: "tag-wrapper" };
 const _hoisted_12 = { style: { "font-weight": "bold" } };
-const _sfc_main$a = /* @__PURE__ */ defineComponent({
+const _sfc_main$e = /* @__PURE__ */ defineComponent({
   __name: "TaskItem",
   props: {
     task: {},
@@ -95018,7 +95607,7 @@ const _sfc_main$a = /* @__PURE__ */ defineComponent({
               result: unref(coverResult),
               onPreview: handlePreview
             }, null, 8, ["result"])) : createCommentVNode("", true)
-          ], 64)) : _ctx.task.displayStatus === unref(TaskItemDisplayStatus).Running ? (openBlock(), createElementBlock("i", _hoisted_2$d)) : _ctx.task.displayStatus === unref(TaskItemDisplayStatus).Pending ? (openBlock(), createElementBlock("span", _hoisted_3$5, "...")) : _ctx.task.displayStatus === unref(TaskItemDisplayStatus).Cancelled ? (openBlock(), createElementBlock("i", _hoisted_4$3)) : _ctx.task.displayStatus === unref(TaskItemDisplayStatus).Failed ? (openBlock(), createElementBlock("i", _hoisted_5$2)) : createCommentVNode("", true)
+          ], 64)) : _ctx.task.displayStatus === unref(TaskItemDisplayStatus).Running ? (openBlock(), createElementBlock("i", _hoisted_2$d)) : _ctx.task.displayStatus === unref(TaskItemDisplayStatus).Pending ? (openBlock(), createElementBlock("span", _hoisted_3$6, "...")) : _ctx.task.displayStatus === unref(TaskItemDisplayStatus).Cancelled ? (openBlock(), createElementBlock("i", _hoisted_4$3)) : _ctx.task.displayStatus === unref(TaskItemDisplayStatus).Failed ? (openBlock(), createElementBlock("i", _hoisted_5$2)) : createCommentVNode("", true)
         ]),
         createBaseVNode("div", _hoisted_6$1, [
           createBaseVNode("div", _hoisted_7$1, [
@@ -95067,7 +95656,7 @@ const _sfc_main$a = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const TaskItem = /* @__PURE__ */ _export_sfc(_sfc_main$a, [["__scopeId", "data-v-11ef4cfe"]]);
+const TaskItem = /* @__PURE__ */ _export_sfc(_sfc_main$e, [["__scopeId", "data-v-11ef4cfe"]]);
 var theme$6 = /* @__PURE__ */ __name(function theme31(_ref) {
   var dt3 = _ref.dt;
   return "\n.p-galleria {\n    overflow: hidden;\n    border-style: solid;\n    border-width: ".concat(dt3("galleria.border.width"), ";\n    border-color: ").concat(dt3("galleria.border.color"), ";\n    border-radius: ").concat(dt3("galleria.border.radius"), ";\n}\n\n.p-galleria-content {\n    display: flex;\n    flex-direction: column;\n}\n\n.p-galleria-items-container {\n    display: flex;\n    flex-direction: column;\n    position: relative;\n}\n\n.p-galleria-items {\n    position: relative;\n    display: flex;\n    height: 100%;\n}\n\n.p-galleria-nav-button {\n    position: absolute;\n    top: 50%;\n    display: inline-flex;\n    justify-content: center;\n    align-items: center;\n    overflow: hidden;\n    background: ").concat(dt3("galleria.nav.button.background"), ";\n    color: ").concat(dt3("galleria.nav.button.color"), ";\n    width: ").concat(dt3("galleria.nav.button.size"), ";\n    height: ").concat(dt3("galleria.nav.button.size"), ";\n    transition: background ").concat(dt3("galleria.transition.duration"), ", color ").concat(dt3("galleria.transition.duration"), ", outline-color ").concat(dt3("galleria.transition.duration"), ", box-shadow ").concat(dt3("galleria.transition.duration"), ";\n    margin: calc(-1 * calc(").concat(dt3("galleria.nav.button.size"), ") / 2) ").concat(dt3("galleria.nav.button.gutter"), " 0 ").concat(dt3("galleria.nav.button.gutter"), ";\n    padding: 0;\n    user-select: none;\n    border: 0 none;\n    cursor: pointer;\n    outline-color: transparent;\n}\n\n.p-galleria-nav-button:not(.p-disabled):hover {\n    background: ").concat(dt3("galleria.nav.button.hover.background"), ";\n    color: ").concat(dt3("galleria.nav.button.hover.color"), ";\n}\n\n.p-galleria-nav-button:not(.p-disabled):focus-visible {\n    box-shadow: ").concat(dt3("galleria.nav.button.focus.ring.shadow"), ";\n    outline: ").concat(dt3("galleria.nav.button.focus.ring.width"), " ").concat(dt3("galleria.nav.button.focus.ring.style"), " ").concat(dt3("galleria.nav.button.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("galleria.nav.button.focus.ring.offset"), ";\n}\n\n.p-galleria-next-icon,\n.p-galleria-prev-icon {\n    font-size: ").concat(dt3("galleria.nav.icon.size"), ";\n    width: ").concat(dt3("galleria.nav.icon.size"), ";\n    height: ").concat(dt3("galleria.nav.icon.size"), ";\n}\n\n.p-galleria-prev-button {\n    border-radius: ").concat(dt3("galleria.nav.button.prev.border.radius"), ";\n    left: 0;\n}\n\n.p-galleria-next-button {\n    border-radius: ").concat(dt3("galleria.nav.button.next.border.radius"), ";\n    right: 0;\n}\n\n.p-galleria-item {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    height: 100%;\n    width: 100%;\n}\n\n.p-galleria-hover-navigators .p-galleria-nav-button {\n    pointer-events: none;\n    opacity: 0;\n    transition: opacity ").concat(dt3("galleria.transition.duration"), " ease-in-out;\n}\n\n.p-galleria-hover-navigators .p-galleria-items-container:hover .p-galleria-nav-button {\n    pointer-events: all;\n    opacity: 1;\n}\n\n.p-galleria-hover-navigators .p-galleria-items-container:hover .p-galleria-nav-button.p-disabled {\n    pointer-events: none;\n}\n\n.p-galleria-caption {\n    position: absolute;\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    background: ").concat(dt3("galleria.caption.background"), ";\n    color: ").concat(dt3("galleria.caption.color"), ";\n    padding: ").concat(dt3("galleria.caption.padding"), ";\n}\n\n.p-galleria-thumbnails {\n    display: flex;\n    flex-direction: column;\n    overflow: auto;\n    flex-shrink: 0;\n}\n\n.p-galleria-thumbnail-nav-button {\n    align-self: center;\n    flex: 0 0 auto;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    overflow: hidden;\n    position: relative;\n    margin: 0 ").concat(dt3("galleria.thumbnail.nav.button.gutter"), ";\n    padding: 0;\n    border: none;\n    user-select: none;\n    cursor: pointer;\n    background: transparent;\n    color: ").concat(dt3("galleria.thumbnail.nav.button.color"), ";\n    width: ").concat(dt3("galleria.thumbnail.nav.button.size"), ";\n    height: ").concat(dt3("galleria.thumbnail.nav.button.size"), ";\n    transition: background ").concat(dt3("galleria.transition.duration"), ", color ").concat(dt3("galleria.transition.duration"), ", outline-color ").concat(dt3("galleria.transition.duration"), ";\n    outline-color: transparent;\n    border-radius: ").concat(dt3("galleria.thumbnail.nav.button.border.radius"), ";\n}\n\n.p-galleria-thumbnail-nav-button:hover {\n    background: ").concat(dt3("galleria.thumbnail.nav.button.hover.background"), ";\n    color: ").concat(dt3("galleria.thumbnail.nav.button.hover.color"), ";\n}\n\n.p-galleria-thumbnail-nav-button:focus-visible {\n    box-shadow: ").concat(dt3("galleria.thumbnail.nav.button.focus.ring.shadow"), ";\n    outline: ").concat(dt3("galleria.thumbnail.nav.button.focus.ring.width"), " ").concat(dt3("galleria.thumbnail.nav.button.focus.ring.style"), " ").concat(dt3("galleria.thumbnail.nav.button.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("galleria.thumbnail.nav.button.focus.ring.offset"), ";\n}\n\n.p-galleria-thumbnail-nav-button .p-galleria-thumbnail-next-icon,\n.p-galleria-thumbnail-nav-button .p-galleria-thumbnail-prev-icon {\n    font-size: ").concat(dt3("galleria.thumbnail.nav.button.icon.size"), ";\n    width: ").concat(dt3("galleria.thumbnail.nav.button.icon.size"), ";\n    height: ").concat(dt3("galleria.thumbnail.nav.button.icon.size"), ";\n}\n\n.p-galleria-thumbnails-content {\n    display: flex;\n    flex-direction: row;\n    background: ").concat(dt3("galleria.thumbnails.content.background"), ";\n    padding: ").concat(dt3("galleria.thumbnails.content.padding"), ";\n}\n\n.p-galleria-thumbnails-viewport {\n    overflow: hidden;\n    width: 100%;\n}\n\n.p-galleria-thumbnail-items {\n    display: flex;\n}\n\n.p-galleria-thumbnail-item {\n    overflow: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    cursor: pointer;\n    opacity: 0.5;\n}\n\n.p-galleria-thumbnail {\n    outline-color: transparent;\n}\n\n.p-galleria-thumbnail-item:hover {\n    opacity: 1;\n    transition: opacity 0.3s;\n}\n\n.p-galleria-thumbnail-item-current {\n    opacity: 1;\n}\n\n.p-galleria-thumbnails-left .p-galleria-content,\n.p-galleria-thumbnails-right .p-galleria-content {\n    flex-direction: row;\n}\n\n.p-galleria-thumbnails-left .p-galleria-items-container,\n.p-galleria-thumbnails-right .p-galleria-items-container {\n    flex-direction: row;\n}\n\n.p-galleria-thumbnails-left .p-galleria-items-container,\n.p-galleria-thumbnails-top .p-galleria-items-container {\n    order: 2;\n}\n\n.p-galleria-thumbnails-left .p-galleria-thumbnails,\n.p-galleria-thumbnails-top .p-galleria-thumbnails {\n    order: 1;\n}\n\n.p-galleria-thumbnails-left .p-galleria-thumbnails-content,\n.p-galleria-thumbnails-right .p-galleria-thumbnails-content {\n    flex-direction: column;\n    flex-grow: 1;\n}\n\n.p-galleria-thumbnails-left .p-galleria-thumbnail-items,\n.p-galleria-thumbnails-right .p-galleria-thumbnail-items {\n    flex-direction: column;\n    height: 100%;\n}\n\n.p-galleria-indicator-list {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    padding: ").concat(dt3("galleria.indicator.list.padding"), ";\n    gap: ").concat(dt3("galleria.indicator.list.gap"), ";\n    margin: 0;\n    list-style: none;\n}\n\n.p-galleria-indicator-button {\n    display: inline-flex;\n    align-items: center;\n    background: ").concat(dt3("galleria.indicator.button.background"), ";\n    width: ").concat(dt3("galleria.indicator.button.width"), ";\n    height: ").concat(dt3("galleria.indicator.button.height"), ";\n    transition: background ").concat(dt3("galleria.transition.duration"), ", color ").concat(dt3("galleria.transition.duration"), ", outline-color ").concat(dt3("galleria.transition.duration"), ", box-shadow ").concat(dt3("galleria.transition.duration"), ";\n    outline-color: transparent;\n    border-radius: ").concat(dt3("galleria.indicator.button.border.radius"), ";\n    margin: 0;\n    padding: 0;\n    border: none;\n    user-select: none;\n    cursor: pointer;\n}\n\n.p-galleria-indicator-button:hover {\n    background: ").concat(dt3("galleria.indicator.button.hover.background"), ";\n}\n\n.p-galleria-indicator-button:focus-visible {\n    box-shadow: ").concat(dt3("galleria.indicator.button.focus.ring.shadow"), ";\n    outline: ").concat(dt3("galleria.indicator.button.focus.ring.width"), " ").concat(dt3("galleria.indicator.button.focus.ring.style"), " ").concat(dt3("galleria.indicator.button.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("galleria.indicator.button.focus.ring.offset"), ";\n}\n\n.p-galleria-indicator-active .p-galleria-indicator-button {\n    background: ").concat(dt3("galleria.indicator.button.active.background"), ";\n}\n\n.p-galleria-indicators-left .p-galleria-items-container,\n.p-galleria-indicators-right .p-galleria-items-container {\n    flex-direction: row;\n    align-items: center;\n}\n\n.p-galleria-indicators-left .p-galleria-items,\n.p-galleria-indicators-top .p-galleria-items {\n    order: 2;\n}\n\n.p-galleria-indicators-left .p-galleria-indicator-list,\n.p-galleria-indicators-top .p-galleria-indicator-list {\n    order: 1;\n}\n\n.p-galleria-indicators-left .p-galleria-indicator-list,\n.p-galleria-indicators-right .p-galleria-indicator-list {\n    flex-direction: column;\n}\n\n.p-galleria-inset-indicators .p-galleria-indicator-list {\n    position: absolute;\n    display: flex;\n    z-index: 1;\n    background: ").concat(dt3("galleria.inset.indicator.list.background"), ";\n}\n\n.p-galleria-inset-indicators .p-galleria-indicator-button {\n    background: ").concat(dt3("galleria.inset.indicator.button.background"), ";\n}\n\n.p-galleria-inset-indicators .p-galleria-indicator-button:hover {\n    background: ").concat(dt3("galleria.inset.indicator.button.hover.background"), ";\n}\n\n.p-galleria-inset-indicators .p-galleria-indicator-active .p-galleria-indicator-button {\n    background: ").concat(dt3("galleria.inset.indicator.button.active.background"), ";\n}\n\n.p-galleria-inset-indicators.p-galleria-indicators-top .p-galleria-indicator-list {\n    top: 0;\n    left: 0;\n    width: 100%;\n    align-items: flex-start;\n}\n\n.p-galleria-inset-indicators.p-galleria-indicators-right .p-galleria-indicator-list {\n    right: 0;\n    top: 0;\n    height: 100%;\n    align-items: flex-end;\n}\n\n.p-galleria-inset-indicators.p-galleria-indicators-bottom .p-galleria-indicator-list {\n    bottom: 0;\n    left: 0;\n    width: 100%;\n    align-items: flex-end;\n}\n\n.p-galleria-inset-indicators.p-galleria-indicators-left .p-galleria-indicator-list {\n    left: 0;\n    top: 0;\n    height: 100%;\n    align-items: flex-start;\n}\n\n.p-galleria-mask {\n    position: fixed;\n    top: 0;\n    left: 0;\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.p-galleria-close-button {\n    position: absolute;\n    top: 0;\n    right: 0;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    overflow: hidden;\n    margin: ").concat(dt3("galleria.close.button.gutter"), ";\n    background: ").concat(dt3("galleria.close.button.background"), ";\n    color: ").concat(dt3("galleria.close.button.color"), ";\n    width: ").concat(dt3("galleria.close.button.size"), ";\n    height: ").concat(dt3("galleria.close.button.size"), ";\n    padding: 0;\n    border: none;\n    user-select: none;\n    cursor: pointer;\n    border-radius: ").concat(dt3("galleria.close.button.border.radius"), ";\n    outline-color: transparent;\n    transition: background ").concat(dt3("galleria.transition.duration"), ", color ").concat(dt3("galleria.transition.duration"), ", outline-color ").concat(dt3("galleria.transition.duration"), ";\n}\n\n.p-galleria-close-icon {\n    font-size: ").concat(dt3("galleria.close.button.icon.size"), ";\n    width: ").concat(dt3("galleria.close.button.icon.size"), ";\n    height: ").concat(dt3("galleria.close.button.icon.size"), ";\n}\n\n.p-galleria-close-button:hover {\n    background: ").concat(dt3("galleria.close.button.hover.background"), ";\n    color: ").concat(dt3("galleria.close.button.hover.color"), ";\n}\n\n.p-galleria-close-button:focus-visible {\n    box-shadow: ").concat(dt3("galleria.close.button.focus.ring.shadow"), ";\n    outline: ").concat(dt3("galleria.close.button.focus.ring.width"), " ").concat(dt3("galleria.close.button.focus.ring.style"), " ").concat(dt3("galleria.close.button.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("galleria.close.button.focus.ring.offset"), ";\n}\n\n.p-galleria-mask .p-galleria-nav-button {\n    position: fixed;\n    top: 50%;\n}\n\n.p-galleria-enter-active {\n    transition: all 150ms cubic-bezier(0, 0, 0.2, 1);\n}\n\n.p-galleria-leave-active {\n    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n\n.p-galleria-enter-from,\n.p-galleria-leave-to {\n    opacity: 0;\n    transform: scale(0.7);\n}\n\n.p-galleria-enter-active .p-galleria-nav-button {\n    opacity: 0;\n}\n\n.p-items-hidden .p-galleria-thumbnail-item {\n    visibility: hidden;\n}\n\n.p-items-hidden .p-galleria-thumbnail-item.p-galleria-thumbnail-item-active {\n    visibility: visible;\n}\n");
@@ -96444,7 +97033,7 @@ function _toPrimitive$4(t, r) {
 __name(_toPrimitive$4, "_toPrimitive$4");
 var _hoisted_1$1$2 = ["id", "aria-label", "aria-roledescription"];
 var _hoisted_2$9 = ["aria-label"];
-var _hoisted_3$4 = ["aria-live"];
+var _hoisted_3$5 = ["aria-live"];
 function render$1$2(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_GalleriaItem = resolveComponent("GalleriaItem");
   var _component_GalleriaThumbnails = resolveComponent("GalleriaThumbnails");
@@ -96519,7 +97108,7 @@ function render$1$2(_ctx, _cache, $props, $setup, $data, $options) {
     onStopSlideshow: $options.stopSlideShow,
     pt: _ctx.pt,
     unstyled: _ctx.unstyled
-  }, null, 8, ["activeIndex", "slideShowActive", "containerId", "value", "templates", "numVisible", "responsiveOptions", "circular", "isVertical", "contentHeight", "showThumbnailNavigators", "prevButtonProps", "nextButtonProps", "onStopSlideshow", "pt", "unstyled"])) : createCommentVNode("", true)], 16, _hoisted_3$4), _ctx.$attrs.templates && _ctx.$attrs.templates["footer"] ? (openBlock(), createElementBlock("div", mergeProps({
+  }, null, 8, ["activeIndex", "slideShowActive", "containerId", "value", "templates", "numVisible", "responsiveOptions", "circular", "isVertical", "contentHeight", "showThumbnailNavigators", "prevButtonProps", "nextButtonProps", "onStopSlideshow", "pt", "unstyled"])) : createCommentVNode("", true)], 16, _hoisted_3$5), _ctx.$attrs.templates && _ctx.$attrs.templates["footer"] ? (openBlock(), createElementBlock("div", mergeProps({
     key: 2,
     "class": _ctx.cx("footer")
   }, $options.getPTOptions("footer")), [(openBlock(), createBlock(resolveDynamicComponent(_ctx.$attrs.templates["footer"])))], 16)) : createCommentVNode("", true)], 16, _hoisted_1$1$2)) : createCommentVNode("", true);
@@ -96647,7 +97236,7 @@ function render$a(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render$a, "render$a");
 script$b.render = render$a;
-const _sfc_main$9 = /* @__PURE__ */ defineComponent({
+const _sfc_main$d = /* @__PURE__ */ defineComponent({
   __name: "ResultGallery",
   props: {
     allGalleryItems: {},
@@ -96785,8 +97374,8 @@ script$a.render = render$9;
 const _withScopeId$4 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-1b0a8fe3"), n = n(), popScopeId(), n), "_withScopeId$4");
 const _hoisted_1$d = { class: "comfy-vue-side-bar-container" };
 const _hoisted_2$8 = { class: "comfy-vue-side-bar-header-span" };
-const _hoisted_3$3 = { class: "comfy-vue-side-bar-body" };
-const _sfc_main$8 = /* @__PURE__ */ defineComponent({
+const _hoisted_3$4 = { class: "comfy-vue-side-bar-body" };
+const _sfc_main$c = /* @__PURE__ */ defineComponent({
   __name: "SidebarTabTemplate",
   props: {
     title: {
@@ -96807,22 +97396,22 @@ const _sfc_main$8 = /* @__PURE__ */ defineComponent({
           ]),
           _: 3
         }),
-        createBaseVNode("div", _hoisted_3$3, [
+        createBaseVNode("div", _hoisted_3$4, [
           renderSlot(_ctx.$slots, "body", {}, void 0, true)
         ])
       ]);
     };
   }
 });
-const SidebarTabTemplate = /* @__PURE__ */ _export_sfc(_sfc_main$8, [["__scopeId", "data-v-1b0a8fe3"]]);
+const SidebarTabTemplate = /* @__PURE__ */ _export_sfc(_sfc_main$c, [["__scopeId", "data-v-1b0a8fe3"]]);
 const _withScopeId$3 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-3cc33869"), n = n(), popScopeId(), n), "_withScopeId$3");
 const _hoisted_1$c = { class: "queue-grid" };
 const _hoisted_2$7 = { key: 1 };
-const _hoisted_3$2 = { key: 2 };
+const _hoisted_3$3 = { key: 2 };
 const IMAGE_FIT = "Comfy.Queue.ImageFit";
 const ITEMS_PER_PAGE = 8;
 const SCROLL_THRESHOLD = 100;
-const _sfc_main$7 = /* @__PURE__ */ defineComponent({
+const _sfc_main$b = /* @__PURE__ */ defineComponent({
   __name: "QueueSidebarTab",
   setup(__props) {
     const confirm2 = useConfirm();
@@ -97057,7 +97646,7 @@ const _sfc_main$7 = /* @__PURE__ */ defineComponent({
               }, null, 512)
             ], 512)) : unref(queueStore).isLoading ? (openBlock(), createElementBlock("div", _hoisted_2$7, [
               createVNode(unref(script$V), { style: { "width": "50px", "left": "50%", "transform": "translateX(-50%)" } })
-            ])) : (openBlock(), createElementBlock("div", _hoisted_3$2, [
+            ])) : (openBlock(), createElementBlock("div", _hoisted_3$3, [
               createVNode(NoResultsPlaceholder, {
                 icon: "pi pi-info-circle",
                 title: _ctx.$t("noTasksFound"),
@@ -97073,7 +97662,7 @@ const _sfc_main$7 = /* @__PURE__ */ defineComponent({
           ref: menu,
           model: menuItems.value
         }, null, 8, ["model"]),
-        createVNode(_sfc_main$9, {
+        createVNode(_sfc_main$d, {
           activeIndex: galleryActiveIndex.value,
           "onUpdate:activeIndex": _cache[2] || (_cache[2] = ($event) => galleryActiveIndex.value = $event),
           allGalleryItems: allGalleryItems.value
@@ -97082,151 +97671,7 @@ const _sfc_main$7 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const QueueSidebarTab = /* @__PURE__ */ _export_sfc(_sfc_main$7, [["__scopeId", "data-v-3cc33869"]]);
-const useNodeBookmarkStore = defineStore("nodeBookmark", () => {
-  const settingStore = useSettingStore();
-  const nodeDefStore = useNodeDefStore();
-  const bookmarks = computed(
-    () => settingStore.get("Comfy.NodeLibrary.Bookmarks")
-  );
-  const bookmarksSet = computed(() => new Set(bookmarks.value));
-  const bookmarkedRoot = computed(
-    () => buildBookmarkTree(bookmarks.value)
-  );
-  const isBookmarked = /* @__PURE__ */ __name((node3) => bookmarksSet.value.has(node3.nodePath) || bookmarksSet.value.has(node3.display_name), "isBookmarked");
-  const toggleBookmark = /* @__PURE__ */ __name((node3) => {
-    if (isBookmarked(node3)) {
-      deleteBookmark(node3.nodePath);
-      deleteBookmark(node3.display_name);
-    } else {
-      addBookmark(node3.display_name);
-    }
-  }, "toggleBookmark");
-  const buildBookmarkTree = /* @__PURE__ */ __name((bookmarks2) => {
-    const bookmarkNodes = bookmarks2.map((bookmark) => {
-      if (bookmark.endsWith("/")) return createDummyFolderNodeDef(bookmark);
-      const parts2 = bookmark.split("/");
-      const displayName = parts2.pop();
-      const category = parts2.join("/");
-      const srcNodeDef = nodeDefStore.nodeDefsByDisplayName[displayName];
-      if (!srcNodeDef) {
-        return null;
-      }
-      const nodeDef = _.clone(srcNodeDef);
-      nodeDef.category = category;
-      return nodeDef;
-    }).filter((nodeDef) => nodeDef !== null);
-    return buildNodeDefTree(bookmarkNodes);
-  }, "buildBookmarkTree");
-  const addBookmark = /* @__PURE__ */ __name((nodePath) => {
-    settingStore.set("Comfy.NodeLibrary.Bookmarks", [
-      ...bookmarks.value,
-      nodePath
-    ]);
-  }, "addBookmark");
-  const deleteBookmark = /* @__PURE__ */ __name((nodePath) => {
-    settingStore.set(
-      "Comfy.NodeLibrary.Bookmarks",
-      bookmarks.value.filter((b) => b !== nodePath)
-    );
-  }, "deleteBookmark");
-  const addNewBookmarkFolder = /* @__PURE__ */ __name((parent) => {
-    const parentPath = parent ? parent.nodePath : "";
-    let newFolderPath = parentPath + "New Folder/";
-    let suffix2 = 1;
-    while (bookmarks.value.some((b) => b.startsWith(newFolderPath))) {
-      newFolderPath = parentPath + `New Folder ${suffix2}/`;
-      suffix2++;
-    }
-    addBookmark(newFolderPath);
-    return newFolderPath;
-  }, "addNewBookmarkFolder");
-  const renameBookmarkFolder = /* @__PURE__ */ __name((folderNode, newName) => {
-    if (!folderNode.isDummyFolder) {
-      throw new Error("Cannot rename non-folder node");
-    }
-    const newNodePath = folderNode.category.split("/").slice(0, -1).concat(newName).join("/") + "/";
-    if (newNodePath === folderNode.nodePath) {
-      return;
-    }
-    if (bookmarks.value.some((b) => b.startsWith(newNodePath))) {
-      throw new Error(`Folder name "${newNodePath}" already exists`);
-    }
-    settingStore.set(
-      "Comfy.NodeLibrary.Bookmarks",
-      bookmarks.value.map(
-        (b) => b.startsWith(folderNode.nodePath) ? b.replace(folderNode.nodePath, newNodePath) : b
-      )
-    );
-    renameBookmarkCustomization(folderNode.nodePath, newNodePath);
-  }, "renameBookmarkFolder");
-  const deleteBookmarkFolder = /* @__PURE__ */ __name((folderNode) => {
-    if (!folderNode.isDummyFolder) {
-      throw new Error("Cannot delete non-folder node");
-    }
-    settingStore.set(
-      "Comfy.NodeLibrary.Bookmarks",
-      bookmarks.value.filter(
-        (b) => b !== folderNode.nodePath && !b.startsWith(folderNode.nodePath)
-      )
-    );
-    deleteBookmarkCustomization(folderNode.nodePath);
-  }, "deleteBookmarkFolder");
-  const bookmarksCustomization = computed(() => settingStore.get("Comfy.NodeLibrary.BookmarksCustomization"));
-  const updateBookmarkCustomization = /* @__PURE__ */ __name((nodePath, customization) => {
-    const currentCustomization = bookmarksCustomization.value[nodePath] || {};
-    const newCustomization = { ...currentCustomization, ...customization };
-    if (newCustomization.icon === defaultBookmarkIcon) {
-      delete newCustomization.icon;
-    }
-    if (newCustomization.color === defaultBookmarkColor) {
-      delete newCustomization.color;
-    }
-    if (Object.keys(newCustomization).length === 0) {
-      deleteBookmarkCustomization(nodePath);
-    } else {
-      settingStore.set("Comfy.NodeLibrary.BookmarksCustomization", {
-        ...bookmarksCustomization.value,
-        [nodePath]: newCustomization
-      });
-    }
-  }, "updateBookmarkCustomization");
-  const deleteBookmarkCustomization = /* @__PURE__ */ __name((nodePath) => {
-    settingStore.set("Comfy.NodeLibrary.BookmarksCustomization", {
-      ...bookmarksCustomization.value,
-      [nodePath]: void 0
-    });
-  }, "deleteBookmarkCustomization");
-  const renameBookmarkCustomization = /* @__PURE__ */ __name((oldNodePath, newNodePath) => {
-    const updatedCustomization = { ...bookmarksCustomization.value };
-    if (updatedCustomization[oldNodePath]) {
-      updatedCustomization[newNodePath] = updatedCustomization[oldNodePath];
-      delete updatedCustomization[oldNodePath];
-    }
-    settingStore.set(
-      "Comfy.NodeLibrary.BookmarksCustomization",
-      updatedCustomization
-    );
-  }, "renameBookmarkCustomization");
-  const defaultBookmarkIcon = "pi-bookmark-fill";
-  const defaultBookmarkColor = "#a1a1aa";
-  return {
-    bookmarks,
-    bookmarkedRoot,
-    isBookmarked,
-    toggleBookmark,
-    addBookmark,
-    addNewBookmarkFolder,
-    renameBookmarkFolder,
-    deleteBookmarkFolder,
-    bookmarksCustomization,
-    updateBookmarkCustomization,
-    deleteBookmarkCustomization,
-    renameBookmarkCustomization,
-    defaultBookmarkIcon,
-    defaultBookmarkColor
-  };
-});
+const QueueSidebarTab = /* @__PURE__ */ _export_sfc(_sfc_main$b, [["__scopeId", "data-v-3cc33869"]]);
 var theme$4 = /* @__PURE__ */ __name(function theme33(_ref) {
   var dt3 = _ref.dt;
   return "\n.p-popover {\n    margin-top: ".concat(dt3("popover.gutter"), ";\n    background: ").concat(dt3("popover.background"), ";\n    color: ").concat(dt3("popover.color"), ";\n    border: 1px solid ").concat(dt3("popover.border.color"), ";\n    border-radius: ").concat(dt3("popover.border.radius"), ";\n    box-shadow: ").concat(dt3("popover.shadow"), ";\n}\n\n.p-popover-content {\n    padding: ").concat(dt3("popover.content.padding"), ";\n}\n\n.p-popover-flipped {\n    margin-top: calc(").concat(dt3("popover.gutter"), " * -1);\n    margin-bottom: ").concat(dt3("popover.gutter"), ";\n}\n\n.p-popover-enter-from {\n    opacity: 0;\n    transform: scaleY(0.8);\n}\n\n.p-popover-leave-to {\n    opacity: 0;\n}\n\n.p-popover-enter-active {\n    transition: transform 0.12s cubic-bezier(0, 0, 0.2, 1), opacity 0.12s cubic-bezier(0, 0, 0.2, 1);\n}\n\n.p-popover-leave-active {\n    transition: opacity 0.1s linear;\n}\n\n.p-popover:after,\n.p-popover:before {\n    bottom: 100%;\n    left: ").concat(dt3("popover.arrow.offset"), ';\n    content: " ";\n    height: 0;\n    width: 0;\n    position: absolute;\n    pointer-events: none;\n}\n\n.p-popover:after {\n    border-width: calc(').concat(dt3("popover.gutter"), " - 2px);\n    margin-left: calc(-1 * (").concat(dt3("popover.gutter"), " - 2px));\n    border-style: solid;\n    border-color: transparent;\n    border-bottom-color: ").concat(dt3("popover.background"), ";\n}\n\n.p-popover:before {\n    border-width: ").concat(dt3("popover.gutter"), ";\n    margin-left: calc(-1 * ").concat(dt3("popover.gutter"), ");\n    border-style: solid;\n    border-color: transparent;\n    border-bottom-color: ").concat(dt3("popover.border.color"), ";\n}\n\n.p-popover-flipped:after,\n.p-popover-flipped:before {\n    bottom: auto;\n    top: 100%;\n}\n\n.p-popover.p-popover-flipped:after {\n    border-bottom-color: transparent;\n    border-top-color: ").concat(dt3("popover.background"), ";\n}\n\n.p-popover.p-popover-flipped:before {\n    border-bottom-color: transparent;\n    border-top-color: ").concat(dt3("popover.border.color"), ";\n}\n");
@@ -97595,176 +98040,6 @@ function render$8(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render$8, "render$8");
 script$9.render = render$8;
-const _withScopeId$2 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-adf5f221"), n = n(), popScopeId(), n), "_withScopeId$2");
-const _hoisted_1$a = { class: "node-content" };
-const _hoisted_2$6 = { class: "node-label" };
-const _sfc_main$6 = /* @__PURE__ */ defineComponent({
-  __name: "NodeTreeLeaf",
-  props: {
-    node: {},
-    isBookmarked: { type: Boolean }
-  },
-  emits: ["toggle-bookmark"],
-  setup(__props, { emit: __emit }) {
-    const props = __props;
-    const emit2 = __emit;
-    const toggleBookmark = /* @__PURE__ */ __name(() => {
-      emit2("toggle-bookmark", props.node);
-    }, "toggleBookmark");
-    const container = ref(null);
-    let draggableCleanup;
-    onMounted(() => {
-      const treeNodeElement = container.value?.closest(
-        ".p-tree-node"
-      );
-      draggableCleanup = draggable({
-        element: treeNodeElement,
-        getInitialData() {
-          return {
-            type: "add-node",
-            data: props.node
-          };
-        }
-      });
-    });
-    onUnmounted(() => {
-      draggableCleanup();
-    });
-    return (_ctx, _cache) => {
-      return openBlock(), createElementBlock("div", {
-        class: normalizeClass(["node-tree-leaf", { bookmark: _ctx.isBookmarked }]),
-        ref_key: "container",
-        ref: container
-      }, [
-        createBaseVNode("div", _hoisted_1$a, [
-          _ctx.node.experimental ? (openBlock(), createBlock(unref(script$w), {
-            key: 0,
-            value: _ctx.$t("experimental"),
-            severity: "primary"
-          }, null, 8, ["value"])) : createCommentVNode("", true),
-          _ctx.node.deprecated ? (openBlock(), createBlock(unref(script$w), {
-            key: 1,
-            value: _ctx.$t("deprecated"),
-            severity: "danger"
-          }, null, 8, ["value"])) : createCommentVNode("", true),
-          createBaseVNode("span", _hoisted_2$6, toDisplayString$1(_ctx.node.display_name), 1)
-        ]),
-        createVNode(unref(script$J), {
-          class: "bookmark-button",
-          size: "small",
-          icon: _ctx.isBookmarked ? "pi pi-bookmark-fill" : "pi pi-bookmark",
-          text: "",
-          severity: "secondary",
-          onClick: withModifiers(toggleBookmark, ["stop"])
-        }, null, 8, ["icon"])
-      ], 2);
-    };
-  }
-});
-const NodeTreeLeaf = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["__scopeId", "data-v-adf5f221"]]);
-const _withScopeId$1 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-f2d72e9b"), n = n(), popScopeId(), n), "_withScopeId$1");
-const _hoisted_1$9 = { class: "folder-label" };
-const _sfc_main$5 = /* @__PURE__ */ defineComponent({
-  __name: "NodeTreeFolder",
-  props: {
-    node: {},
-    isBookmarkFolder: { type: Boolean }
-  },
-  emits: ["itemDropped"],
-  setup(__props, { emit: __emit }) {
-    const props = __props;
-    const emit2 = __emit;
-    const nodeBookmarkStore = useNodeBookmarkStore();
-    const customization = computed(() => {
-      return nodeBookmarkStore.bookmarksCustomization[props.node.data.nodePath];
-    });
-    const addNodeToBookmarkFolder = /* @__PURE__ */ __name((node3) => {
-      if (!props.node.data) {
-        console.error("Bookmark folder does not have data!");
-        return;
-      }
-      if (nodeBookmarkStore.isBookmarked(node3)) {
-        nodeBookmarkStore.toggleBookmark(node3);
-      }
-      const folderNodeDef = props.node.data;
-      const nodePath = folderNodeDef.category + "/" + node3.display_name;
-      nodeBookmarkStore.addBookmark(nodePath);
-    }, "addNodeToBookmarkFolder");
-    const container = ref(null);
-    const canDrop = ref(false);
-    const treeNodeElement = ref(null);
-    const iconElement = ref(null);
-    let dropTargetCleanup = /* @__PURE__ */ __name(() => {
-    }, "dropTargetCleanup");
-    let stopWatchCustomization = null;
-    onMounted(() => {
-      if (!props.isBookmarkFolder) return;
-      treeNodeElement.value = container.value?.closest(
-        ".p-tree-node-content"
-      );
-      dropTargetCleanup = dropTargetForElements({
-        element: treeNodeElement.value,
-        onDrop: /* @__PURE__ */ __name((event2) => {
-          const dndData = event2.source.data;
-          if (dndData.type === "add-node") {
-            addNodeToBookmarkFolder(dndData.data);
-            canDrop.value = false;
-            emit2("itemDropped", props.node);
-          }
-        }, "onDrop"),
-        onDragEnter: /* @__PURE__ */ __name((event2) => {
-          const dndData = event2.source.data;
-          if (dndData.type === "add-node") {
-            canDrop.value = true;
-          }
-        }, "onDragEnter"),
-        onDragLeave: /* @__PURE__ */ __name((event2) => {
-          canDrop.value = false;
-        }, "onDragLeave")
-      });
-      iconElement.value = treeNodeElement.value.querySelector(
-        ":scope > .p-tree-node-icon"
-      );
-      updateIconColor();
-      stopWatchCustomization = watch(customization, updateIconColor, { deep: true });
-    });
-    const updateIconColor = /* @__PURE__ */ __name(() => {
-      if (iconElement.value && customization.value) {
-        iconElement.value.style.color = customization.value.color;
-      }
-    }, "updateIconColor");
-    onUnmounted(() => {
-      dropTargetCleanup();
-      if (stopWatchCustomization) {
-        stopWatchCustomization();
-      }
-    });
-    return (_ctx, _cache) => {
-      return openBlock(), createElementBlock("div", {
-        class: normalizeClass([
-          "node-tree-folder",
-          { bookmark: props.isBookmarkFolder, "can-drop": canDrop.value }
-        ]),
-        ref_key: "container",
-        ref: container
-      }, [
-        createBaseVNode("span", _hoisted_1$9, [
-          renderSlot(_ctx.$slots, "folder-label", {
-            node: props.node
-          }, () => [
-            createTextVNode(toDisplayString$1(props.node.label), 1)
-          ], true)
-        ]),
-        createVNode(unref(script$K), {
-          value: props.node.totalNodes,
-          severity: "secondary",
-          style: { marginLeft: "0.5rem" }
-        }, null, 8, ["value"])
-      ], 2);
-    };
-  }
-});
-const NodeTreeFolder = /* @__PURE__ */ _export_sfc(_sfc_main$5, [["__scopeId", "data-v-f2d72e9b"]]);
 var theme$3 = /* @__PURE__ */ __name(function theme34(_ref) {
   var dt3 = _ref.dt;
   return "\n.p-tree {\n    background: ".concat(dt3("tree.background"), ";\n    color: ").concat(dt3("tree.color"), ";\n    padding: ").concat(dt3("tree.padding"), ";\n}\n\n.p-tree-root-children,\n.p-tree-node-children {\n    display: flex;\n    list-style-type: none;\n    flex-direction: column;\n    margin: 0;\n    gap: ").concat(dt3("tree.gap"), ";\n}\n\n.p-tree-root-children {\n    padding: ").concat(dt3("tree.gap"), " 0 0 0;\n}\n\n.p-tree-node-children {\n    padding: ").concat(dt3("tree.gap"), " 0 0 ").concat(dt3("tree.indent"), ";\n}\n\n.p-tree-node {\n    padding: 0;\n    outline: 0 none;\n}\n\n.p-tree-node-content {\n    border-radius: ").concat(dt3("tree.node.border.radius"), ";\n    padding: ").concat(dt3("tree.node.padding"), ";\n    display: flex;\n    align-items: center;\n    outline-color: transparent;\n    color: ").concat(dt3("tree.node.color"), ";\n    gap: ").concat(dt3("tree.node.gap"), ";\n    transition: background ").concat(dt3("tree.transition.duration"), ", color ").concat(dt3("tree.transition.duration"), ", outline-color ").concat(dt3("tree.transition.duration"), ", box-shadow ").concat(dt3("tree.transition.duration"), ";\n}\n\n.p-tree-node:focus-visible > .p-tree-node-content {\n    box-shadow: ").concat(dt3("tree.node.focus.ring.shadow"), ";\n    outline: ").concat(dt3("tree.node.focus.ring.width"), " ").concat(dt3("tree.node.focus.ring.style"), " ").concat(dt3("tree.node.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("tree.node.focus.ring.offset"), ";\n}\n\n.p-tree-node-content.p-tree-node-selectable:not(.p-tree-node-selected):hover {\n    background: ").concat(dt3("tree.node.hover.background"), ";\n    color: ").concat(dt3("tree.node.hover.color"), ";\n}\n\n.p-tree-node-content.p-tree-node-selectable:not(.p-tree-node-selected):hover .p-tree-node-icon {\n    color: ").concat(dt3("tree.node.icon.hover.color"), ";\n}\n\n.p-tree-node-content.p-tree-node-selected {\n    background: ").concat(dt3("tree.node.selected.background"), ";\n    color: ").concat(dt3("tree.node.selected.color"), ";\n}\n\n.p-tree-node-content.p-tree-node-selected .p-tree-node-toggle-button {\n    color: inherit;\n}\n\n.p-tree-node-toggle-button {\n    cursor: pointer;\n    user-select: none;\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    overflow: hidden;\n    position: relative;\n    flex-shrink: 0;\n    width: ").concat(dt3("tree.node.toggle.button.size"), ";\n    height: ").concat(dt3("tree.node.toggle.button.size"), ";\n    color: ").concat(dt3("tree.node.toggle.button.color"), ";\n    border: 0 none;\n    background: transparent;\n    border-radius: ").concat(dt3("tree.node.toggle.button.border.radius"), ";\n    transition: background ").concat(dt3("tree.transition.duration"), ", color ").concat(dt3("tree.transition.duration"), ", border-color ").concat(dt3("tree.transition.duration"), ", outline-color ").concat(dt3("tree.transition.duration"), ", box-shadow ").concat(dt3("tree.transition.duration"), ";\n    outline-color: transparent;\n    padding: 0;\n}\n\n.p-tree-node-toggle-button:enabled:hover {\n    background: ").concat(dt3("tree.node.toggle.button.hover.background"), ";\n    color: ").concat(dt3("tree.node.toggle.button.hover.color"), ";\n}\n\n.p-tree-node-content.p-tree-node-selected .p-tree-node-toggle-button:hover {\n    background: ").concat(dt3("tree.node.toggle.button.selected.hover.background"), ";\n    color: ").concat(dt3("tree.node.toggle.button.selected.hover.color"), ";\n}\n\n.p-tree-root {\n    overflow: auto;\n}\n\n.p-tree-node-selectable {\n    cursor: pointer;\n    user-select: none;\n}\n\n.p-tree-node-leaf > .p-tree-node-content .p-tree-node-toggle-button {\n    visibility: hidden;\n}\n\n.p-tree-node-icon {\n    color: ").concat(dt3("tree.node.icon.color"), ";\n    transition: color ").concat(dt3("tree.transition.duration"), ";\n}\n\n.p-tree-node-content.p-tree-node-selected .p-tree-node-icon {\n    color: ").concat(dt3("tree.node.icon.selected.color"), ";\n}\n\n.p-tree-filter-input {\n    width: 100%;\n}\n\n.p-tree-loading {\n    position: relative;\n    height: 100%;\n}\n\n.p-tree-loading-icon {\n    font-size: ").concat(dt3("tree.loading.icon.size"), ";\n    width: ").concat(dt3("tree.loading.icon.size"), ";\n    height: ").concat(dt3("tree.loading.icon.size"), ";\n}\n\n.p-tree .p-tree-mask {\n    position: absolute;\n    z-index: 1;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}\n\n.p-tree-flex-scrollable {\n    display: flex;\n    flex: 1;\n    height: 100%;\n    flex-direction: column;\n}\n\n.p-tree-flex-scrollable .p-tree-root {\n    flex: 1;\n}\n");
@@ -97813,11 +98088,11 @@ var script$8 = {
   name: "MinusIcon",
   "extends": script$U
 };
-var _hoisted_1$8 = /* @__PURE__ */ createBaseVNode("path", {
+var _hoisted_1$a = /* @__PURE__ */ createBaseVNode("path", {
   d: "M13.2222 7.77778H0.777778C0.571498 7.77778 0.373667 7.69584 0.227806 7.54998C0.0819442 7.40412 0 7.20629 0 7.00001C0 6.79373 0.0819442 6.5959 0.227806 6.45003C0.373667 6.30417 0.571498 6.22223 0.777778 6.22223H13.2222C13.4285 6.22223 13.6263 6.30417 13.7722 6.45003C13.9181 6.5959 14 6.79373 14 7.00001C14 7.20629 13.9181 7.40412 13.7722 7.54998C13.6263 7.69584 13.4285 7.77778 13.2222 7.77778Z",
   fill: "currentColor"
 }, null, -1);
-var _hoisted_2$5 = [_hoisted_1$8];
+var _hoisted_2$6 = [_hoisted_1$a];
 function render$7(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
@@ -97825,7 +98100,7 @@ function render$7(_ctx, _cache, $props, $setup, $data, $options) {
     viewBox: "0 0 14 14",
     fill: "none",
     xmlns: "http://www.w3.org/2000/svg"
-  }, _ctx.pti()), _hoisted_2$5, 16);
+  }, _ctx.pti()), _hoisted_2$6, 16);
 }
 __name(render$7, "render$7");
 script$8.render = render$7;
@@ -98020,8 +98295,8 @@ var script$7 = {
     MinusIcon: script$8
   }
 };
-var _hoisted_1$7 = ["data-p-checked", "data-p-indeterminate", "data-p-disabled"];
-var _hoisted_2$4 = ["id", "value", "name", "checked", "tabindex", "disabled", "readonly", "required", "aria-labelledby", "aria-label", "aria-invalid", "aria-checked"];
+var _hoisted_1$9 = ["data-p-checked", "data-p-indeterminate", "data-p-disabled"];
+var _hoisted_2$5 = ["id", "value", "name", "checked", "tabindex", "disabled", "readonly", "required", "aria-labelledby", "aria-label", "aria-invalid", "aria-checked"];
 function render$6(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_CheckIcon = resolveComponent("CheckIcon");
   var _component_MinusIcon = resolveComponent("MinusIcon");
@@ -98056,7 +98331,7 @@ function render$6(_ctx, _cache, $props, $setup, $data, $options) {
     onChange: _cache[2] || (_cache[2] = function() {
       return $options.onChange && $options.onChange.apply($options, arguments);
     })
-  }, $options.getPTOptions("input")), null, 16, _hoisted_2$4), createBaseVNode("div", mergeProps({
+  }, $options.getPTOptions("input")), null, 16, _hoisted_2$5), createBaseVNode("div", mergeProps({
     "class": _ctx.cx("box")
   }, $options.getPTOptions("box")), [renderSlot(_ctx.$slots, "icon", {
     checked: $options.checked,
@@ -98070,7 +98345,7 @@ function render$6(_ctx, _cache, $props, $setup, $data, $options) {
       key: 1,
       "class": _ctx.cx("icon")
     }, $options.getPTOptions("icon")), null, 16, ["class"])) : createCommentVNode("", true)];
-  })], 16)], 16, _hoisted_1$7);
+  })], 16)], 16, _hoisted_1$9);
 }
 __name(render$6, "render$6");
 script$7.render = render$6;
@@ -98635,7 +98910,7 @@ var script$1$2 = {
   }
 };
 var _hoisted_1$1$1 = ["aria-label", "aria-selected", "aria-expanded", "aria-setsize", "aria-posinset", "aria-level", "aria-checked", "tabindex"];
-var _hoisted_2$3 = ["data-p-selected", "data-p-selectable"];
+var _hoisted_2$4 = ["data-p-selected", "data-p-selectable"];
 function render$1$1(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_SpinnerIcon = resolveComponent("SpinnerIcon");
   var _component_Checkbox = resolveComponent("Checkbox");
@@ -98736,7 +99011,7 @@ function render$1$1(_ctx, _cache, $props, $setup, $data, $options) {
     selected: $options.checkboxMode ? $options.checked : $options.selected
   }, null, 8, ["node", "selected"])) : (openBlock(), createElementBlock(Fragment, {
     key: 1
-  }, [createTextVNode(toDisplayString$1($options.label($props.node)), 1)], 64))], 16)], 16, _hoisted_2$3), $options.hasChildren && $options.expanded ? (openBlock(), createElementBlock("ul", mergeProps({
+  }, [createTextVNode(toDisplayString$1($options.label($props.node)), 1)], 64))], 16)], 16, _hoisted_2$4), $options.hasChildren && $options.expanded ? (openBlock(), createElementBlock("ul", mergeProps({
     key: 0,
     "class": _ctx.cx("nodeChildren"),
     role: "group"
@@ -99085,7 +99360,7 @@ var script$6 = {
     SpinnerIcon: script$N
   }
 };
-var _hoisted_1$6 = ["aria-labelledby", "aria-label"];
+var _hoisted_1$8 = ["aria-labelledby", "aria-label"];
 function render$5(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_SpinnerIcon = resolveComponent("SpinnerIcon");
   var _component_InputText = resolveComponent("InputText");
@@ -99167,10 +99442,419 @@ function render$5(_ctx, _cache, $props, $setup, $data, $options) {
       unstyled: _ctx.unstyled,
       pt: _ctx.pt
     }, null, 8, ["node", "templates", "level", "index", "expandedKeys", "onNodeToggle", "onNodeClick", "selectionMode", "selectionKeys", "onCheckboxChange", "loadingMode", "unstyled", "pt"]);
-  }), 128))], 16, _hoisted_1$6)], 16)], 16);
+  }), 128))], 16, _hoisted_1$8)], 16)], 16);
 }
 __name(render$5, "render$5");
 script$6.render = render$5;
+const _withScopeId$2 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-d4b7b060"), n = n(), popScopeId(), n), "_withScopeId$2");
+const _hoisted_1$7 = { class: "node-content" };
+const _hoisted_2$3 = { class: "node-label" };
+const _hoisted_3$2 = { class: "node-actions" };
+const _sfc_main$a = /* @__PURE__ */ defineComponent({
+  __name: "TreeExplorerTreeNode",
+  props: {
+    node: {}
+  },
+  emits: ["itemDropped", "dragStart", "dragEnd"],
+  setup(__props, { emit: __emit }) {
+    const props = __props;
+    const emit2 = __emit;
+    const labelEditable = computed(() => !!props.node.handleRename);
+    const renameEditingNode = inject("renameEditingNode");
+    const isEditing = computed(
+      () => labelEditable.value && renameEditingNode.value?.key === props.node.key
+    );
+    const handleRename = /* @__PURE__ */ __name((newName) => {
+      props.node.handleRename(props.node, newName);
+      renameEditingNode.value = null;
+    }, "handleRename");
+    const container = ref(null);
+    const canDrop = ref(false);
+    const treeNodeElement = ref(null);
+    let dropTargetCleanup = /* @__PURE__ */ __name(() => {
+    }, "dropTargetCleanup");
+    let draggableCleanup = /* @__PURE__ */ __name(() => {
+    }, "draggableCleanup");
+    onMounted(() => {
+      treeNodeElement.value = container.value?.closest(
+        ".p-tree-node-content"
+      );
+      if (props.node.droppable) {
+        dropTargetCleanup = dropTargetForElements({
+          element: treeNodeElement.value,
+          onDrop: /* @__PURE__ */ __name((event2) => {
+            const dndData = event2.source.data;
+            if (dndData.type === "tree-explorer-node") {
+              props.node.handleDrop?.(props.node, dndData);
+              canDrop.value = false;
+              emit2("itemDropped", props.node, dndData.data);
+            }
+          }, "onDrop"),
+          onDragEnter: /* @__PURE__ */ __name((event2) => {
+            const dndData = event2.source.data;
+            if (dndData.type === "tree-explorer-node") {
+              canDrop.value = true;
+            }
+          }, "onDragEnter"),
+          onDragLeave: /* @__PURE__ */ __name(() => {
+            canDrop.value = false;
+          }, "onDragLeave")
+        });
+      }
+      if (props.node.draggable) {
+        draggableCleanup = draggable({
+          element: treeNodeElement.value,
+          getInitialData() {
+            return {
+              type: "tree-explorer-node",
+              data: props.node
+            };
+          },
+          onDragStart: /* @__PURE__ */ __name(() => emit2("dragStart", props.node), "onDragStart"),
+          onDrop: /* @__PURE__ */ __name(() => emit2("dragEnd", props.node), "onDrop")
+        });
+      }
+    });
+    onUnmounted(() => {
+      dropTargetCleanup();
+      draggableCleanup();
+    });
+    return (_ctx, _cache) => {
+      return openBlock(), createElementBlock("div", {
+        class: normalizeClass([
+          "tree-node",
+          {
+            "can-drop": canDrop.value,
+            "tree-folder": !props.node.leaf,
+            "tree-leaf": props.node.leaf
+          }
+        ]),
+        ref_key: "container",
+        ref: container
+      }, [
+        createBaseVNode("div", _hoisted_1$7, [
+          createBaseVNode("span", _hoisted_2$3, [
+            renderSlot(_ctx.$slots, "before-label", {
+              node: props.node
+            }, void 0, true),
+            createVNode(EditableText, {
+              modelValue: _ctx.node.label,
+              isEditing: isEditing.value,
+              onEdit: handleRename
+            }, null, 8, ["modelValue", "isEditing"]),
+            renderSlot(_ctx.$slots, "after-label", {
+              node: props.node
+            }, void 0, true)
+          ]),
+          !props.node.leaf ? (openBlock(), createBlock(unref(script$K), {
+            key: 0,
+            value: props.node.totalLeaves,
+            severity: "secondary",
+            class: "leaf-count-badge"
+          }, null, 8, ["value"])) : createCommentVNode("", true)
+        ]),
+        createBaseVNode("div", _hoisted_3$2, [
+          renderSlot(_ctx.$slots, "actions", {
+            node: props.node
+          }, void 0, true)
+        ])
+      ], 2);
+    };
+  }
+});
+const TreeExplorerTreeNode = /* @__PURE__ */ _export_sfc(_sfc_main$a, [["__scopeId", "data-v-d4b7b060"]]);
+const _sfc_main$9 = /* @__PURE__ */ defineComponent({
+  __name: "TreeExplorer",
+  props: /* @__PURE__ */ mergeModels({
+    roots: {},
+    class: {},
+    extraMenuItems: { type: [Array, Function] }
+  }, {
+    "expandedKeys": {},
+    "expandedKeysModifiers": {}
+  }),
+  emits: /* @__PURE__ */ mergeModels(["nodeClick", "nodeDelete", "contextMenu"], ["update:expandedKeys"]),
+  setup(__props, { expose: __expose, emit: __emit }) {
+    const expandedKeys2 = useModel(__props, "expandedKeys");
+    provide("expandedKeys", expandedKeys2);
+    const props = __props;
+    const emit2 = __emit;
+    const renderedRoots = computed(() => {
+      return props.roots.map(fillNodeInfo);
+    });
+    const getTreeNodeIcon = /* @__PURE__ */ __name((node3) => {
+      if (node3.getIcon) {
+        const icon2 = node3.getIcon(node3);
+        if (icon2) {
+          return icon2;
+        }
+      } else if (node3.icon) {
+        return node3.icon;
+      }
+      if (node3.leaf) {
+        return "pi pi-file";
+      }
+      const isExpanded = expandedKeys2.value[node3.key];
+      return isExpanded ? "pi pi-folder-open" : "pi pi-folder";
+    }, "getTreeNodeIcon");
+    const fillNodeInfo = /* @__PURE__ */ __name((node3) => {
+      const children = node3.children?.map(fillNodeInfo);
+      return {
+        ...node3,
+        icon: getTreeNodeIcon(node3),
+        children,
+        type: node3.leaf ? "node" : "folder",
+        totalLeaves: node3.leaf ? 1 : children.reduce((acc, child) => acc + child.totalLeaves, 0)
+      };
+    }, "fillNodeInfo");
+    const onNodeContentClick = /* @__PURE__ */ __name((e, node3) => {
+      emit2("nodeClick", node3, e);
+    }, "onNodeContentClick");
+    const menu = ref(null);
+    const menuTargetNode = ref(null);
+    provide("menuTargetNode", menuTargetNode);
+    const renameEditingNode = ref(null);
+    provide("renameEditingNode", renameEditingNode);
+    const { t } = useI18n();
+    const renameCommand = /* @__PURE__ */ __name((node3) => {
+      renameEditingNode.value = node3;
+    }, "renameCommand");
+    const deleteCommand = /* @__PURE__ */ __name((node3) => {
+      node3.handleDelete?.(node3);
+      emit2("nodeDelete", node3);
+    }, "deleteCommand");
+    const menuItems = computed(() => [
+      {
+        label: t("rename"),
+        icon: "pi pi-file-edit",
+        command: /* @__PURE__ */ __name(() => renameCommand(menuTargetNode.value), "command"),
+        visible: menuTargetNode.value?.handleRename !== void 0
+      },
+      {
+        label: t("delete"),
+        icon: "pi pi-trash",
+        command: /* @__PURE__ */ __name(() => deleteCommand(menuTargetNode.value), "command"),
+        visible: menuTargetNode.value?.handleDelete !== void 0
+      },
+      ...props.extraMenuItems ? typeof props.extraMenuItems === "function" ? props.extraMenuItems(menuTargetNode.value) : props.extraMenuItems : []
+    ]);
+    const handleContextMenu = /* @__PURE__ */ __name((node3, e) => {
+      menuTargetNode.value = node3;
+      emit2("contextMenu", node3, e);
+      if (menuItems.value.filter((item2) => item2.visible).length > 0) {
+        menu.value?.show(e);
+      }
+    }, "handleContextMenu");
+    __expose({
+      renameCommand,
+      deleteCommand
+    });
+    return (_ctx, _cache) => {
+      return openBlock(), createElementBlock(Fragment, null, [
+        createVNode(unref(script$6), {
+          class: normalizeClass(["tree-explorer", props.class]),
+          expandedKeys: expandedKeys2.value,
+          "onUpdate:expandedKeys": _cache[0] || (_cache[0] = ($event) => expandedKeys2.value = $event),
+          value: renderedRoots.value,
+          selectionMode: "single",
+          pt: {
+            nodeLabel: "tree-explorer-node-label",
+            nodeContent: /* @__PURE__ */ __name(({ props: props2 }) => ({
+              onClick: /* @__PURE__ */ __name((e) => onNodeContentClick(e, props2.node), "onClick"),
+              onContextmenu: /* @__PURE__ */ __name((e) => handleContextMenu(props2.node, e), "onContextmenu")
+            }), "nodeContent"),
+            nodeToggleButton: /* @__PURE__ */ __name(() => ({
+              onClick: /* @__PURE__ */ __name((e) => {
+                e.stopImmediatePropagation();
+              }, "onClick")
+            }), "nodeToggleButton")
+          }
+        }, {
+          folder: withCtx(({ node: node3 }) => [
+            renderSlot(_ctx.$slots, "folder", { node: node3 }, () => [
+              createVNode(TreeExplorerTreeNode, { node: node3 }, null, 8, ["node"])
+            ], true)
+          ]),
+          node: withCtx(({ node: node3 }) => [
+            renderSlot(_ctx.$slots, "node", { node: node3 }, () => [
+              createVNode(TreeExplorerTreeNode, { node: node3 }, null, 8, ["node"])
+            ], true)
+          ]),
+          _: 3
+        }, 8, ["class", "expandedKeys", "value", "pt"]),
+        createVNode(unref(script$f), {
+          ref_key: "menu",
+          ref: menu,
+          model: menuItems.value
+        }, null, 8, ["model"])
+      ], 64);
+    };
+  }
+});
+const TreeExplorer = /* @__PURE__ */ _export_sfc(_sfc_main$9, [["__scopeId", "data-v-9d3310b9"]]);
+const _sfc_main$8 = /* @__PURE__ */ defineComponent({
+  __name: "NodeTreeLeaf",
+  props: {
+    node: {}
+  },
+  emits: ["toggle-bookmark"],
+  setup(__props, { emit: __emit }) {
+    const props = __props;
+    const nodeDef = computed(() => props.node.data);
+    const nodeBookmarkStore = useNodeBookmarkStore();
+    const isBookmarked = computed(
+      () => nodeBookmarkStore.isBookmarked(nodeDef.value)
+    );
+    const settingStore = useSettingStore();
+    const sidebarLocation = computed(
+      () => settingStore.get("Comfy.Sidebar.Location")
+    );
+    const emit2 = __emit;
+    const toggleBookmark = /* @__PURE__ */ __name(() => {
+      nodeBookmarkStore.toggleBookmark(nodeDef.value);
+    }, "toggleBookmark");
+    const previewRef = ref(null);
+    const nodePreviewStyle = ref({
+      position: "absolute",
+      top: "0px",
+      left: "0px"
+    });
+    const handleNodeHover = /* @__PURE__ */ __name(async () => {
+      const hoverTarget = nodeContentElement.value;
+      const targetRect = hoverTarget.getBoundingClientRect();
+      const previewHeight = previewRef.value?.$el.offsetHeight || 0;
+      const availableSpaceBelow = window.innerHeight - targetRect.bottom;
+      nodePreviewStyle.value.top = previewHeight > availableSpaceBelow ? `${Math.max(0, targetRect.top - (previewHeight - availableSpaceBelow) - 20)}px` : `${targetRect.top - 40}px`;
+      if (sidebarLocation.value === "left") {
+        nodePreviewStyle.value.left = `${targetRect.right}px`;
+      } else {
+        nodePreviewStyle.value.left = `${targetRect.left - 400}px`;
+      }
+    }, "handleNodeHover");
+    const container = ref(null);
+    const nodeContentElement = ref(null);
+    const isHovered = ref(false);
+    const handleMouseEnter = /* @__PURE__ */ __name(async () => {
+      isHovered.value = true;
+      await nextTick();
+      handleNodeHover();
+    }, "handleMouseEnter");
+    const handleMouseLeave = /* @__PURE__ */ __name(() => {
+      isHovered.value = false;
+    }, "handleMouseLeave");
+    onMounted(() => {
+      nodeContentElement.value = container.value?.closest(".p-tree-node-content");
+      nodeContentElement.value?.addEventListener("mouseenter", handleMouseEnter);
+      nodeContentElement.value?.addEventListener("mouseleave", handleMouseLeave);
+    });
+    onUnmounted(() => {
+      nodeContentElement.value?.removeEventListener("mouseenter", handleMouseEnter);
+      nodeContentElement.value?.removeEventListener("mouseleave", handleMouseLeave);
+    });
+    return (_ctx, _cache) => {
+      return openBlock(), createElementBlock("div", {
+        ref_key: "container",
+        ref: container,
+        class: "node-lib-node-container"
+      }, [
+        createVNode(TreeExplorerTreeNode, { node: _ctx.node }, {
+          "before-label": withCtx(() => [
+            nodeDef.value.experimental ? (openBlock(), createBlock(unref(script$w), {
+              key: 0,
+              value: _ctx.$t("experimental"),
+              severity: "primary"
+            }, null, 8, ["value"])) : createCommentVNode("", true),
+            nodeDef.value.deprecated ? (openBlock(), createBlock(unref(script$w), {
+              key: 1,
+              value: _ctx.$t("deprecated"),
+              severity: "danger"
+            }, null, 8, ["value"])) : createCommentVNode("", true)
+          ]),
+          actions: withCtx(() => [
+            createVNode(unref(script$J), {
+              class: "bookmark-button",
+              size: "small",
+              icon: isBookmarked.value ? "pi pi-bookmark-fill" : "pi pi-bookmark",
+              text: "",
+              severity: "secondary",
+              onClick: withModifiers(toggleBookmark, ["stop"])
+            }, null, 8, ["icon"])
+          ]),
+          _: 1
+        }, 8, ["node"]),
+        isHovered.value ? (openBlock(), createBlock(Teleport, {
+          key: 0,
+          to: "#node-library-node-preview-container"
+        }, [
+          createBaseVNode("div", {
+            class: "node-lib-node-preview",
+            style: normalizeStyle(nodePreviewStyle.value)
+          }, [
+            createVNode(NodePreview, {
+              ref_key: "previewRef",
+              ref: previewRef,
+              nodeDef: nodeDef.value
+            }, null, 8, ["nodeDef"])
+          ], 4)
+        ])) : createCommentVNode("", true)
+      ], 512);
+    };
+  }
+});
+const NodeTreeLeaf = /* @__PURE__ */ _export_sfc(_sfc_main$8, [["__scopeId", "data-v-3238e135"]]);
+const _sfc_main$7 = /* @__PURE__ */ defineComponent({
+  __name: "NodeTreeFolder",
+  props: {
+    node: {}
+  },
+  setup(__props) {
+    const props = __props;
+    const nodeBookmarkStore = useNodeBookmarkStore();
+    const customization = computed(() => {
+      return nodeBookmarkStore.bookmarksCustomization[props.node.data.nodePath];
+    });
+    const treeNodeElement = ref(null);
+    const iconElement = ref(null);
+    let stopWatchCustomization = null;
+    const container = ref(null);
+    onMounted(() => {
+      treeNodeElement.value = container.value?.closest(
+        ".p-tree-node-content"
+      );
+      iconElement.value = treeNodeElement.value.querySelector(
+        ":scope > .p-tree-node-icon"
+      );
+      updateIconColor();
+      stopWatchCustomization = watch(customization, updateIconColor, { deep: true });
+    });
+    const updateIconColor = /* @__PURE__ */ __name(() => {
+      if (iconElement.value && customization.value) {
+        iconElement.value.style.color = customization.value.color;
+      }
+    }, "updateIconColor");
+    onUnmounted(() => {
+      if (stopWatchCustomization) {
+        stopWatchCustomization();
+      }
+    });
+    const expandedKeys2 = inject("expandedKeys");
+    const handleItemDrop = /* @__PURE__ */ __name((node3) => {
+      expandedKeys2.value[node3.key] = true;
+    }, "handleItemDrop");
+    return (_ctx, _cache) => {
+      return openBlock(), createElementBlock("div", {
+        ref_key: "container",
+        ref: container,
+        class: "node-lib-node-container"
+      }, [
+        createVNode(TreeExplorerTreeNode, {
+          node: _ctx.node,
+          onItemDropped: handleItemDrop
+        }, null, 8, ["node"])
+      ], 512);
+    };
+  }
+});
 var theme$1 = /* @__PURE__ */ __name(function theme36(_ref) {
   var dt3 = _ref.dt;
   return "\n.p-colorpicker {\n    display: inline-block;\n    position: relative;\n}\n\n.p-colorpicker-dragging {\n    cursor: pointer;\n}\n\n.p-colorpicker-preview {\n    width: ".concat(dt3("colorpicker.preview.width"), ";\n    height: ").concat(dt3("colorpicker.preview.height"), ";\n    padding: 0;\n    border: 0 none;\n    border-radius: ").concat(dt3("colorpicker.preview.border.radius"), ";\n    transition: background ").concat(dt3("colorpicker.transition.duration"), ", color ").concat(dt3("colorpicker.transition.duration"), ", border-color ").concat(dt3("colorpicker.transition.duration"), ", outline-color ").concat(dt3("colorpicker.transition.duration"), ", box-shadow ").concat(dt3("colorpicker.transition.duration"), ";\n    outline-color: transparent;\n    cursor: pointer;\n}\n\n.p-colorpicker-preview:enabled:focus-visible {\n    border-color: ").concat(dt3("colorpicker.preview.focus.border.color"), ";\n    box-shadow: ").concat(dt3("colorpicker.preview.focus.ring.shadow"), ";\n    outline: ").concat(dt3("colorpicker.preview.focus.ring.width"), " ").concat(dt3("colorpicker.preview.focus.ring.style"), " ").concat(dt3("colorpicker.preview.focus.ring.color"), ";\n    outline-offset: ").concat(dt3("colorpicker.preview.focus.ring.offset"), ";\n}\n\n.p-colorpicker-panel {\n    background: ").concat(dt3("colorpicker.panel.background"), ";\n    border: 1px solid ").concat(dt3("colorpicker.panel.border.color"), ";\n    border-radius: ").concat(dt3("colorpicker.panel.border.radius"), ";\n    box-shadow: ").concat(dt3("colorpicker.panel.shadow"), ";\n    width: 193px;\n    height: 166px;\n    position: absolute;\n    top: 0;\n    left: 0;\n}\n\n.p-colorpicker-panel-inline {\n    box-shadow: none;\n    position: static;\n}\n\n.p-colorpicker-content {\n    position: relative;\n}\n\n.p-colorpicker-color-selector {\n    width: 150px;\n    height: 150px;\n    top: 8px;\n    left: 8px;\n    position: absolute;\n}\n\n.p-colorpicker-color-background {\n    width: 100%;\n    height: 100%;\n    background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 100%), linear-gradient(to right, #fff 0%, rgba(255, 255, 255, 0) 100%);\n}\n\n.p-colorpicker-color-handle {\n    position: absolute;\n    top: 0px;\n    left: 150px;\n    border-radius: 100%;\n    width: 10px;\n    height: 10px;\n    border-width: 1px;\n    border-style: solid;\n    margin: -5px 0 0 -5px;\n    cursor: pointer;\n    opacity: 0.85;\n    border-color: ").concat(dt3("colorpicker.handle.color"), ";\n}\n\n.p-colorpicker-hue {\n    width: 17px;\n    height: 150px;\n    top: 8px;\n    left: 167px;\n    position: absolute;\n    opacity: 0.85;\n    background: linear-gradient(0deg,\n        red 0,\n        #ff0 17%,\n        #0f0 33%,\n        #0ff 50%,\n        #00f 67%,\n        #f0f 83%,\n        red);\n}\n\n.p-colorpicker-hue-handle {\n    position: absolute;\n    top: 150px;\n    left: 0px;\n    width: 21px;\n    margin-left: -2px;\n    margin-top: -5px;\n    height: 10px;\n    border-width: 2px;\n    border-style: solid;\n    opacity: 0.85;\n    cursor: pointer;\n    border-color: ").concat(dt3("colorpicker.handle.color"), ";\n}\n");
@@ -99748,7 +100432,7 @@ var script$5 = {
     Portal: script$z
   }
 };
-var _hoisted_1$5 = ["tabindex", "disabled"];
+var _hoisted_1$6 = ["tabindex", "disabled"];
 function render$4(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_Portal = resolveComponent("Portal");
   return openBlock(), createElementBlock("div", mergeProps({
@@ -99768,7 +100452,7 @@ function render$4(_ctx, _cache, $props, $setup, $data, $options) {
     onKeydown: _cache[1] || (_cache[1] = function() {
       return $options.onInputKeydown && $options.onInputKeydown.apply($options, arguments);
     })
-  }, _ctx.ptm("preview")), null, 16, _hoisted_1$5)) : createCommentVNode("", true), createVNode(_component_Portal, {
+  }, _ctx.ptm("preview")), null, 16, _hoisted_1$6)) : createCommentVNode("", true), createVNode(_component_Portal, {
     appendTo: _ctx.appendTo,
     disabled: _ctx.inline
   }, {
@@ -99837,8 +100521,8 @@ function render$4(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render$4, "render$4");
 script$5.render = render$4;
-const _withScopeId = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-91077f2a"), n = n(), popScopeId(), n), "_withScopeId");
-const _hoisted_1$4 = { class: "p-fluid" };
+const _withScopeId$1 = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-91077f2a"), n = n(), popScopeId(), n), "_withScopeId$1");
+const _hoisted_1$5 = { class: "p-fluid" };
 const _hoisted_2$2 = { class: "field icon-field" };
 const _hoisted_3$1 = { for: "icon" };
 const _hoisted_4$1 = { class: "field color-field" };
@@ -99849,7 +100533,7 @@ const _hoisted_7 = {
   class: "pi pi-palette",
   style: { fontSize: "1.2rem" }
 };
-const _sfc_main$4 = /* @__PURE__ */ defineComponent({
+const _sfc_main$6 = /* @__PURE__ */ defineComponent({
   __name: "CustomizationDialog",
   props: {
     modelValue: { type: Boolean },
@@ -99949,7 +100633,7 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent({
           }, null, 8, ["label"])
         ]),
         default: withCtx(() => [
-          createBaseVNode("div", _hoisted_1$4, [
+          createBaseVNode("div", _hoisted_1$5, [
             createBaseVNode("div", _hoisted_2$2, [
               createBaseVNode("label", _hoisted_3$1, toDisplayString$1(_ctx.$t("icon")), 1),
               createVNode(unref(script$i), {
@@ -100008,7 +100692,7 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const FolderCustomizationDialog = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["__scopeId", "data-v-91077f2a"]]);
+const FolderCustomizationDialog = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["__scopeId", "data-v-91077f2a"]]);
 function useTreeExpansion() {
   const expandedKeys2 = ref({});
   const toggleNode = /* @__PURE__ */ __name((node3) => {
@@ -100062,172 +100746,115 @@ function useTreeExpansion() {
   };
 }
 __name(useTreeExpansion, "useTreeExpansion");
-const _sfc_main$3 = /* @__PURE__ */ defineComponent({
-  __name: "NodeLibrarySidebarTab",
-  setup(__props) {
-    const { t } = useI18n();
-    const toast = useToast();
-    const nodeDefStore = useNodeDefStore();
+const _sfc_main$5 = /* @__PURE__ */ defineComponent({
+  __name: "NodeBookmarkTreeExplorer",
+  props: {
+    filteredNodeDefs: {}
+  },
+  setup(__props, { expose: __expose }) {
+    const props = __props;
     const { expandedKeys: expandedKeys2, expandNode, toggleNodeOnEvent } = useTreeExpansion();
-    const searchFilter = ref(null);
-    const alphabeticalSort = ref(false);
-    const hoveredComfyNodeName = ref(null);
-    const hoveredComfyNode = computed(() => {
-      if (!hoveredComfyNodeName.value) {
-        return null;
-      }
-      return nodeDefStore.nodeDefsByName[hoveredComfyNodeName.value] || null;
-    });
-    const previewRef = ref(null);
-    const searchQuery = ref("");
-    const settingStore = useSettingStore();
-    const sidebarLocation = computed(
-      () => settingStore.get("Comfy.Sidebar.Location")
-    );
-    const nodePreviewStyle = ref({
-      position: "absolute",
-      top: "0px",
-      left: "0px"
-    });
-    const nodeBookmarkStore = useNodeBookmarkStore();
-    const allNodesRoot = computed(() => {
-      return {
-        key: "all-nodes",
-        label: "All Nodes",
-        children: [
-          ...nodeBookmarkStore.bookmarkedRoot.children ?? [],
-          ...nodeDefStore.nodeTree.children
-        ]
-      };
-    });
-    const root26 = computed(() => {
-      const root27 = filteredRoot.value || allNodesRoot.value;
-      return alphabeticalSort.value ? sortedTree(root27) : root27;
-    });
-    const renderedRoot = computed(() => {
-      return fillNodeInfo(root26.value);
-    });
-    const getTreeNodeIcon = /* @__PURE__ */ __name((node3) => {
+    const handleNodeClick = /* @__PURE__ */ __name((node3, e) => {
       if (node3.leaf) {
-        return "pi pi-circle-fill";
-      }
-      if (node3.data && node3.data.isDummyFolder) {
-        const customization = nodeBookmarkStore.bookmarksCustomization[node3.data.nodePath];
-        if (customization?.icon) {
-          return "pi " + customization.icon;
-        }
-        return "pi pi-bookmark-fill";
-      }
-      const isExpanded = expandedKeys2.value[node3.key];
-      return isExpanded ? "pi pi-folder-open" : "pi pi-folder";
-    }, "getTreeNodeIcon");
-    const fillNodeInfo = /* @__PURE__ */ __name((node3) => {
-      const children = node3.children?.map(fillNodeInfo);
-      return {
-        ...node3,
-        icon: getTreeNodeIcon(node3),
-        children,
-        type: node3.leaf ? "node" : "folder",
-        totalNodes: node3.leaf ? 1 : children.reduce((acc, child) => acc + child.totalNodes, 0)
-      };
-    }, "fillNodeInfo");
-    const handleNodeHover = /* @__PURE__ */ __name(async (event2, nodeName) => {
-      hoveredComfyNodeName.value = nodeName || null;
-      if (!nodeName) return;
-      const hoverTarget = event2.target;
-      const targetRect = hoverTarget.getBoundingClientRect();
-      await nextTick();
-      const previewHeight = previewRef.value?.$el.offsetHeight || 0;
-      const availableSpaceBelow = window.innerHeight - targetRect.bottom;
-      nodePreviewStyle.value.top = previewHeight > availableSpaceBelow ? `${Math.max(0, targetRect.top - (previewHeight - availableSpaceBelow) - 20)}px` : `${targetRect.top - 40}px`;
-      if (sidebarLocation.value === "left") {
-        nodePreviewStyle.value.left = `${targetRect.right}px`;
+        app$1.addNodeOnGraph(node3.data, { pos: app$1.getCanvasCenter() });
       } else {
-        nodePreviewStyle.value.left = `${targetRect.left - 400}px`;
-      }
-    }, "handleNodeHover");
-    const handleItemDropped = /* @__PURE__ */ __name((node3) => {
-      expandedKeys2.value[node3.key] = true;
-    }, "handleItemDropped");
-    const insertNode = /* @__PURE__ */ __name((nodeDef) => {
-      app$1.addNodeOnGraph(nodeDef, { pos: app$1.getCanvasCenter() });
-    }, "insertNode");
-    const filteredRoot = ref(null);
-    const filters = ref([]);
-    const handleSearch = /* @__PURE__ */ __name((query) => {
-      if (query.length < 3 && !filters.value.length) {
-        filteredRoot.value = null;
-        expandedKeys2.value = {};
-        return;
-      }
-      const f = filters.value.map((f2) => f2.filter);
-      const matchedNodes = nodeDefStore.nodeSearchService.searchNode(
-        query,
-        f,
-        {
-          limit: 64
-        },
-        {
-          matchWildcards: false
-        }
-      );
-      filteredRoot.value = buildNodeDefTree(matchedNodes);
-      expandNode(filteredRoot.value);
-    }, "handleSearch");
-    const onNodeContentClick = /* @__PURE__ */ __name((e, node3) => {
-      if (!node3.key) return;
-      if (node3.type === "folder") {
         toggleNodeOnEvent(e, node3);
-      } else {
-        insertNode(node3.data);
       }
-    }, "onNodeContentClick");
-    const menu = ref(null);
-    const menuTargetNode = ref(null);
-    const renameEditingNode = ref(null);
-    const menuItems = computed(() => [
-      {
-        label: t("newFolder"),
-        icon: "pi pi-folder-plus",
-        command: /* @__PURE__ */ __name(() => {
-          if (menuTargetNode.value?.data) {
-            addNewBookmarkFolder(menuTargetNode.value?.data);
-          }
-        }, "command")
-      },
-      {
-        label: t("delete"),
-        icon: "pi pi-trash",
-        command: /* @__PURE__ */ __name(() => {
-          if (menuTargetNode.value?.data) {
-            nodeBookmarkStore.deleteBookmarkFolder(menuTargetNode.value.data);
-          }
-        }, "command")
-      },
-      {
-        label: t("rename"),
-        icon: "pi pi-file-edit",
-        command: /* @__PURE__ */ __name(() => {
-          renameEditingNode.value = menuTargetNode.value;
-        }, "command")
-      },
-      {
-        label: t("customize"),
-        icon: "pi pi-palette",
-        command: /* @__PURE__ */ __name(() => {
-          initialIcon.value = nodeBookmarkStore.bookmarksCustomization[menuTargetNode.value.data.nodePath]?.icon || nodeBookmarkStore.defaultBookmarkIcon;
-          initialColor.value = nodeBookmarkStore.bookmarksCustomization[menuTargetNode.value.data.nodePath]?.color || nodeBookmarkStore.defaultBookmarkColor;
-          showCustomizationDialog.value = true;
-        }, "command")
+    }, "handleNodeClick");
+    const nodeBookmarkStore = useNodeBookmarkStore();
+    const bookmarkedRoot = computed(() => {
+      const filterTree = /* @__PURE__ */ __name((node3) => {
+        if (node3.leaf) {
+          return props.filteredNodeDefs.some((def2) => def2.name === node3.data.name) ? node3 : null;
+        }
+        const filteredChildren = node3.children?.map(filterTree).filter((child) => child !== null);
+        if (filteredChildren && filteredChildren.length > 0) {
+          return {
+            ...node3,
+            children: filteredChildren
+          };
+        }
+        return null;
+      }, "filterTree");
+      return props.filteredNodeDefs.length ? filterTree(nodeBookmarkStore.bookmarkedRoot) || {
+        key: "root",
+        label: "Root",
+        children: []
+      } : nodeBookmarkStore.bookmarkedRoot;
+    });
+    watch(
+      () => props.filteredNodeDefs,
+      (newValue) => {
+        if (newValue.length) {
+          nextTick(() => expandNode(bookmarkedRoot.value));
+        }
       }
-    ]);
-    const handleContextMenu = /* @__PURE__ */ __name((node3, e) => {
-      const nodeDef = node3.data;
-      if (nodeDef?.isDummyFolder) {
-        menuTargetNode.value = node3;
-        menu.value?.show(e);
+    );
+    const renderedBookmarkedRoot = computed(
+      () => {
+        const fillNodeInfo = /* @__PURE__ */ __name((node3) => {
+          const children = node3.children?.map(fillNodeInfo);
+          const sortedChildren = children?.sort((a, b) => {
+            if (a.leaf === b.leaf) {
+              return a.label.localeCompare(b.label);
+            }
+            return a.leaf ? 1 : -1;
+          });
+          return {
+            key: node3.key,
+            label: node3.leaf ? node3.data.display_name : node3.label,
+            leaf: node3.leaf,
+            data: node3.data,
+            getIcon: /* @__PURE__ */ __name((node22) => {
+              if (node22.leaf) {
+                return "pi pi-circle-fill";
+              }
+              const customization = nodeBookmarkStore.bookmarksCustomization[node22.data.nodePath];
+              return customization?.icon ? "pi " + customization.icon : "pi pi-bookmark-fill";
+            }, "getIcon"),
+            children: sortedChildren,
+            draggable: node3.leaf,
+            droppable: !node3.leaf,
+            handleDrop: /* @__PURE__ */ __name((node22, data24) => {
+              const nodeDefToAdd = data24.data.data;
+              if (nodeBookmarkStore.isBookmarked(nodeDefToAdd)) {
+                nodeBookmarkStore.toggleBookmark(nodeDefToAdd);
+              }
+              const folderNodeDef = node22.data;
+              const nodePath = folderNodeDef.category + "/" + nodeDefToAdd.name;
+              nodeBookmarkStore.addBookmark(nodePath);
+            }, "handleDrop"),
+            ...node3.leaf ? {} : {
+              handleRename,
+              handleDelete: /* @__PURE__ */ __name((node22) => {
+                nodeBookmarkStore.deleteBookmarkFolder(node22.data);
+              }, "handleDelete")
+            }
+          };
+        }, "fillNodeInfo");
+        return fillNodeInfo(bookmarkedRoot.value);
       }
-    }, "handleContextMenu");
+    );
+    const treeExplorerRef = ref(null);
+    const addNewBookmarkFolder = /* @__PURE__ */ __name((parent) => {
+      const newFolderKey = "root/" + nodeBookmarkStore.addNewBookmarkFolder(parent?.data).slice(0, -1);
+      nextTick(() => {
+        treeExplorerRef.value?.renameCommand(
+          findNodeByKey(
+            renderedBookmarkedRoot.value,
+            newFolderKey
+          )
+        );
+        if (parent) {
+          expandedKeys2.value[parent.key] = true;
+        }
+      });
+    }, "addNewBookmarkFolder");
+    __expose({
+      addNewBookmarkFolder
+    });
+    const toast = useToast();
+    const { t } = useI18n();
     const handleRename = /* @__PURE__ */ __name((node3, newName) => {
       if (node3.data && node3.data.isDummyFolder) {
         try {
@@ -100241,25 +100868,144 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
           });
         }
       }
-      renameEditingNode.value = null;
     }, "handleRename");
-    const addNewBookmarkFolder = /* @__PURE__ */ __name((parent) => {
-      const newFolderKey = "root/" + nodeBookmarkStore.addNewBookmarkFolder(parent).slice(0, -1);
-      nextTick(() => {
-        renameEditingNode.value = findNodeByKey(renderedRoot.value, newFolderKey);
-      });
-    }, "addNewBookmarkFolder");
     const showCustomizationDialog = ref(false);
     const initialIcon = ref(nodeBookmarkStore.defaultBookmarkIcon);
     const initialColor = ref(nodeBookmarkStore.defaultBookmarkColor);
+    const customizationTargetNodePath = ref("");
     const updateCustomization = /* @__PURE__ */ __name((icon2, color) => {
-      if (menuTargetNode.value?.data) {
+      if (customizationTargetNodePath.value) {
         nodeBookmarkStore.updateBookmarkCustomization(
-          menuTargetNode.value.data.nodePath,
+          customizationTargetNodePath.value,
           { icon: icon2, color }
         );
       }
     }, "updateCustomization");
+    const extraMenuItems = computed(
+      () => (menuTargetNode) => [
+        {
+          label: t("newFolder"),
+          icon: "pi pi-folder-plus",
+          command: /* @__PURE__ */ __name(() => {
+            addNewBookmarkFolder(menuTargetNode);
+          }, "command"),
+          visible: !menuTargetNode?.leaf
+        },
+        {
+          label: t("customize"),
+          icon: "pi pi-palette",
+          command: /* @__PURE__ */ __name(() => {
+            const customization = nodeBookmarkStore.bookmarksCustomization[menuTargetNode.data.nodePath];
+            initialIcon.value = customization?.icon || nodeBookmarkStore.defaultBookmarkIcon;
+            initialColor.value = customization?.color || nodeBookmarkStore.defaultBookmarkColor;
+            showCustomizationDialog.value = true;
+            customizationTargetNodePath.value = menuTargetNode.data.nodePath;
+          }, "command"),
+          visible: !menuTargetNode?.leaf
+        }
+      ]
+    );
+    return (_ctx, _cache) => {
+      return openBlock(), createElementBlock(Fragment, null, [
+        createVNode(TreeExplorer, {
+          class: "node-lib-bookmark-tree-explorer",
+          ref_key: "treeExplorerRef",
+          ref: treeExplorerRef,
+          roots: renderedBookmarkedRoot.value.children,
+          expandedKeys: unref(expandedKeys2),
+          extraMenuItems: extraMenuItems.value,
+          onNodeClick: handleNodeClick
+        }, {
+          folder: withCtx(({ node: node3 }) => [
+            createVNode(_sfc_main$7, { node: node3 }, null, 8, ["node"])
+          ]),
+          node: withCtx(({ node: node3 }) => [
+            createVNode(NodeTreeLeaf, { node: node3 }, null, 8, ["node"])
+          ]),
+          _: 1
+        }, 8, ["roots", "expandedKeys", "extraMenuItems"]),
+        createVNode(FolderCustomizationDialog, {
+          modelValue: showCustomizationDialog.value,
+          "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => showCustomizationDialog.value = $event),
+          onConfirm: updateCustomization,
+          initialIcon: initialIcon.value,
+          initialColor: initialColor.value
+        }, null, 8, ["modelValue", "initialIcon", "initialColor"])
+      ], 64);
+    };
+  }
+});
+const _withScopeId = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-85688f44"), n = n(), popScopeId(), n), "_withScopeId");
+const _hoisted_1$4 = /* @__PURE__ */ _withScopeId(() => /* @__PURE__ */ createBaseVNode("div", { id: "node-library-node-preview-container" }, null, -1));
+const _sfc_main$4 = /* @__PURE__ */ defineComponent({
+  __name: "NodeLibrarySidebarTab",
+  setup(__props) {
+    const nodeDefStore = useNodeDefStore();
+    const nodeBookmarkStore = useNodeBookmarkStore();
+    const { expandedKeys: expandedKeys2, expandNode, toggleNodeOnEvent } = useTreeExpansion();
+    const nodeBookmarkTreeExplorerRef = ref(null);
+    const searchFilter = ref(null);
+    const alphabeticalSort = ref(false);
+    const searchQuery = ref("");
+    const root26 = computed(() => {
+      const root27 = filteredRoot.value || nodeDefStore.nodeTree;
+      return alphabeticalSort.value ? sortedTree(root27) : root27;
+    });
+    const renderedRoot = computed(() => {
+      const fillNodeInfo = /* @__PURE__ */ __name((node3) => {
+        const children = node3.children?.map(fillNodeInfo);
+        return {
+          key: node3.key,
+          label: node3.leaf ? node3.data.display_name : node3.label,
+          leaf: node3.leaf,
+          data: node3.data,
+          getIcon: /* @__PURE__ */ __name((node22) => {
+            if (node22.leaf) {
+              return "pi pi-circle-fill";
+            }
+          }, "getIcon"),
+          children,
+          draggable: node3.leaf
+        };
+      }, "fillNodeInfo");
+      return fillNodeInfo(root26.value);
+    });
+    const filteredNodeDefs = ref([]);
+    const filteredRoot = computed(() => {
+      if (!filteredNodeDefs.value.length) {
+        return null;
+      }
+      return buildNodeDefTree(filteredNodeDefs.value);
+    });
+    const filters = ref([]);
+    const handleSearch = /* @__PURE__ */ __name((query) => {
+      if (query.length === 0 && !filters.value.length) {
+        filteredNodeDefs.value = [];
+        expandedKeys2.value = {};
+        return;
+      }
+      const f = filters.value.map((f2) => f2.filter);
+      filteredNodeDefs.value = nodeDefStore.nodeSearchService.searchNode(
+        query,
+        f,
+        {
+          limit: 64
+        },
+        {
+          matchWildcards: false
+        }
+      );
+      nextTick(() => {
+        expandNode(filteredRoot.value);
+      });
+    }, "handleSearch");
+    const handleNodeClick = /* @__PURE__ */ __name((node3, e) => {
+      if (node3.leaf) {
+        app$1.addNodeOnGraph(node3.data, { pos: app$1.getCanvasCenter() });
+      } else {
+        toggleNodeOnEvent(e, node3);
+      }
+    }, "handleNodeClick");
     const onAddFilter = /* @__PURE__ */ __name((filterAndValue) => {
       filters.value.push({
         filter: filterAndValue,
@@ -100289,7 +101035,7 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
               icon: "pi pi-folder-plus",
               text: "",
               severity: "secondary",
-              onClick: _cache[0] || (_cache[0] = ($event) => addNewBookmarkFolder())
+              onClick: _cache[0] || (_cache[0] = ($event) => nodeBookmarkTreeExplorerRef.value?.addNewBookmarkFolder())
             }, null, 512), [
               [_directive_tooltip, _ctx.$t("newFolder")]
             ]),
@@ -100325,88 +101071,38 @@ const _sfc_main$3 = /* @__PURE__ */ defineComponent({
               ]),
               _: 1
             }, 512),
-            createVNode(unref(script$6), {
-              class: "node-lib-tree",
+            createVNode(_sfc_main$5, {
+              ref_key: "nodeBookmarkTreeExplorerRef",
+              ref: nodeBookmarkTreeExplorerRef,
+              "filtered-node-defs": filteredNodeDefs.value
+            }, null, 8, ["filtered-node-defs"]),
+            unref(nodeBookmarkStore).bookmarks.length > 0 ? (openBlock(), createBlock(unref(script$F), {
+              key: 0,
+              type: "dashed"
+            })) : createCommentVNode("", true),
+            createVNode(TreeExplorer, {
+              class: "node-lib-tree-explorer",
+              roots: renderedRoot.value.children,
               expandedKeys: unref(expandedKeys2),
               "onUpdate:expandedKeys": _cache[4] || (_cache[4] = ($event) => isRef(expandedKeys2) ? expandedKeys2.value = $event : null),
-              selectionMode: "single",
-              value: renderedRoot.value.children,
-              pt: {
-                nodeLabel: "node-lib-tree-node-label",
-                nodeContent: /* @__PURE__ */ __name(({ props }) => ({
-                  onClick: /* @__PURE__ */ __name((e) => onNodeContentClick(e, props.node), "onClick"),
-                  onMouseenter: /* @__PURE__ */ __name((event2) => handleNodeHover(event2, props.node?.data?.name), "onMouseenter"),
-                  onMouseleave: /* @__PURE__ */ __name(() => {
-                    hoveredComfyNodeName.value = null;
-                  }, "onMouseleave"),
-                  onContextmenu: /* @__PURE__ */ __name((e) => handleContextMenu(props.node, e), "onContextmenu")
-                }), "nodeContent"),
-                nodeToggleButton: /* @__PURE__ */ __name(() => ({
-                  onClick: /* @__PURE__ */ __name((e) => {
-                    e.stopImmediatePropagation();
-                  }, "onClick")
-                }), "nodeToggleButton")
-              }
+              onNodeClick: handleNodeClick
             }, {
-              folder: withCtx(({ node: node3 }) => [
-                createVNode(NodeTreeFolder, {
-                  node: node3,
-                  isBookmarkFolder: !!node3.data && node3.data.isDummyFolder,
-                  onItemDropped: handleItemDropped
-                }, {
-                  "folder-label": withCtx(({ node: node22 }) => [
-                    createVNode(EditableText, {
-                      modelValue: node22.label,
-                      isEditing: renameEditingNode.value?.key === node22.key,
-                      onEdit: /* @__PURE__ */ __name((newName) => handleRename(node22, newName), "onEdit")
-                    }, null, 8, ["modelValue", "isEditing", "onEdit"])
-                  ]),
-                  _: 2
-                }, 1032, ["node", "isBookmarkFolder"])
-              ]),
               node: withCtx(({ node: node3 }) => [
-                createVNode(NodeTreeLeaf, {
-                  node: node3.data,
-                  isBookmarked: unref(nodeBookmarkStore).isBookmarked(node3.data),
-                  onToggleBookmark: /* @__PURE__ */ __name(($event) => unref(nodeBookmarkStore).toggleBookmark(node3.data), "onToggleBookmark")
-                }, null, 8, ["node", "isBookmarked", "onToggleBookmark"])
+                createVNode(NodeTreeLeaf, { node: node3 }, null, 8, ["node"])
               ]),
               _: 1
-            }, 8, ["expandedKeys", "value", "pt"]),
-            hoveredComfyNode.value ? (openBlock(), createElementBlock("div", {
-              key: 0,
-              class: "node-lib-node-preview",
-              style: normalizeStyle(nodePreviewStyle.value)
-            }, [
-              (openBlock(), createBlock(NodePreview, {
-                ref_key: "previewRef",
-                ref: previewRef,
-                key: hoveredComfyNode.value.name,
-                nodeDef: hoveredComfyNode.value
-              }, null, 8, ["nodeDef"]))
-            ], 4)) : createCommentVNode("", true)
+            }, 8, ["roots", "expandedKeys"])
           ]),
           _: 1
         }, 8, ["title"]),
-        createVNode(unref(script$f), {
-          ref_key: "menu",
-          ref: menu,
-          model: menuItems.value
-        }, null, 8, ["model"]),
-        createVNode(FolderCustomizationDialog, {
-          modelValue: showCustomizationDialog.value,
-          "onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => showCustomizationDialog.value = $event),
-          onConfirm: updateCustomization,
-          initialIcon: initialIcon.value,
-          initialColor: initialColor.value
-        }, null, 8, ["modelValue", "initialIcon", "initialColor"])
+        _hoisted_1$4
       ], 64);
     };
   }
 });
-const NodeLibrarySidebarTab = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-87967891"]]);
+const NodeLibrarySidebarTab = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["__scopeId", "data-v-85688f44"]]);
 const _hoisted_1$3 = { key: 1 };
-const _sfc_main$2 = /* @__PURE__ */ defineComponent({
+const _sfc_main$3 = /* @__PURE__ */ defineComponent({
   __name: "GlobalDialog",
   setup(__props) {
     const dialogStore = useDialogStore();
@@ -101067,7 +101763,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render, "render");
 script.render = render;
-const _sfc_main$1 = /* @__PURE__ */ defineComponent({
+const _sfc_main$2 = /* @__PURE__ */ defineComponent({
   __name: "GlobalToast",
   setup(__props) {
     const toast = useToast();
@@ -101141,110 +101837,27 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _sfc_main = /* @__PURE__ */ defineComponent({
-  __name: "App",
+const _sfc_main$1 = /* @__PURE__ */ defineComponent({
+  __name: "UnloadWindowConfirmDialog",
   setup(__props) {
-    const isLoading = computed(() => useWorkspaceStore().spinner);
-    const theme38 = computed(
-      () => useSettingStore().get("Comfy.ColorPalette")
-    );
-    watch(
-      theme38,
-      (newTheme) => {
-        const DARK_THEME_CLASS = "dark-theme";
-        const isDarkTheme = newTheme !== "light";
-        if (isDarkTheme) {
-          document.body.classList.add(DARK_THEME_CLASS);
-        } else {
-          document.body.classList.remove(DARK_THEME_CLASS);
-        }
-      },
-      { immediate: true }
-    );
-    watchEffect(() => {
-      const fontSize = useSettingStore().get("Comfy.TextareaWidget.FontSize");
-      document.documentElement.style.setProperty(
-        "--comfy-textarea-font-size",
-        `${fontSize}px`
-      );
-    });
-    const { t } = useI18n();
-    const init2 = /* @__PURE__ */ __name(() => {
-      useSettingStore().addSettings(app$1.ui.settings);
-      app$1.extensionManager = useWorkspaceStore();
-      app$1.extensionManager.registerSidebarTab({
-        id: "queue",
-        icon: "pi pi-history",
-        iconBadge: /* @__PURE__ */ __name(() => {
-          const value3 = useQueuePendingTaskCountStore().count.toString();
-          return value3 === "0" ? null : value3;
-        }, "iconBadge"),
-        title: t("sideToolbar.queue"),
-        tooltip: t("sideToolbar.queue"),
-        component: markRaw(QueueSidebarTab),
-        type: "vue"
-      });
-      app$1.extensionManager.registerSidebarTab({
-        id: "node-library",
-        icon: "pi pi-book",
-        title: t("sideToolbar.nodeLibrary"),
-        tooltip: t("sideToolbar.nodeLibrary"),
-        component: markRaw(NodeLibrarySidebarTab),
-        type: "vue"
-      });
-    }, "init");
-    const queuePendingTaskCountStore = useQueuePendingTaskCountStore();
-    const onStatus = /* @__PURE__ */ __name((e) => queuePendingTaskCountStore.update(e), "onStatus");
-    const toast = useToast();
-    const reconnectingMessage = {
-      severity: "error",
-      summary: t("reconnecting")
-    };
-    const onReconnecting = /* @__PURE__ */ __name(() => {
-      toast.remove(reconnectingMessage);
-      toast.add(reconnectingMessage);
-    }, "onReconnecting");
-    const onReconnected = /* @__PURE__ */ __name(() => {
-      toast.remove(reconnectingMessage);
-      toast.add({
-        severity: "success",
-        summary: t("reconnected"),
-        life: 2e3
-      });
-    }, "onReconnected");
-    onMounted(() => {
-      api.addEventListener("status", onStatus);
-      api.addEventListener("reconnecting", onReconnecting);
-      api.addEventListener("reconnected", onReconnected);
-      try {
-        init2();
-      } catch (e) {
-        console.error("Failed to init Vue app", e);
+    const settingStore = useSettingStore();
+    const handleBeforeUnload = /* @__PURE__ */ __name((event2) => {
+      if (settingStore.get("Comfy.Window.UnloadConfirmation")) {
+        event2.preventDefault();
+        return true;
       }
+      return void 0;
+    }, "handleBeforeUnload");
+    onMounted(() => {
+      window.addEventListener("beforeunload", handleBeforeUnload);
     });
     onUnmounted(() => {
-      api.removeEventListener("status", onStatus);
-      api.removeEventListener("reconnecting", onReconnecting);
-      api.removeEventListener("reconnected", onReconnected);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     });
-    return (_ctx, _cache) => {
-      return openBlock(), createElementBlock(Fragment, null, [
-        isLoading.value ? (openBlock(), createBlock(unref(script$V), {
-          key: 0,
-          class: "spinner"
-        })) : createCommentVNode("", true),
-        createVNode(unref(script$W), {
-          "full-screen": "",
-          blocked: isLoading.value
-        }, null, 8, ["blocked"]),
-        createVNode(_sfc_main$2),
-        createVNode(_sfc_main$1),
-        createVNode(_sfc_main$d)
-      ], 64);
+    return () => {
     };
   }
 });
-const App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-8616e7a1"]]);
 const messages = {
   en: {
     add: "Add",
@@ -101350,6 +101963,124 @@ const i18n = createI18n({
   fallbackLocale: "en",
   messages
 });
+const _sfc_main = /* @__PURE__ */ defineComponent({
+  __name: "App",
+  setup(__props) {
+    const isLoading = computed(() => useWorkspaceStore().spinner);
+    const theme38 = computed(
+      () => useSettingStore().get("Comfy.ColorPalette")
+    );
+    watch(
+      theme38,
+      (newTheme) => {
+        const DARK_THEME_CLASS = "dark-theme";
+        const isDarkTheme = newTheme !== "light";
+        if (isDarkTheme) {
+          document.body.classList.add(DARK_THEME_CLASS);
+        } else {
+          document.body.classList.remove(DARK_THEME_CLASS);
+        }
+      },
+      { immediate: true }
+    );
+    watchEffect(() => {
+      const fontSize = useSettingStore().get("Comfy.TextareaWidget.FontSize");
+      document.documentElement.style.setProperty(
+        "--comfy-textarea-font-size",
+        `${fontSize}px`
+      );
+    });
+    watchEffect(() => {
+      const padding = useSettingStore().get("Comfy.TreeExplorer.ItemPadding");
+      document.documentElement.style.setProperty(
+        "--comfy-tree-explorer-item-padding",
+        `${padding}px`
+      );
+    });
+    watchEffect(() => {
+      const locale2 = useSettingStore().get("Comfy.Locale");
+      if (locale2) {
+        i18n.global.locale.value = locale2;
+      }
+    });
+    const { t } = useI18n();
+    const init2 = /* @__PURE__ */ __name(() => {
+      useSettingStore().addSettings(app$1.ui.settings);
+      app$1.extensionManager = useWorkspaceStore();
+      app$1.extensionManager.registerSidebarTab({
+        id: "queue",
+        icon: "pi pi-history",
+        iconBadge: /* @__PURE__ */ __name(() => {
+          const value3 = useQueuePendingTaskCountStore().count.toString();
+          return value3 === "0" ? null : value3;
+        }, "iconBadge"),
+        title: t("sideToolbar.queue"),
+        tooltip: t("sideToolbar.queue"),
+        component: markRaw(QueueSidebarTab),
+        type: "vue"
+      });
+      app$1.extensionManager.registerSidebarTab({
+        id: "node-library",
+        icon: "pi pi-book",
+        title: t("sideToolbar.nodeLibrary"),
+        tooltip: t("sideToolbar.nodeLibrary"),
+        component: markRaw(NodeLibrarySidebarTab),
+        type: "vue"
+      });
+    }, "init");
+    const queuePendingTaskCountStore = useQueuePendingTaskCountStore();
+    const onStatus = /* @__PURE__ */ __name((e) => queuePendingTaskCountStore.update(e), "onStatus");
+    const toast = useToast();
+    const reconnectingMessage = {
+      severity: "error",
+      summary: t("reconnecting")
+    };
+    const onReconnecting = /* @__PURE__ */ __name(() => {
+      toast.remove(reconnectingMessage);
+      toast.add(reconnectingMessage);
+    }, "onReconnecting");
+    const onReconnected = /* @__PURE__ */ __name(() => {
+      toast.remove(reconnectingMessage);
+      toast.add({
+        severity: "success",
+        summary: t("reconnected"),
+        life: 2e3
+      });
+    }, "onReconnected");
+    onMounted(() => {
+      api.addEventListener("status", onStatus);
+      api.addEventListener("reconnecting", onReconnecting);
+      api.addEventListener("reconnected", onReconnected);
+      try {
+        init2();
+      } catch (e) {
+        console.error("Failed to init Vue app", e);
+      }
+    });
+    onUnmounted(() => {
+      api.removeEventListener("status", onStatus);
+      api.removeEventListener("reconnecting", onReconnecting);
+      api.removeEventListener("reconnected", onReconnected);
+    });
+    return (_ctx, _cache) => {
+      return openBlock(), createElementBlock(Fragment, null, [
+        isLoading.value ? (openBlock(), createBlock(unref(script$V), {
+          key: 0,
+          class: "spinner"
+        })) : createCommentVNode("", true),
+        createVNode(unref(script$W), {
+          "full-screen": "",
+          blocked: isLoading.value
+        }, null, 8, ["blocked"]),
+        createVNode(_sfc_main$3),
+        createVNode(_sfc_main$2),
+        createVNode(_sfc_main$1),
+        createVNode(_sfc_main$h)
+      ], 64);
+    };
+  }
+});
+const App = /* @__PURE__ */ _export_sfc(_sfc_main, [["__scopeId", "data-v-75e4840f"]]);
 const ComfyUIPreset = definePreset(index$1, {
   semantic: {
     primary: index$1["primitive"].blue
@@ -101387,4 +102118,4 @@ export {
   createSpinner as j,
   useToastStore as u
 };
-//# sourceMappingURL=index-CI3N807S.js.map
+//# sourceMappingURL=index-Dfv2aLsq.js.map
