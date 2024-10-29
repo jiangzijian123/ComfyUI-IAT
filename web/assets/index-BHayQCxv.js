@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./KeybindingPanel-YkUFoiMw.js","./index-DBWDcZsl.js","./index-DYEEBf64.js","./KeybindingPanel-BNYKhW1k.css","./ExtensionPanel-DZLYjWBj.js","./index-D36_Nnai.js","./widgetInputs-DNVvusS1.js","./index-BRhY6FpL.css","./userSelection-DVDwxLD5.js","./userSelection-CmI-fOSC.css","./GraphView-DmeOoKWv.js","./GraphView-Bx1-rDWO.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./KeybindingPanel-Dm_3sBT5.js","./index-CwRXxFdA.js","./index-C_wOqB0f.js","./KeybindingPanel-BNYKhW1k.css","./ExtensionPanel-BmKi_NKS.js","./index-BReiUkk9.js","./widgetInputs-DdecKYqd.js","./index-BRhY6FpL.css","./userSelection-DITGVoWz.js","./userSelection-CmI-fOSC.css","./GraphView-C4blCugc.js","./GraphView-Cf7ubG48.css"])))=>i.map(i=>d[i]);
 var __defProp2 = Object.defineProperty;
 var __name = (target, value3) => __defProp2(target, "name", { value: value3, configurable: true });
 (/* @__PURE__ */ __name(function polyfill() {
@@ -12004,7 +12004,7 @@ const vue_runtime_esmBundler = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Obj
 }, Symbol.toStringTag, { value: "Module" }));
 const config = {
   app_title: "ComfyUI",
-  app_version: "1.3.21"
+  app_version: "1.3.26"
 };
 var isVue2$2 = false;
 var isVue3$2 = true;
@@ -13728,26 +13728,35 @@ const PiniaVuePlugin = /* @__PURE__ */ __name(function(_Vue) {
     }
   });
 }, "PiniaVuePlugin");
-const useToastStore = /* @__PURE__ */ defineStore("toast", {
-  state: /* @__PURE__ */ __name(() => ({
-    messagesToAdd: [],
-    messagesToRemove: [],
-    removeAllRequested: false
-  }), "state"),
-  actions: {
-    add(message2) {
-      this.messagesToAdd = [...this.messagesToAdd, message2];
-    },
-    remove(message2) {
-      this.messagesToRemove = [...this.messagesToRemove, message2];
-    },
-    removeAll() {
-      this.removeAllRequested = true;
-    },
-    addAlert(message2) {
-      this.add({ severity: "warn", summary: "Alert", detail: message2 });
-    }
+const useToastStore = /* @__PURE__ */ defineStore("toast", () => {
+  const messagesToAdd = ref([]);
+  const messagesToRemove = ref([]);
+  const removeAllRequested = ref(false);
+  function add2(message2) {
+    messagesToAdd.value = [...messagesToAdd.value, message2];
   }
+  __name(add2, "add");
+  function remove4(message2) {
+    messagesToRemove.value = [...messagesToRemove.value, message2];
+  }
+  __name(remove4, "remove");
+  function removeAll() {
+    removeAllRequested.value = true;
+  }
+  __name(removeAll, "removeAll");
+  function addAlert(message2) {
+    add2({ severity: "warn", summary: "Alert", detail: message2 });
+  }
+  __name(addAlert, "addAlert");
+  return {
+    messagesToAdd,
+    messagesToRemove,
+    removeAllRequested,
+    add: add2,
+    remove: remove4,
+    removeAll,
+    addAlert
+  };
 });
 var util;
 (function(util2) {
@@ -18326,7 +18335,8 @@ const zExecutingWsMessage = z.object({
   prompt_id: zPromptId
 });
 const zExecutedWsMessage = zExecutingWsMessage.extend({
-  outputs: zOutputs
+  output: zOutputs,
+  merge: z.boolean().optional()
 });
 const zExecutionWsMessageBase = z.object({
   prompt_id: zPromptId,
@@ -21180,13 +21190,20 @@ class ComfyApi extends EventTarget {
   #registered = /* @__PURE__ */ new Set();
   api_host;
   api_base;
+  /**
+   * The client id from the initial session storage.
+   */
   initialClientId;
-  user;
-  socket;
+  /**
+   * The current client id from websocket status updates.
+   */
   clientId;
+  user;
+  socket = null;
   reportedUnknownMessageTypes = /* @__PURE__ */ new Set();
   constructor() {
     super();
+    this.user = "";
     this.api_host = location.host;
     this.api_base = location.pathname.split("/").slice(0, -1).join("/");
     console.log("Running on", this.api_host);
@@ -21211,7 +21228,13 @@ class ComfyApi extends EventTarget {
     if (!options3.cache) {
       options3.cache = "no-cache";
     }
-    options3.headers["Comfy-User"] = this.user;
+    if (Array.isArray(options3.headers)) {
+      options3.headers.push(["Comfy-User", this.user]);
+    } else if (options3.headers instanceof Headers) {
+      options3.headers.set("Comfy-User", this.user);
+    } else {
+      options3.headers["Comfy-User"] = this.user;
+    }
     return fetch(this.apiURL(route), options3);
   }
   addEventListener(type, callback, options3) {
@@ -21307,9 +21330,10 @@ class ComfyApi extends EventTarget {
           switch (msg.type) {
             case "status":
               if (msg.data.sid) {
-                this.clientId = msg.data.sid;
-                window.name = this.clientId;
-                sessionStorage.setItem("clientId", this.clientId);
+                const clientId = msg.data.sid;
+                this.clientId = clientId;
+                window.name = clientId;
+                sessionStorage.setItem("clientId", clientId);
               }
               this.dispatchEvent(
                 new CustomEvent("status", { detail: msg.data.status })
@@ -21426,9 +21450,13 @@ class ComfyApi extends EventTarget {
    * @param {number} number The index at which to queue the prompt, passing -1 will insert the prompt at the front of the queue
    * @param {object} prompt The prompt data to queue
    */
-  async queuePrompt(number2, { output, workflow }) {
+  async queuePrompt(number2, {
+    output,
+    workflow
+  }) {
     const body = {
-      client_id: this.clientId,
+      client_id: this.clientId ?? "",
+      // TODO: Unify clientId access
       prompt: output,
       extra_data: { extra_pnginfo: { workflow } }
     };
@@ -21458,7 +21486,7 @@ class ComfyApi extends EventTarget {
   async getModelFolders() {
     const res = await this.fetchApi(`/models`);
     if (res.status === 404) {
-      return null;
+      return [];
     }
     return await res.json();
   }
@@ -21732,12 +21760,15 @@ class ComfyApi extends EventTarget {
     );
     return resp;
   }
+  /**
+   * @deprecated Use `listUserDataFullInfo` instead.
+   */
   async listUserData(dir, recurse, split) {
     const resp = await this.fetchApi(
       `/userdata?${new URLSearchParams({
-        recurse,
+        recurse: recurse ? "true" : "false",
         dir,
-        split
+        split: split ? "true" : "false"
       })}`
     );
     if (resp.status === 404) return [];
@@ -27853,16 +27884,16 @@ class ResultItemImpl {
     if (!this.isVhsFormat) {
       return defaultType;
     }
-    if (this.format.endsWith("webm")) {
+    if (this.format?.endsWith("webm")) {
       return "video/webm";
     }
-    if (this.format.endsWith("mp4")) {
+    if (this.format?.endsWith("mp4")) {
       return "video/mp4";
     }
     return defaultType;
   }
   get isVideo() {
-    return !this.isImage && this.format && this.format.startsWith("video/");
+    return !this.isImage && !!this.format?.startsWith("video/");
   }
   get isGif() {
     return this.filename.endsWith(".gif");
@@ -27890,7 +27921,7 @@ class TaskItemImpl {
     this.taskType = taskType;
     this.prompt = prompt;
     this.status = status;
-    this.outputs = outputs;
+    this.outputs = outputs ?? {};
     this.flatOutputs = flatOutputs ?? this.calculateFlatOutputs();
   }
   calculateFlatOutputs() {
@@ -28044,79 +28075,85 @@ class TaskItemImpl {
     );
   }
 }
-const useQueueStore = /* @__PURE__ */ defineStore("queue", {
-  state: /* @__PURE__ */ __name(() => ({
-    runningTasks: [],
-    pendingTasks: [],
-    historyTasks: [],
-    maxHistoryItems: 64,
-    isLoading: false
-  }), "state"),
-  getters: {
-    tasks(state) {
-      return [
-        ...state.pendingTasks,
-        ...state.runningTasks,
-        ...state.historyTasks
-      ];
-    },
-    flatTasks() {
-      return this.tasks.flatMap((task) => task.flatten());
-    },
-    lastHistoryQueueIndex(state) {
-      return state.historyTasks.length ? state.historyTasks[0].queueIndex : -1;
-    },
-    hasPendingTasks(state) {
-      return state.pendingTasks.length > 0;
+const useQueueStore = /* @__PURE__ */ defineStore("queue", () => {
+  const runningTasks = ref([]);
+  const pendingTasks = ref([]);
+  const historyTasks = ref([]);
+  const maxHistoryItems = ref(64);
+  const isLoading = ref(false);
+  const tasks = computed(
+    () => [
+      ...pendingTasks.value,
+      ...runningTasks.value,
+      ...historyTasks.value
+    ]
+  );
+  const flatTasks = computed(
+    () => tasks.value.flatMap((task) => task.flatten())
+  );
+  const lastHistoryQueueIndex = computed(
+    () => historyTasks.value.length ? historyTasks.value[0].queueIndex : -1
+  );
+  const hasPendingTasks = computed(() => pendingTasks.value.length > 0);
+  const update = /* @__PURE__ */ __name(async () => {
+    isLoading.value = true;
+    try {
+      const [queue2, history2] = await Promise.all([
+        api.getQueue(),
+        api.getHistory(maxHistoryItems.value)
+      ]);
+      const toClassAll = /* @__PURE__ */ __name((tasks2) => tasks2.map(
+        (task) => new TaskItemImpl(
+          task.taskType,
+          task.prompt,
+          // status and outputs only exist on history tasks
+          "status" in task ? task.status : void 0,
+          "outputs" in task ? task.outputs : void 0
+        )
+      ).sort((a, b) => b.queueIndex - a.queueIndex), "toClassAll");
+      runningTasks.value = toClassAll(queue2.Running);
+      pendingTasks.value = toClassAll(queue2.Pending);
+      const allIndex = new Set(
+        history2.History.map((item2) => item2.prompt[0])
+      );
+      const newHistoryItems = toClassAll(
+        history2.History.filter(
+          (item2) => item2.prompt[0] > lastHistoryQueueIndex.value
+        )
+      );
+      const existingHistoryItems = historyTasks.value.filter(
+        (item2) => allIndex.has(item2.queueIndex)
+      );
+      historyTasks.value = [...newHistoryItems, ...existingHistoryItems].slice(0, maxHistoryItems.value).sort((a, b) => b.queueIndex - a.queueIndex);
+    } finally {
+      isLoading.value = false;
     }
-  },
-  actions: {
-    // Fetch the queue data from the API
-    async update() {
-      this.isLoading = true;
-      try {
-        const [queue2, history2] = await Promise.all([
-          api.getQueue(),
-          api.getHistory(this.maxHistoryItems)
-        ]);
-        const toClassAll = /* @__PURE__ */ __name((tasks) => tasks.map(
-          (task) => new TaskItemImpl(
-            task.taskType,
-            task.prompt,
-            task["status"],
-            task["outputs"] || {}
-          )
-        ).sort((a, b) => b.queueIndex - a.queueIndex), "toClassAll");
-        this.runningTasks = toClassAll(queue2.Running);
-        this.pendingTasks = toClassAll(queue2.Pending);
-        const allIndex = new Set(
-          history2.History.map((item2) => item2.prompt[0])
-        );
-        const newHistoryItems = toClassAll(
-          history2.History.filter(
-            (item2) => item2.prompt[0] > this.lastHistoryQueueIndex
-          )
-        );
-        const existingHistoryItems = this.historyTasks.filter(
-          (item2) => allIndex.has(item2.queueIndex)
-        );
-        this.historyTasks = [...newHistoryItems, ...existingHistoryItems].slice(0, this.maxHistoryItems).sort((a, b) => b.queueIndex - a.queueIndex);
-      } finally {
-        this.isLoading = false;
-      }
-    },
-    async clear(targets = ["queue", "history"]) {
-      if (targets.length === 0) {
-        return;
-      }
-      await Promise.all(targets.map((type) => api.clearItems(type)));
-      await this.update();
-    },
-    async delete(task) {
-      await api.deleteItem(task.apiTaskType, task.promptId);
-      await this.update();
+  }, "update");
+  const clear2 = /* @__PURE__ */ __name(async (targets = ["queue", "history"]) => {
+    if (targets.length === 0) {
+      return;
     }
-  }
+    await Promise.all(targets.map((type) => api.clearItems(type)));
+    await update();
+  }, "clear");
+  const deleteTask = /* @__PURE__ */ __name(async (task) => {
+    await api.deleteItem(task.apiTaskType, task.promptId);
+    await update();
+  }, "deleteTask");
+  return {
+    runningTasks,
+    pendingTasks,
+    historyTasks,
+    maxHistoryItems,
+    isLoading,
+    tasks,
+    flatTasks,
+    lastHistoryQueueIndex,
+    hasPendingTasks,
+    update,
+    clear: clear2,
+    delete: deleteTask
+  };
 });
 const useQueuePendingTaskCountStore = /* @__PURE__ */ defineStore(
   "queuePendingTaskCount",
@@ -28811,52 +28848,63 @@ const CORE_SETTINGS = [
     versionAdded: "1.3.14"
   }
 ];
-const useSettingStore = /* @__PURE__ */ defineStore("setting", {
-  state: /* @__PURE__ */ __name(() => ({
-    settingValues: {},
-    settings: {}
-  }), "state"),
-  getters: {
-    // Setting tree structure used for the settings dialog display.
-    settingTree() {
-      const root21 = buildTree(
-        Object.values(this.settings).filter(
-          (setting) => setting.type !== "hidden"
-        ),
-        (setting) => setting.category || setting.id.split(".")
-      );
-      const floatingSettings = root21.children.filter((node3) => node3.leaf);
-      if (floatingSettings.length) {
-        root21.children = root21.children.filter((node3) => !node3.leaf);
-        root21.children.push({
-          key: "Other",
-          label: "Other",
-          leaf: false,
-          children: floatingSettings
-        });
-      }
-      return root21;
-    }
-  },
-  actions: {
-    addSettings(settings) {
-      for (const id3 in settings.settingsLookup) {
-        const value3 = settings.getSettingValue(id3);
-        this.settingValues[id3] = value3;
-      }
-      this.settings = settings.settingsParamLookup;
-      CORE_SETTINGS.forEach((setting) => {
-        settings.addSetting(setting);
+const useSettingStore = /* @__PURE__ */ defineStore("setting", () => {
+  const settingValues = ref({});
+  const settings = ref({});
+  const settingTree = computed(() => {
+    const root21 = buildTree(
+      Object.values(settings.value).filter(
+        (setting) => setting.type !== "hidden"
+      ),
+      (setting) => setting.category || setting.id.split(".")
+    );
+    const floatingSettings = (root21.children ?? []).filter((node3) => node3.leaf);
+    if (floatingSettings.length) {
+      root21.children = (root21.children ?? []).filter((node3) => !node3.leaf);
+      root21.children.push({
+        key: "Other",
+        label: "Other",
+        leaf: false,
+        children: floatingSettings
       });
-    },
-    async set(key, value3) {
-      this.settingValues[key] = value3;
-      await app$1.ui.settings.setSettingValueAsync(key, value3);
-    },
-    get(key) {
-      return this.settingValues[key] ?? app$1.ui.settings.getSettingDefaultValue(key);
     }
+    return root21;
+  });
+  function addSettings(settingsDialog) {
+    for (const id3 in settingsDialog.settingsLookup) {
+      const value3 = settingsDialog.getSettingValue(id3);
+      settingValues.value[id3] = value3;
+    }
+    settings.value = settingsDialog.settingsParamLookup;
+    CORE_SETTINGS.forEach((setting) => {
+      settingsDialog.addSetting(setting);
+    });
   }
+  __name(addSettings, "addSettings");
+  function loadExtensionSettings(extension) {
+    extension.settings?.forEach((setting) => {
+      app$1.ui.settings.addSetting(setting);
+    });
+  }
+  __name(loadExtensionSettings, "loadExtensionSettings");
+  async function set2(key, value3) {
+    settingValues.value[key] = value3;
+    await app$1.ui.settings.setSettingValueAsync(key, value3);
+  }
+  __name(set2, "set");
+  function get2(key) {
+    return settingValues.value[key] ?? app$1.ui.settings.getSettingDefaultValue(key);
+  }
+  __name(get2, "get");
+  return {
+    settingValues,
+    settings,
+    settingTree,
+    addSettings,
+    loadExtensionSettings,
+    set: set2,
+    get: get2
+  };
 });
 class ComfySettingsDialog extends ComfyDialog$1 {
   static {
@@ -28868,44 +28916,10 @@ class ComfySettingsDialog extends ComfyDialog$1 {
   settingsParamLookup;
   constructor(app2) {
     super();
-    const frontendVersion = window["__COMFYUI_FRONTEND_VERSION__"];
     this.app = app2;
     this.settingsValues = {};
     this.settingsLookup = {};
     this.settingsParamLookup = {};
-    this.element = $el(
-      "dialog",
-      {
-        id: "comfy-settings-dialog",
-        parent: document.body
-      },
-      [
-        $el("table.comfy-modal-content.comfy-table", [
-          $el(
-            "caption",
-            { textContent: `Settings (v${frontendVersion})` },
-            $el("button.comfy-btn", {
-              type: "button",
-              textContent: "×",
-              onclick: /* @__PURE__ */ __name(() => {
-                this.element.close();
-              }, "onclick")
-            })
-          ),
-          $el("tbody", { $: /* @__PURE__ */ __name((tbody) => this.textElement = tbody, "$") }),
-          $el("button", {
-            type: "button",
-            textContent: "Close",
-            style: {
-              cursor: "pointer"
-            },
-            onclick: /* @__PURE__ */ __name(() => {
-              this.element.close();
-            }, "onclick")
-          })
-        ])
-      ]
-    );
   }
   get settings() {
     return Object.values(this.settingsLookup);
@@ -28994,17 +29008,25 @@ class ComfySettingsDialog extends ComfyDialog$1 {
     this.settingsLookup[id3].onChange?.(value3);
     this.#dispatchChange(id3, value3);
   }
+  /**
+   * Deprecated for external callers/extensions. Use `ComfyExtension.settings` field instead.
+   * Example:
+   * ```ts
+   * app.registerExtension({
+   *   name: 'My Extension',
+   *   settings: [
+   *     {
+   *       id: 'My.Setting',
+   *       name: 'My Setting',
+   *       type: 'text',
+   *       defaultValue: 'Hello, world!'
+   *     }
+   *   ]
+   * })
+   * ```
+   */
   addSetting(params) {
-    const {
-      id: id3,
-      name,
-      type,
-      defaultValue,
-      onChange: onChange4,
-      attrs: attrs3 = {},
-      tooltip = "",
-      options: options3 = void 0
-    } = params;
+    const { id: id3, name, type, defaultValue, onChange: onChange4 } = params;
     if (!id3) {
       throw new Error("Settings must have an ID");
     }
@@ -29038,154 +29060,7 @@ class ComfySettingsDialog extends ComfyDialog$1 {
       onChange: onChange4,
       name,
       render: /* @__PURE__ */ __name(() => {
-        if (type === "hidden") return;
-        const setter = /* @__PURE__ */ __name((v2) => {
-          if (onChange4) {
-            onChange4(v2, value3);
-          }
-          this.setSettingValue(id3, v2);
-          value3 = v2;
-        }, "setter");
-        value3 = this.getSettingValue(id3, defaultValue);
-        let element;
-        const htmlID = id3.replaceAll(".", "-");
-        const labelCell = $el("td", [
-          $el("label", {
-            for: htmlID,
-            classList: [tooltip !== "" ? "comfy-tooltip-indicator" : ""],
-            textContent: name
-          })
-        ]);
-        if (typeof type === "function") {
-          element = type(name, setter, value3, attrs3);
-        } else {
-          switch (type) {
-            case "boolean":
-              element = $el("tr", [
-                labelCell,
-                $el("td", [
-                  $el("input", {
-                    id: htmlID,
-                    type: "checkbox",
-                    checked: value3,
-                    onchange: /* @__PURE__ */ __name((event2) => {
-                      const isChecked2 = event2.target.checked;
-                      if (onChange4 !== void 0) {
-                        onChange4(isChecked2);
-                      }
-                      this.setSettingValue(id3, isChecked2);
-                    }, "onchange")
-                  })
-                ])
-              ]);
-              break;
-            case "number":
-              element = $el("tr", [
-                labelCell,
-                $el("td", [
-                  $el("input", {
-                    type,
-                    value: value3,
-                    id: htmlID,
-                    oninput: /* @__PURE__ */ __name((e) => {
-                      setter(e.target.value);
-                    }, "oninput"),
-                    ...attrs3
-                  })
-                ])
-              ]);
-              break;
-            case "slider":
-              element = $el("tr", [
-                labelCell,
-                $el("td", [
-                  $el(
-                    "div",
-                    {
-                      style: {
-                        display: "grid",
-                        gridAutoFlow: "column"
-                      }
-                    },
-                    [
-                      $el("input", {
-                        ...attrs3,
-                        value: value3,
-                        type: "range",
-                        oninput: /* @__PURE__ */ __name((e) => {
-                          setter(e.target.value);
-                          e.target.nextElementSibling.value = e.target.value;
-                        }, "oninput")
-                      }),
-                      $el("input", {
-                        ...attrs3,
-                        value: value3,
-                        id: htmlID,
-                        type: "number",
-                        style: { maxWidth: "4rem" },
-                        oninput: /* @__PURE__ */ __name((e) => {
-                          setter(e.target.value);
-                          e.target.previousElementSibling.value = e.target.value;
-                        }, "oninput")
-                      })
-                    ]
-                  )
-                ])
-              ]);
-              break;
-            case "combo":
-              element = $el("tr", [
-                labelCell,
-                $el("td", [
-                  $el(
-                    "select",
-                    {
-                      oninput: /* @__PURE__ */ __name((e) => {
-                        setter(e.target.value);
-                      }, "oninput")
-                    },
-                    (typeof options3 === "function" ? options3(value3) : options3 || []).map((opt) => {
-                      if (typeof opt === "string") {
-                        opt = { text: opt };
-                      }
-                      const v2 = opt.value ?? opt.text;
-                      return $el("option", {
-                        value: v2,
-                        textContent: opt.text,
-                        selected: value3 + "" === v2 + ""
-                      });
-                    })
-                  )
-                ])
-              ]);
-              break;
-            case "text":
-            default:
-              if (type !== "text") {
-                console.warn(
-                  `Unsupported setting type '${type}, defaulting to text`
-                );
-              }
-              element = $el("tr", [
-                labelCell,
-                $el("td", [
-                  $el("input", {
-                    value: value3,
-                    id: htmlID,
-                    oninput: /* @__PURE__ */ __name((e) => {
-                      setter(e.target.value);
-                    }, "oninput"),
-                    ...attrs3
-                  })
-                ])
-              ]);
-              break;
-          }
-        }
-        if (tooltip) {
-          element.title = tooltip;
-        }
-        return element;
+        console.warn("[ComfyUI] Setting render is deprecated", id3);
       }, "render")
     };
     const self2 = this;
@@ -29198,50 +29073,43 @@ class ComfySettingsDialog extends ComfyDialog$1 {
       }
     };
   }
-  show() {
-    this.textElement.replaceChildren(
-      $el(
-        "tr",
-        {
-          style: { display: "none" }
-        },
-        [$el("th"), $el("th", { style: { width: "33%" } })]
-      ),
-      ...this.settings.sort((a, b) => a.name.localeCompare(b.name)).map((s) => s.render()).filter(Boolean)
-    );
-    this.element.showModal();
-  }
 }
 window.comfyAPI = window.comfyAPI || {};
 window.comfyAPI.settings = window.comfyAPI.settings || {};
 window.comfyAPI.settings.ComfySettingsDialog = ComfySettingsDialog;
-const useDialogStore = /* @__PURE__ */ defineStore("dialog", {
-  state: /* @__PURE__ */ __name(() => ({
-    isVisible: false,
-    title: "",
-    headerComponent: null,
-    component: null,
-    props: {},
-    dialogComponentProps: {}
-  }), "state"),
-  actions: {
-    showDialog(options3) {
-      this.isVisible = true;
-      nextTick(() => {
-        this.title = options3.title ?? "";
-        this.headerComponent = options3.headerComponent ? markRaw(options3.headerComponent) : null;
-        this.component = markRaw(options3.component);
-        this.props = options3.props || {};
-        this.dialogComponentProps = options3.dialogComponentProps || {};
-      });
-    },
-    closeDialog() {
-      if (this.dialogComponentProps.onClose) {
-        this.dialogComponentProps.onClose();
-      }
-      this.isVisible = false;
-    }
+const useDialogStore = /* @__PURE__ */ defineStore("dialog", () => {
+  const isVisible2 = ref(false);
+  const title = ref("");
+  const headerComponent = shallowRef(null);
+  const component = shallowRef(null);
+  const props = ref({});
+  const dialogComponentProps = ref({});
+  function showDialog(options3) {
+    isVisible2.value = true;
+    title.value = options3.title ?? "";
+    headerComponent.value = options3.headerComponent ? markRaw(options3.headerComponent) : null;
+    component.value = markRaw(options3.component);
+    props.value = options3.props || {};
+    dialogComponentProps.value = options3.dialogComponentProps || {};
   }
+  __name(showDialog, "showDialog");
+  function closeDialog() {
+    if (dialogComponentProps.value.onClose) {
+      dialogComponentProps.value.onClose();
+    }
+    isVisible2.value = false;
+  }
+  __name(closeDialog, "closeDialog");
+  return {
+    isVisible: isVisible2,
+    title,
+    headerComponent,
+    component,
+    props,
+    dialogComponentProps,
+    showDialog,
+    closeDialog
+  };
 });
 function hasClass(element, className) {
   if (element) {
@@ -32910,14 +32778,34 @@ var script$S = {
   name: "BlankIcon",
   "extends": script$T
 };
-var _hoisted_1$17 = /* @__PURE__ */ createBaseVNode("rect", {
+var _hoisted_1$18 = /* @__PURE__ */ createBaseVNode("rect", {
   width: "1",
   height: "1",
   fill: "currentColor",
   "fill-opacity": "0"
 }, null, -1);
-var _hoisted_2$Q = [_hoisted_1$17];
+var _hoisted_2$R = [_hoisted_1$18];
 function render$R(_ctx, _cache, $props, $setup, $data, $options) {
+  return openBlock(), createElementBlock("svg", mergeProps({
+    width: "14",
+    height: "14",
+    viewBox: "0 0 14 14",
+    fill: "none",
+    xmlns: "http://www.w3.org/2000/svg"
+  }, _ctx.pti()), _hoisted_2$R, 16);
+}
+__name(render$R, "render$R");
+script$S.render = render$R;
+var script$R = {
+  name: "CheckIcon",
+  "extends": script$T
+};
+var _hoisted_1$17 = /* @__PURE__ */ createBaseVNode("path", {
+  d: "M4.86199 11.5948C4.78717 11.5923 4.71366 11.5745 4.64596 11.5426C4.57826 11.5107 4.51779 11.4652 4.46827 11.4091L0.753985 7.69483C0.683167 7.64891 0.623706 7.58751 0.580092 7.51525C0.536478 7.44299 0.509851 7.36177 0.502221 7.27771C0.49459 7.19366 0.506156 7.10897 0.536046 7.03004C0.565935 6.95111 0.613367 6.88 0.674759 6.82208C0.736151 6.76416 0.8099 6.72095 0.890436 6.69571C0.970973 6.67046 1.05619 6.66385 1.13966 6.67635C1.22313 6.68886 1.30266 6.72017 1.37226 6.76792C1.44186 6.81567 1.4997 6.8786 1.54141 6.95197L4.86199 10.2503L12.6397 2.49483C12.7444 2.42694 12.8689 2.39617 12.9932 2.40745C13.1174 2.41873 13.2343 2.47141 13.3251 2.55705C13.4159 2.64268 13.4753 2.75632 13.4938 2.87973C13.5123 3.00315 13.4888 3.1292 13.4271 3.23768L5.2557 11.4091C5.20618 11.4652 5.14571 11.5107 5.07801 11.5426C5.01031 11.5745 4.9368 11.5923 4.86199 11.5948Z",
+  fill: "currentColor"
+}, null, -1);
+var _hoisted_2$Q = [_hoisted_1$17];
+function render$Q(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
     height: "14",
@@ -32926,39 +32814,19 @@ function render$R(_ctx, _cache, $props, $setup, $data, $options) {
     xmlns: "http://www.w3.org/2000/svg"
   }, _ctx.pti()), _hoisted_2$Q, 16);
 }
-__name(render$R, "render$R");
-script$S.render = render$R;
-var script$R = {
-  name: "CheckIcon",
-  "extends": script$T
-};
-var _hoisted_1$16 = /* @__PURE__ */ createBaseVNode("path", {
-  d: "M4.86199 11.5948C4.78717 11.5923 4.71366 11.5745 4.64596 11.5426C4.57826 11.5107 4.51779 11.4652 4.46827 11.4091L0.753985 7.69483C0.683167 7.64891 0.623706 7.58751 0.580092 7.51525C0.536478 7.44299 0.509851 7.36177 0.502221 7.27771C0.49459 7.19366 0.506156 7.10897 0.536046 7.03004C0.565935 6.95111 0.613367 6.88 0.674759 6.82208C0.736151 6.76416 0.8099 6.72095 0.890436 6.69571C0.970973 6.67046 1.05619 6.66385 1.13966 6.67635C1.22313 6.68886 1.30266 6.72017 1.37226 6.76792C1.44186 6.81567 1.4997 6.8786 1.54141 6.95197L4.86199 10.2503L12.6397 2.49483C12.7444 2.42694 12.8689 2.39617 12.9932 2.40745C13.1174 2.41873 13.2343 2.47141 13.3251 2.55705C13.4159 2.64268 13.4753 2.75632 13.4938 2.87973C13.5123 3.00315 13.4888 3.1292 13.4271 3.23768L5.2557 11.4091C5.20618 11.4652 5.14571 11.5107 5.07801 11.5426C5.01031 11.5745 4.9368 11.5923 4.86199 11.5948Z",
-  fill: "currentColor"
-}, null, -1);
-var _hoisted_2$P = [_hoisted_1$16];
-function render$Q(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock("svg", mergeProps({
-    width: "14",
-    height: "14",
-    viewBox: "0 0 14 14",
-    fill: "none",
-    xmlns: "http://www.w3.org/2000/svg"
-  }, _ctx.pti()), _hoisted_2$P, 16);
-}
 __name(render$Q, "render$Q");
 script$R.render = render$Q;
 var script$Q = {
   name: "SearchIcon",
   "extends": script$T
 };
-var _hoisted_1$15 = /* @__PURE__ */ createBaseVNode("path", {
+var _hoisted_1$16 = /* @__PURE__ */ createBaseVNode("path", {
   "fill-rule": "evenodd",
   "clip-rule": "evenodd",
   d: "M2.67602 11.0265C3.6661 11.688 4.83011 12.0411 6.02086 12.0411C6.81149 12.0411 7.59438 11.8854 8.32483 11.5828C8.87005 11.357 9.37808 11.0526 9.83317 10.6803L12.9769 13.8241C13.0323 13.8801 13.0983 13.9245 13.171 13.9548C13.2438 13.985 13.3219 14.0003 13.4007 14C13.4795 14.0003 13.5575 13.985 13.6303 13.9548C13.7031 13.9245 13.7691 13.8801 13.8244 13.8241C13.9367 13.7116 13.9998 13.5592 13.9998 13.4003C13.9998 13.2414 13.9367 13.089 13.8244 12.9765L10.6807 9.8328C11.053 9.37773 11.3573 8.86972 11.5831 8.32452C11.8857 7.59408 12.0414 6.81119 12.0414 6.02056C12.0414 4.8298 11.6883 3.66579 11.0268 2.67572C10.3652 1.68564 9.42494 0.913972 8.32483 0.45829C7.22472 0.00260857 6.01418 -0.116618 4.84631 0.115686C3.67844 0.34799 2.60568 0.921393 1.76369 1.76338C0.921698 2.60537 0.348296 3.67813 0.115991 4.84601C-0.116313 6.01388 0.00291375 7.22441 0.458595 8.32452C0.914277 9.42464 1.68595 10.3649 2.67602 11.0265ZM3.35565 2.0158C4.14456 1.48867 5.07206 1.20731 6.02086 1.20731C7.29317 1.20731 8.51338 1.71274 9.41304 2.6124C10.3127 3.51206 10.8181 4.73226 10.8181 6.00457C10.8181 6.95337 10.5368 7.88088 10.0096 8.66978C9.48251 9.45868 8.73328 10.0736 7.85669 10.4367C6.98011 10.7997 6.01554 10.8947 5.08496 10.7096C4.15439 10.5245 3.2996 10.0676 2.62869 9.39674C1.95778 8.72583 1.50089 7.87104 1.31579 6.94046C1.13068 6.00989 1.22568 5.04532 1.58878 4.16874C1.95187 3.29215 2.56675 2.54292 3.35565 2.0158Z",
   fill: "currentColor"
 }, null, -1);
-var _hoisted_2$O = [_hoisted_1$15];
+var _hoisted_2$P = [_hoisted_1$16];
 function render$P(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
@@ -32966,7 +32834,7 @@ function render$P(_ctx, _cache, $props, $setup, $data, $options) {
     viewBox: "0 0 14 14",
     fill: "none",
     xmlns: "http://www.w3.org/2000/svg"
-  }, _ctx.pti()), _hoisted_2$O, 16);
+  }, _ctx.pti()), _hoisted_2$P, 16);
 }
 __name(render$P, "render$P");
 script$Q.render = render$P;
@@ -33128,7 +32996,7 @@ var script$N = {
     }, "hasFluid")
   }
 };
-var _hoisted_1$14 = ["value", "aria-invalid"];
+var _hoisted_1$15 = ["value", "aria-invalid"];
 function render$M(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("input", mergeProps({
     type: "text",
@@ -33138,7 +33006,7 @@ function render$M(_ctx, _cache, $props, $setup, $data, $options) {
     onInput: _cache[0] || (_cache[0] = function() {
       return $options.onInput && $options.onInput.apply($options, arguments);
     })
-  }, $options.getPTOptions("root")), null, 16, _hoisted_1$14);
+  }, $options.getPTOptions("root")), null, 16, _hoisted_1$15);
 }
 __name(render$M, "render$M");
 script$N.render = render$M;
@@ -33736,11 +33604,11 @@ var script$M = {
   name: "SpinnerIcon",
   "extends": script$T
 };
-var _hoisted_1$13 = /* @__PURE__ */ createBaseVNode("path", {
+var _hoisted_1$14 = /* @__PURE__ */ createBaseVNode("path", {
   d: "M6.99701 14C5.85441 13.999 4.72939 13.7186 3.72012 13.1832C2.71084 12.6478 1.84795 11.8737 1.20673 10.9284C0.565504 9.98305 0.165424 8.89526 0.041387 7.75989C-0.0826496 6.62453 0.073125 5.47607 0.495122 4.4147C0.917119 3.35333 1.59252 2.4113 2.46241 1.67077C3.33229 0.930247 4.37024 0.413729 5.4857 0.166275C6.60117 -0.0811796 7.76026 -0.0520535 8.86188 0.251112C9.9635 0.554278 10.9742 1.12227 11.8057 1.90555C11.915 2.01493 11.9764 2.16319 11.9764 2.31778C11.9764 2.47236 11.915 2.62062 11.8057 2.73C11.7521 2.78503 11.688 2.82877 11.6171 2.85864C11.5463 2.8885 11.4702 2.90389 11.3933 2.90389C11.3165 2.90389 11.2404 2.8885 11.1695 2.85864C11.0987 2.82877 11.0346 2.78503 10.9809 2.73C9.9998 1.81273 8.73246 1.26138 7.39226 1.16876C6.05206 1.07615 4.72086 1.44794 3.62279 2.22152C2.52471 2.99511 1.72683 4.12325 1.36345 5.41602C1.00008 6.70879 1.09342 8.08723 1.62775 9.31926C2.16209 10.5513 3.10478 11.5617 4.29713 12.1803C5.48947 12.7989 6.85865 12.988 8.17414 12.7157C9.48963 12.4435 10.6711 11.7264 11.5196 10.6854C12.3681 9.64432 12.8319 8.34282 12.8328 7C12.8328 6.84529 12.8943 6.69692 13.0038 6.58752C13.1132 6.47812 13.2616 6.41667 13.4164 6.41667C13.5712 6.41667 13.7196 6.47812 13.8291 6.58752C13.9385 6.69692 14 6.84529 14 7C14 8.85651 13.2622 10.637 11.9489 11.9497C10.6356 13.2625 8.85432 14 6.99701 14Z",
   fill: "currentColor"
 }, null, -1);
-var _hoisted_2$N = [_hoisted_1$13];
+var _hoisted_2$O = [_hoisted_1$14];
 function render$L(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
@@ -33748,7 +33616,7 @@ function render$L(_ctx, _cache, $props, $setup, $data, $options) {
     viewBox: "0 0 14 14",
     fill: "none",
     xmlns: "http://www.w3.org/2000/svg"
-  }, _ctx.pti()), _hoisted_2$N, 16);
+  }, _ctx.pti()), _hoisted_2$O, 16);
 }
 __name(render$L, "render$L");
 script$M.render = render$L;
@@ -34615,7 +34483,7 @@ var script$L = {
     SpinnerIcon: script$M
   }
 };
-var _hoisted_1$12 = ["tabindex"];
+var _hoisted_1$13 = ["tabindex"];
 function render$K(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_SpinnerIcon = resolveComponent("SpinnerIcon");
   return !_ctx.disabled ? (openBlock(), createElementBlock("div", mergeProps({
@@ -34675,7 +34543,7 @@ function render$K(_ctx, _cache, $props, $setup, $data, $options) {
       spin: "",
       "class": "p-virtualscroller-loading-icon"
     }, _ctx.ptm("loadingIcon")), null, 16)];
-  })], 16)) : createCommentVNode("", true)], 16, _hoisted_1$12)) : (openBlock(), createElementBlock(Fragment, {
+  })], 16)) : createCommentVNode("", true)], 16, _hoisted_1$13)) : (openBlock(), createElementBlock(Fragment, {
     key: 1
   }, [renderSlot(_ctx.$slots, "default"), renderSlot(_ctx.$slots, "content", {
     items: _ctx.items,
@@ -35515,12 +35383,12 @@ var script$K = {
     BlankIcon: script$S
   }
 };
-var _hoisted_1$11 = ["id"];
-var _hoisted_2$M = ["tabindex"];
-var _hoisted_3$q = ["id", "aria-multiselectable", "aria-label", "aria-labelledby", "aria-activedescendant", "aria-disabled"];
-var _hoisted_4$i = ["id"];
-var _hoisted_5$e = ["id", "aria-label", "aria-selected", "aria-disabled", "aria-setsize", "aria-posinset", "onClick", "onMousedown", "onMousemove", "onDblclick", "data-p-selected", "data-p-focused", "data-p-disabled"];
-var _hoisted_6$a = ["tabindex"];
+var _hoisted_1$12 = ["id"];
+var _hoisted_2$N = ["tabindex"];
+var _hoisted_3$p = ["id", "aria-multiselectable", "aria-label", "aria-labelledby", "aria-activedescendant", "aria-disabled"];
+var _hoisted_4$h = ["id"];
+var _hoisted_5$d = ["id", "aria-label", "aria-selected", "aria-disabled", "aria-setsize", "aria-posinset", "onClick", "onMousedown", "onMousemove", "onDblclick", "data-p-selected", "data-p-focused", "data-p-disabled"];
+var _hoisted_6$9 = ["tabindex"];
 function render$J(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_InputText = resolveComponent("InputText");
   var _component_SearchIcon = resolveComponent("SearchIcon");
@@ -35548,7 +35416,7 @@ function render$J(_ctx, _cache, $props, $setup, $data, $options) {
   }, _ctx.ptm("hiddenFirstFocusableEl"), {
     "data-p-hidden-accessible": true,
     "data-p-hidden-focusable": true
-  }), null, 16, _hoisted_2$M), _ctx.$slots.header ? (openBlock(), createElementBlock("div", {
+  }), null, 16, _hoisted_2$N), _ctx.$slots.header ? (openBlock(), createElementBlock("div", {
     key: 0,
     "class": normalizeClass(_ctx.cx("header"))
   }, [renderSlot(_ctx.$slots, "header", {
@@ -35662,7 +35530,7 @@ function render$J(_ctx, _cache, $props, $setup, $data, $options) {
           index: $options.getOptionIndex(i2, getItemOptions)
         }, function() {
           return [createTextVNode(toDisplayString$1($options.getOptionGroupLabel(option3.optionGroup)), 1)];
-        })], 16, _hoisted_4$i)) : withDirectives((openBlock(), createElementBlock("li", mergeProps({
+        })], 16, _hoisted_4$h)) : withDirectives((openBlock(), createElementBlock("li", mergeProps({
           key: 1,
           id: $data.id + "_" + $options.getOptionIndex(i2, getItemOptions),
           style: {
@@ -35715,7 +35583,7 @@ function render$J(_ctx, _cache, $props, $setup, $data, $options) {
           index: $options.getOptionIndex(i2, getItemOptions)
         }, function() {
           return [createTextVNode(toDisplayString$1($options.getOptionLabel(option3)), 1)];
-        })], 16, _hoisted_5$e)), [[_directive_ripple]])], 64);
+        })], 16, _hoisted_5$d)), [[_directive_ripple]])], 64);
       }), 128)), $data.filterValue && (!items2 || items2 && items2.length === 0) ? (openBlock(), createElementBlock("li", mergeProps({
         key: 0,
         "class": _ctx.cx("emptyMessage"),
@@ -35728,7 +35596,7 @@ function render$J(_ctx, _cache, $props, $setup, $data, $options) {
         role: "option"
       }, _ctx.ptm("emptyMessage")), [renderSlot(_ctx.$slots, "empty", {}, function() {
         return [createTextVNode(toDisplayString$1($options.emptyMessageText), 1)];
-      })], 16)) : createCommentVNode("", true)], 16, _hoisted_3$q)];
+      })], 16)) : createCommentVNode("", true)], 16, _hoisted_3$p)];
     }),
     _: 2
   }, [_ctx.$slots.loader ? {
@@ -35768,7 +35636,7 @@ function render$J(_ctx, _cache, $props, $setup, $data, $options) {
   }, _ctx.ptm("hiddenLastFocusableEl"), {
     "data-p-hidden-accessible": true,
     "data-p-hidden-focusable": true
-  }), null, 16, _hoisted_6$a)], 16, _hoisted_1$11);
+  }), null, 16, _hoisted_6$9)], 16, _hoisted_1$12);
 }
 __name(render$J, "render$J");
 script$K.render = render$J;
@@ -36094,26 +35962,128 @@ function render$H(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render$H, "render$H");
 script$I.render = render$H;
-const _withScopeId$k = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-0a88b934"), n = n(), popScopeId(), n), "_withScopeId$k");
-const _hoisted_1$10 = { class: "comfy-missing-nodes" };
-const _hoisted_2$L = /* @__PURE__ */ _withScopeId$k(() => /* @__PURE__ */ createBaseVNode("h4", { class: "warning-title" }, "Warning: Missing Node Types", -1));
-const _hoisted_3$p = /* @__PURE__ */ _withScopeId$k(() => /* @__PURE__ */ createBaseVNode("p", { class: "warning-description" }, " When loading the graph, the following node types were not found: ", -1));
-const _hoisted_4$h = { class: "missing-node-item" };
-const _hoisted_5$d = { class: "node-type" };
-const _hoisted_6$9 = {
+var theme$p = /* @__PURE__ */ __name(function theme10(_ref) {
+  var dt2 = _ref.dt;
+  return "\n.p-card {\n    background: ".concat(dt2("card.background"), ";\n    color: ").concat(dt2("card.color"), ";\n    box-shadow: ").concat(dt2("card.shadow"), ";\n    border-radius: ").concat(dt2("card.border.radius"), ";\n    display: flex;\n    flex-direction: column;\n}\n\n.p-card-caption {\n    display: flex;\n    flex-direction: column;\n    gap: ").concat(dt2("card.caption.gap"), ";\n}\n\n.p-card-body {\n    padding: ").concat(dt2("card.body.padding"), ";\n    display: flex;\n    flex-direction: column;\n    gap: ").concat(dt2("card.body.gap"), ";\n}\n\n.p-card-title {\n    font-size: ").concat(dt2("card.title.font.size"), ";\n    font-weight: ").concat(dt2("card.title.font.weight"), ";\n}\n\n.p-card-subtitle {\n    color: ").concat(dt2("card.subtitle.color"), ";\n}\n");
+}, "theme");
+var classes$r = {
+  root: "p-card p-component",
+  header: "p-card-header",
+  body: "p-card-body",
+  caption: "p-card-caption",
+  title: "p-card-title",
+  subtitle: "p-card-subtitle",
+  content: "p-card-content",
+  footer: "p-card-footer"
+};
+var CardStyle = BaseStyle.extend({
+  name: "card",
+  theme: theme$p,
+  classes: classes$r
+});
+var script$1$q = {
+  name: "BaseCard",
+  "extends": script$U,
+  style: CardStyle,
+  provide: /* @__PURE__ */ __name(function provide10() {
+    return {
+      $pcCard: this,
+      $parentInstance: this
+    };
+  }, "provide")
+};
+var script$H = {
+  name: "Card",
+  "extends": script$1$q,
+  inheritAttrs: false
+};
+function render$G(_ctx, _cache, $props, $setup, $data, $options) {
+  return openBlock(), createElementBlock("div", mergeProps({
+    "class": _ctx.cx("root")
+  }, _ctx.ptmi("root")), [_ctx.$slots.header ? (openBlock(), createElementBlock("div", mergeProps({
+    key: 0,
+    "class": _ctx.cx("header")
+  }, _ctx.ptm("header")), [renderSlot(_ctx.$slots, "header")], 16)) : createCommentVNode("", true), createBaseVNode("div", mergeProps({
+    "class": _ctx.cx("body")
+  }, _ctx.ptm("body")), [_ctx.$slots.title || _ctx.$slots.subtitle ? (openBlock(), createElementBlock("div", mergeProps({
+    key: 0,
+    "class": _ctx.cx("caption")
+  }, _ctx.ptm("caption")), [_ctx.$slots.title ? (openBlock(), createElementBlock("div", mergeProps({
+    key: 0,
+    "class": _ctx.cx("title")
+  }, _ctx.ptm("title")), [renderSlot(_ctx.$slots, "title")], 16)) : createCommentVNode("", true), _ctx.$slots.subtitle ? (openBlock(), createElementBlock("div", mergeProps({
+    key: 1,
+    "class": _ctx.cx("subtitle")
+  }, _ctx.ptm("subtitle")), [renderSlot(_ctx.$slots, "subtitle")], 16)) : createCommentVNode("", true)], 16)) : createCommentVNode("", true), createBaseVNode("div", mergeProps({
+    "class": _ctx.cx("content")
+  }, _ctx.ptm("content")), [renderSlot(_ctx.$slots, "content")], 16), _ctx.$slots.footer ? (openBlock(), createElementBlock("div", mergeProps({
+    key: 1,
+    "class": _ctx.cx("footer")
+  }, _ctx.ptm("footer")), [renderSlot(_ctx.$slots, "footer")], 16)) : createCommentVNode("", true)], 16)], 16);
+}
+__name(render$G, "render$G");
+script$H.render = render$G;
+const _withScopeId$k = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-a1e982e0"), n = n(), popScopeId(), n), "_withScopeId$k");
+const _hoisted_1$11 = { class: "flex flex-col items-center" };
+const _hoisted_2$M = { class: "whitespace-pre-line text-center" };
+const _sfc_main$H = /* @__PURE__ */ defineComponent({
+  __name: "NoResultsPlaceholder",
+  props: {
+    class: {},
+    icon: {},
+    title: {},
+    message: {},
+    buttonLabel: {}
+  },
+  emits: ["action"],
+  setup(__props) {
+    const props = __props;
+    return (_ctx, _cache) => {
+      return openBlock(), createElementBlock("div", {
+        class: normalizeClass(["no-results-placeholder p-8 h-full", props.class])
+      }, [
+        createVNode(unref(script$H), null, {
+          content: withCtx(() => [
+            createBaseVNode("div", _hoisted_1$11, [
+              createBaseVNode("i", {
+                class: normalizeClass(_ctx.icon),
+                style: { "font-size": "3rem", "margin-bottom": "1rem" }
+              }, null, 2),
+              createBaseVNode("h3", null, toDisplayString$1(_ctx.title), 1),
+              createBaseVNode("p", _hoisted_2$M, toDisplayString$1(_ctx.message), 1),
+              _ctx.buttonLabel ? (openBlock(), createBlock(unref(script$I), {
+                key: 0,
+                label: _ctx.buttonLabel,
+                onClick: _cache[0] || (_cache[0] = ($event) => _ctx.$emit("action")),
+                class: "p-button-text"
+              }, null, 8, ["label"])) : createCommentVNode("", true)
+            ])
+          ]),
+          _: 1
+        })
+      ], 2);
+    };
+  }
+});
+const _export_sfc = /* @__PURE__ */ __name((sfc, props) => {
+  const target = sfc.__vccOpts || sfc;
+  for (const [key, val] of props) {
+    target[key] = val;
+  }
+  return target;
+}, "_export_sfc");
+const NoResultsPlaceholder = /* @__PURE__ */ _export_sfc(_sfc_main$H, [["__scopeId", "data-v-a1e982e0"]]);
+const _withScopeId$j = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-05a7c5eb"), n = n(), popScopeId(), n), "_withScopeId$j");
+const _hoisted_1$10 = { class: "flex align-items-center" };
+const _hoisted_2$L = { class: "node-type" };
+const _hoisted_3$o = {
   key: 0,
   class: "node-hint"
-};
-const _hoisted_7$5 = {
-  key: 0,
-  class: "added-nodes-warning"
 };
 const _sfc_main$G = /* @__PURE__ */ defineComponent({
   __name: "LoadWorkflowWarning",
   props: {
-    missingNodeTypes: {},
-    hasAddedNodes: { type: Boolean },
-    maximized: { type: Boolean }
+    missingNodeTypes: {}
   },
   setup(__props) {
     const props = __props;
@@ -36136,46 +36106,43 @@ const _sfc_main$G = /* @__PURE__ */ defineComponent({
       });
     });
     return (_ctx, _cache) => {
-      return openBlock(), createElementBlock("div", _hoisted_1$10, [
-        _hoisted_2$L,
-        _hoisted_3$p,
+      return openBlock(), createElementBlock(Fragment, null, [
+        createVNode(NoResultsPlaceholder, {
+          class: "pb-0",
+          icon: "pi pi-exclamation-circle",
+          title: "Missing Node Types",
+          message: "When loading the graph, the following node types were not found"
+        }),
         createVNode(unref(script$K), {
           options: uniqueNodes.value,
           optionLabel: "label",
           scrollHeight: "100%",
-          class: normalizeClass("missing-nodes-list" + (props.maximized ? " maximized" : "")),
+          class: "comfy-missing-nodes",
           pt: {
             list: { class: "border-none" }
           }
         }, {
           option: withCtx((slotProps) => [
-            createBaseVNode("div", _hoisted_4$h, [
-              createBaseVNode("span", _hoisted_5$d, toDisplayString$1(slotProps.option.label), 1),
-              slotProps.option.hint ? (openBlock(), createElementBlock("span", _hoisted_6$9, toDisplayString$1(slotProps.option.hint), 1)) : createCommentVNode("", true),
+            createBaseVNode("div", _hoisted_1$10, [
+              createBaseVNode("span", _hoisted_2$L, toDisplayString$1(slotProps.option.label), 1),
+              slotProps.option.hint ? (openBlock(), createElementBlock("span", _hoisted_3$o, toDisplayString$1(slotProps.option.hint), 1)) : createCommentVNode("", true),
               slotProps.option.action ? (openBlock(), createBlock(unref(script$I), {
                 key: 1,
                 onClick: slotProps.option.action.callback,
                 label: slotProps.option.action.text,
-                class: "p-button-sm p-button-outlined"
+                size: "small",
+                outlined: ""
               }, null, 8, ["onClick", "label"])) : createCommentVNode("", true)
             ])
           ]),
           _: 1
-        }, 8, ["options", "class"]),
-        _ctx.hasAddedNodes ? (openBlock(), createElementBlock("p", _hoisted_7$5, " Nodes that have failed to load will show as red on the graph. ")) : createCommentVNode("", true)
-      ]);
+        }, 8, ["options"])
+      ], 64);
     };
   }
 });
-const _export_sfc = /* @__PURE__ */ __name((sfc, props) => {
-  const target = sfc.__vccOpts || sfc;
-  for (const [key, val] of props) {
-    target[key] = val;
-  }
-  return target;
-}, "_export_sfc");
-const LoadWorkflowWarning = /* @__PURE__ */ _export_sfc(_sfc_main$G, [["__scopeId", "data-v-0a88b934"]]);
-var script$H = {
+const LoadWorkflowWarning = /* @__PURE__ */ _export_sfc(_sfc_main$G, [["__scopeId", "data-v-05a7c5eb"]]);
+var script$G = {
   name: "MinusIcon",
   "extends": script$T
 };
@@ -36184,7 +36151,7 @@ var _hoisted_1$$ = /* @__PURE__ */ createBaseVNode("path", {
   fill: "currentColor"
 }, null, -1);
 var _hoisted_2$K = [_hoisted_1$$];
-function render$G(_ctx, _cache, $props, $setup, $data, $options) {
+function render$F(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
     height: "14",
@@ -36193,13 +36160,13 @@ function render$G(_ctx, _cache, $props, $setup, $data, $options) {
     xmlns: "http://www.w3.org/2000/svg"
   }, _ctx.pti()), _hoisted_2$K, 16);
 }
-__name(render$G, "render$G");
-script$H.render = render$G;
-var theme$p = /* @__PURE__ */ __name(function theme10(_ref) {
+__name(render$F, "render$F");
+script$G.render = render$F;
+var theme$o = /* @__PURE__ */ __name(function theme11(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-checkbox {\n    position: relative;\n    display: inline-flex;\n    user-select: none;\n    vertical-align: bottom;\n    width: ".concat(dt2("checkbox.width"), ";\n    height: ").concat(dt2("checkbox.height"), ";\n}\n\n.p-checkbox-input {\n    cursor: pointer;\n    appearance: none;\n    position: absolute;\n    top: 0;\n    left: 0;\n    width: 100%;\n    height: 100%;\n    padding: 0;\n    margin: 0;\n    opacity: 0;\n    z-index: 1;\n    outline: 0 none;\n    border: 1px solid transparent;\n    border-radius: ").concat(dt2("checkbox.border.radius"), ";\n}\n\n.p-checkbox-box {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    border-radius: ").concat(dt2("checkbox.border.radius"), ";\n    border: 1px solid ").concat(dt2("checkbox.border.color"), ";\n    background: ").concat(dt2("checkbox.background"), ";\n    width: ").concat(dt2("checkbox.width"), ";\n    height: ").concat(dt2("checkbox.height"), ";\n    transition: background ").concat(dt2("checkbox.transition.duration"), ", color ").concat(dt2("checkbox.transition.duration"), ", border-color ").concat(dt2("checkbox.transition.duration"), ", box-shadow ").concat(dt2("checkbox.transition.duration"), ", outline-color ").concat(dt2("checkbox.transition.duration"), ";\n    outline-color: transparent;\n    box-shadow: ").concat(dt2("checkbox.shadow"), ";\n}\n\n.p-checkbox-icon {\n    transition-duration: ").concat(dt2("checkbox.transition.duration"), ";\n    color: ").concat(dt2("checkbox.icon.color"), ";\n    font-size: ").concat(dt2("checkbox.icon.size"), ";\n    width: ").concat(dt2("checkbox.icon.size"), ";\n    height: ").concat(dt2("checkbox.icon.size"), ";\n}\n\n.p-checkbox:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-box {\n    border-color: ").concat(dt2("checkbox.hover.border.color"), ";\n}\n\n.p-checkbox-checked .p-checkbox-box {\n    border-color: ").concat(dt2("checkbox.checked.border.color"), ";\n    background: ").concat(dt2("checkbox.checked.background"), ";\n}\n\n.p-checkbox-checked .p-checkbox-icon {\n    color: ").concat(dt2("checkbox.icon.checked.color"), ";\n}\n\n.p-checkbox-checked:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-box {\n    background: ").concat(dt2("checkbox.checked.hover.background"), ";\n    border-color: ").concat(dt2("checkbox.checked.hover.border.color"), ";\n}\n\n.p-checkbox-checked:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-icon {\n    color: ").concat(dt2("checkbox.icon.checked.hover.color"), ";\n}\n\n.p-checkbox:not(.p-disabled):has(.p-checkbox-input:focus-visible) .p-checkbox-box {\n    border-color: ").concat(dt2("checkbox.focus.border.color"), ";\n    box-shadow: ").concat(dt2("checkbox.focus.ring.shadow"), ";\n    outline: ").concat(dt2("checkbox.focus.ring.width"), " ").concat(dt2("checkbox.focus.ring.style"), " ").concat(dt2("checkbox.focus.ring.color"), ";\n    outline-offset: ").concat(dt2("checkbox.focus.ring.offset"), ";\n}\n\n.p-checkbox-checked:not(.p-disabled):has(.p-checkbox-input:focus-visible) .p-checkbox-box {\n    border-color: ").concat(dt2("checkbox.checked.focus.border.color"), ";\n}\n\n.p-checkbox.p-invalid > .p-checkbox-box {\n    border-color: ").concat(dt2("checkbox.invalid.border.color"), ";\n}\n\n.p-checkbox.p-variant-filled .p-checkbox-box {\n    background: ").concat(dt2("checkbox.filled.background"), ";\n}\n\n.p-checkbox-checked.p-variant-filled .p-checkbox-box {\n    background: ").concat(dt2("checkbox.checked.background"), ";\n}\n\n.p-checkbox-checked.p-variant-filled:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-box {\n    background: ").concat(dt2("checkbox.checked.hover.background"), ";\n}\n\n.p-checkbox.p-disabled {\n    opacity: 1;\n}\n\n.p-checkbox.p-disabled .p-checkbox-box {\n    background: ").concat(dt2("checkbox.disabled.background"), ";\n    border-color: ").concat(dt2("checkbox.checked.disabled.border.color"), ";\n}\n\n.p-checkbox.p-disabled .p-checkbox-box .p-checkbox-icon {\n    color: ").concat(dt2("checkbox.icon.disabled.color"), ";\n}\n");
 }, "theme");
-var classes$r = {
+var classes$q = {
   root: /* @__PURE__ */ __name(function root5(_ref2) {
     var instance = _ref2.instance, props = _ref2.props;
     return ["p-checkbox p-component", {
@@ -36215,10 +36182,10 @@ var classes$r = {
 };
 var CheckboxStyle = BaseStyle.extend({
   name: "checkbox",
-  theme: theme$p,
-  classes: classes$r
+  theme: theme$o,
+  classes: classes$q
 });
-var script$1$q = {
+var script$1$p = {
   name: "BaseCheckbox",
   "extends": script$U,
   props: {
@@ -36287,7 +36254,7 @@ var script$1$q = {
     }
   },
   style: CheckboxStyle,
-  provide: /* @__PURE__ */ __name(function provide10() {
+  provide: /* @__PURE__ */ __name(function provide11() {
     return {
       $pcCheckbox: this,
       $parentInstance: this
@@ -36324,9 +36291,9 @@ function _arrayLikeToArray$b(r, a) {
   return n;
 }
 __name(_arrayLikeToArray$b, "_arrayLikeToArray$b");
-var script$G = {
+var script$F = {
   name: "Checkbox",
-  "extends": script$1$q,
+  "extends": script$1$p,
   inheritAttrs: false,
   emits: ["update:modelValue", "change", "focus", "blur", "update:indeterminate"],
   data: /* @__PURE__ */ __name(function data3() {
@@ -36384,12 +36351,12 @@ var script$G = {
   },
   components: {
     CheckIcon: script$R,
-    MinusIcon: script$H
+    MinusIcon: script$G
   }
 };
 var _hoisted_1$_ = ["data-p-checked", "data-p-indeterminate", "data-p-disabled"];
 var _hoisted_2$J = ["id", "value", "name", "checked", "tabindex", "disabled", "readonly", "required", "aria-labelledby", "aria-label", "aria-invalid", "aria-checked"];
-function render$F(_ctx, _cache, $props, $setup, $data, $options) {
+function render$E(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_CheckIcon = resolveComponent("CheckIcon");
   var _component_MinusIcon = resolveComponent("MinusIcon");
   return openBlock(), createElementBlock("div", mergeProps({
@@ -36439,9 +36406,9 @@ function render$F(_ctx, _cache, $props, $setup, $data, $options) {
     }, $options.getPTOptions("icon")), null, 16, ["class"])) : createCommentVNode("", true)];
   })], 16)], 16, _hoisted_1$_);
 }
-__name(render$F, "render$F");
-script$G.render = render$F;
-var script$F = {
+__name(render$E, "render$E");
+script$F.render = render$E;
+var script$E = {
   name: "ChevronDownIcon",
   "extends": script$T
 };
@@ -36450,7 +36417,7 @@ var _hoisted_1$Z = /* @__PURE__ */ createBaseVNode("path", {
   fill: "currentColor"
 }, null, -1);
 var _hoisted_2$I = [_hoisted_1$Z];
-function render$E(_ctx, _cache, $props, $setup, $data, $options) {
+function render$D(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
     height: "14",
@@ -36459,9 +36426,9 @@ function render$E(_ctx, _cache, $props, $setup, $data, $options) {
     xmlns: "http://www.w3.org/2000/svg"
   }, _ctx.pti()), _hoisted_2$I, 16);
 }
-__name(render$E, "render$E");
-script$F.render = render$E;
-var script$E = {
+__name(render$D, "render$D");
+script$E.render = render$D;
+var script$D = {
   name: "TimesIcon",
   "extends": script$T
 };
@@ -36470,7 +36437,7 @@ var _hoisted_1$Y = /* @__PURE__ */ createBaseVNode("path", {
   fill: "currentColor"
 }, null, -1);
 var _hoisted_2$H = [_hoisted_1$Y];
-function render$D(_ctx, _cache, $props, $setup, $data, $options) {
+function render$C(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
     height: "14",
@@ -36479,10 +36446,10 @@ function render$D(_ctx, _cache, $props, $setup, $data, $options) {
     xmlns: "http://www.w3.org/2000/svg"
   }, _ctx.pti()), _hoisted_2$H, 16);
 }
-__name(render$D, "render$D");
-script$E.render = render$D;
+__name(render$C, "render$C");
+script$D.render = render$C;
 var OverlayEventBus = EventBus();
-var script$D = {
+var script$C = {
   name: "Portal",
   props: {
     appendTo: {
@@ -36508,7 +36475,7 @@ var script$D = {
     }, "inline")
   }
 };
-function render$C(_ctx, _cache, $props, $setup, $data, $options) {
+function render$B(_ctx, _cache, $props, $setup, $data, $options) {
   return $options.inline ? renderSlot(_ctx.$slots, "default", {
     key: 0
   }) : $data.mounted ? (openBlock(), createBlock(Teleport, {
@@ -36516,13 +36483,13 @@ function render$C(_ctx, _cache, $props, $setup, $data, $options) {
     to: $props.appendTo
   }, [renderSlot(_ctx.$slots, "default")], 8, ["to"])) : createCommentVNode("", true);
 }
-__name(render$C, "render$C");
-script$D.render = render$C;
-var theme$o = /* @__PURE__ */ __name(function theme11(_ref) {
+__name(render$B, "render$B");
+script$C.render = render$B;
+var theme$n = /* @__PURE__ */ __name(function theme12(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-select {\n    display: inline-flex;\n    cursor: pointer;\n    position: relative;\n    user-select: none;\n    background: ".concat(dt2("select.background"), ";\n    border: 1px solid ").concat(dt2("select.border.color"), ";\n    transition: background ").concat(dt2("select.transition.duration"), ", color ").concat(dt2("select.transition.duration"), ", border-color ").concat(dt2("select.transition.duration"), ",\n        outline-color ").concat(dt2("select.transition.duration"), ", box-shadow ").concat(dt2("select.transition.duration"), ";\n    border-radius: ").concat(dt2("select.border.radius"), ";\n    outline-color: transparent;\n    box-shadow: ").concat(dt2("select.shadow"), ";\n}\n\n.p-select:not(.p-disabled):hover {\n    border-color: ").concat(dt2("select.hover.border.color"), ";\n}\n\n.p-select:not(.p-disabled).p-focus {\n    border-color: ").concat(dt2("select.focus.border.color"), ";\n    box-shadow: ").concat(dt2("select.focus.ring.shadow"), ";\n    outline: ").concat(dt2("select.focus.ring.width"), " ").concat(dt2("select.focus.ring.style"), " ").concat(dt2("select.focus.ring.color"), ";\n    outline-offset: ").concat(dt2("select.focus.ring.offset"), ";\n}\n\n.p-select.p-variant-filled {\n    background: ").concat(dt2("select.filled.background"), ";\n}\n\n.p-select.p-variant-filled.p-focus {\n    background: ").concat(dt2("select.filled.focus.background"), ";\n}\n\n.p-select.p-invalid {\n    border-color: ").concat(dt2("select.invalid.border.color"), ";\n}\n\n.p-select.p-disabled {\n    opacity: 1;\n    background: ").concat(dt2("select.disabled.background"), ";\n}\n\n.p-select-clear-icon {\n    position: absolute;\n    top: 50%;\n    margin-top: -0.5rem;\n    color: ").concat(dt2("select.clear.icon.color"), ";\n    right: ").concat(dt2("select.dropdown.width"), ";\n}\n\n.p-select-dropdown {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    flex-shrink: 0;\n    background: transparent;\n    color: ").concat(dt2("select.dropdown.color"), ";\n    width: ").concat(dt2("select.dropdown.width"), ";\n    border-top-right-radius: ").concat(dt2("select.border.radius"), ";\n    border-bottom-right-radius: ").concat(dt2("select.border.radius"), ";\n}\n\n.p-select-label {\n    display: block;\n    white-space: nowrap;\n    overflow: hidden;\n    flex: 1 1 auto;\n    width: 1%;\n    padding: ").concat(dt2("select.padding.y"), " ").concat(dt2("select.padding.x"), ";\n    text-overflow: ellipsis;\n    cursor: pointer;\n    color: ").concat(dt2("select.color"), ";\n    background: transparent;\n    border: 0 none;\n    outline: 0 none;\n}\n\n.p-select-label.p-placeholder {\n    color: ").concat(dt2("select.placeholder.color"), ";\n}\n\n.p-select:has(.p-select-clear-icon) .p-select-label {\n    padding-right: calc(1rem + ").concat(dt2("select.padding.x"), ");\n}\n\n.p-select.p-disabled .p-select-label {\n    color: ").concat(dt2("select.disabled.color"), ";\n}\n\n.p-select-label-empty {\n    overflow: hidden;\n    opacity: 0;\n}\n\ninput.p-select-label {\n    cursor: default;\n}\n\n.p-select .p-select-overlay {\n    min-width: 100%;\n}\n\n.p-select-overlay {\n    position: absolute;\n    top: 0;\n    left: 0;\n    background: ").concat(dt2("select.overlay.background"), ";\n    color: ").concat(dt2("select.overlay.color"), ";\n    border: 1px solid ").concat(dt2("select.overlay.border.color"), ";\n    border-radius: ").concat(dt2("select.overlay.border.radius"), ";\n    box-shadow: ").concat(dt2("select.overlay.shadow"), ";\n}\n\n.p-select-header {\n    padding: ").concat(dt2("select.list.header.padding"), ";\n}\n\n.p-select-filter {\n    width: 100%;\n}\n\n.p-select-list-container {\n    overflow: auto;\n}\n\n.p-select-option-group {\n    cursor: auto;\n    margin: 0;\n    padding: ").concat(dt2("select.option.group.padding"), ";\n    background: ").concat(dt2("select.option.group.background"), ";\n    color: ").concat(dt2("select.option.group.color"), ";\n    font-weight: ").concat(dt2("select.option.group.font.weight"), ";\n}\n\n.p-select-list {\n    margin: 0;\n    padding: 0;\n    list-style-type: none;\n    padding: ").concat(dt2("select.list.padding"), ";\n    gap: ").concat(dt2("select.list.gap"), ";\n    display: flex;\n    flex-direction: column;\n}\n\n.p-select-option {\n    cursor: pointer;\n    font-weight: normal;\n    white-space: nowrap;\n    position: relative;\n    overflow: hidden;\n    display: flex;\n    align-items: center;\n    padding: ").concat(dt2("select.option.padding"), ";\n    border: 0 none;\n    color: ").concat(dt2("select.option.color"), ";\n    background: transparent;\n    transition: background ").concat(dt2("select.transition.duration"), ", color ").concat(dt2("select.transition.duration"), ", border-color ").concat(dt2("select.transition.duration"), ",\n            box-shadow ").concat(dt2("select.transition.duration"), ", outline-color ").concat(dt2("select.transition.duration"), ";\n    border-radius: ").concat(dt2("select.option.border.radius"), ";\n}\n\n.p-select-option:not(.p-select-option-selected):not(.p-disabled).p-focus {\n    background: ").concat(dt2("select.option.focus.background"), ";\n    color: ").concat(dt2("select.option.focus.color"), ";\n}\n\n.p-select-option.p-select-option-selected {\n    background: ").concat(dt2("select.option.selected.background"), ";\n    color: ").concat(dt2("select.option.selected.color"), ";\n}\n\n.p-select-option.p-select-option-selected.p-focus {\n    background: ").concat(dt2("select.option.selected.focus.background"), ";\n    color: ").concat(dt2("select.option.selected.focus.color"), ";\n}\n\n.p-select-option-check-icon {\n    position: relative;\n    margin-inline-start: ").concat(dt2("select.checkmark.gutter.start"), ";\n    margin-inline-end: ").concat(dt2("select.checkmark.gutter.end"), ";\n    color: ").concat(dt2("select.checkmark.color"), ";\n}\n\n.p-select-empty-message {\n    padding: ").concat(dt2("select.empty.message.padding"), ";\n}\n\n.p-select-fluid {\n    display: flex;\n}\n");
 }, "theme");
-var classes$q = {
+var classes$p = {
   root: /* @__PURE__ */ __name(function root6(_ref2) {
     var instance = _ref2.instance, props = _ref2.props, state = _ref2.state;
     return ["p-select p-component p-inputwrapper", {
@@ -36569,10 +36536,10 @@ var classes$q = {
 };
 var SelectStyle = BaseStyle.extend({
   name: "select",
-  theme: theme$o,
-  classes: classes$q
+  theme: theme$n,
+  classes: classes$p
 });
-var script$1$p = {
+var script$1$o = {
   name: "BaseSelect",
   "extends": script$U,
   props: {
@@ -36758,7 +36725,7 @@ var script$1$p = {
     }
   },
   style: SelectStyle,
-  provide: /* @__PURE__ */ __name(function provide11() {
+  provide: /* @__PURE__ */ __name(function provide12() {
     return {
       $pcSelect: this,
       $parentInstance: this
@@ -36847,9 +36814,9 @@ function _toPrimitive$9(t, r) {
   return ("string" === r ? String : Number)(t);
 }
 __name(_toPrimitive$9, "_toPrimitive$9");
-var script$C = {
+var script$B = {
   name: "Select",
-  "extends": script$1$p,
+  "extends": script$1$o,
   inheritAttrs: false,
   emits: ["update:modelValue", "change", "focus", "blur", "before-show", "before-hide", "show", "hide", "filter"],
   inject: {
@@ -37611,11 +37578,11 @@ var script$C = {
   components: {
     InputText: script$N,
     VirtualScroller: script$L,
-    Portal: script$D,
+    Portal: script$C,
     InputIcon: script$O,
     IconField: script$P,
-    TimesIcon: script$E,
-    ChevronDownIcon: script$F,
+    TimesIcon: script$D,
+    ChevronDownIcon: script$E,
     SpinnerIcon: script$M,
     SearchIcon: script$Q,
     CheckIcon: script$R,
@@ -37624,11 +37591,11 @@ var script$C = {
 };
 var _hoisted_1$X = ["id"];
 var _hoisted_2$G = ["id", "value", "placeholder", "tabindex", "disabled", "aria-label", "aria-labelledby", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-invalid"];
-var _hoisted_3$o = ["id", "tabindex", "aria-label", "aria-labelledby", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-disabled"];
+var _hoisted_3$n = ["id", "tabindex", "aria-label", "aria-labelledby", "aria-expanded", "aria-controls", "aria-activedescendant", "aria-disabled"];
 var _hoisted_4$g = ["id"];
 var _hoisted_5$c = ["id"];
 var _hoisted_6$8 = ["id", "aria-label", "aria-selected", "aria-disabled", "aria-setsize", "aria-posinset", "onClick", "onMousemove", "data-p-selected", "data-p-focused", "data-p-disabled"];
-function render$B(_ctx, _cache, $props, $setup, $data, $options) {
+function render$A(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_SpinnerIcon = resolveComponent("SpinnerIcon");
   var _component_InputText = resolveComponent("InputText");
   var _component_SearchIcon = resolveComponent("SearchIcon");
@@ -37707,7 +37674,7 @@ function render$B(_ctx, _cache, $props, $setup, $data, $options) {
     placeholder: _ctx.placeholder
   }, function() {
     return [createTextVNode(toDisplayString$1($options.label === "p-emptylabel" ? " " : $options.label || "empty"), 1)];
-  })], 16, _hoisted_3$o)), $options.isClearIconVisible ? renderSlot(_ctx.$slots, "clearicon", {
+  })], 16, _hoisted_3$n)), $options.isClearIconVisible ? renderSlot(_ctx.$slots, "clearicon", {
     key: 2,
     "class": normalizeClass(_ctx.cx("clearIcon")),
     clearCallback: $options.onClearClick
@@ -37986,12 +37953,12 @@ function render$B(_ctx, _cache, $props, $setup, $data, $options) {
     _: 3
   }, 8, ["appendTo"])], 16, _hoisted_1$X);
 }
-__name(render$B, "render$B");
-script$C.render = render$B;
-const _withScopeId$j = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-d0515260"), n = n(), popScopeId(), n), "_withScopeId$j");
+__name(render$A, "render$A");
+script$B.render = render$A;
+const _withScopeId$i = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-d0515260"), n = n(), popScopeId(), n), "_withScopeId$i");
 const _hoisted_1$W = { class: "comfy-missing-models" };
-const _hoisted_2$F = /* @__PURE__ */ _withScopeId$j(() => /* @__PURE__ */ createBaseVNode("h4", { class: "warning-title" }, "Warning: Missing Models", -1));
-const _hoisted_3$n = /* @__PURE__ */ _withScopeId$j(() => /* @__PURE__ */ createBaseVNode("p", { class: "warning-description" }, " When loading the graph, the following models were not found: ", -1));
+const _hoisted_2$F = /* @__PURE__ */ _withScopeId$i(() => /* @__PURE__ */ createBaseVNode("h4", { class: "warning-title" }, "Warning: Missing Models", -1));
+const _hoisted_3$m = /* @__PURE__ */ _withScopeId$i(() => /* @__PURE__ */ createBaseVNode("p", { class: "warning-description" }, " When loading the graph, the following models were not found: ", -1));
 const _hoisted_4$f = { class: "warning-options" };
 const _hoisted_5$b = { class: "model-info" };
 const _hoisted_6$7 = { class: "model-details" };
@@ -38010,7 +37977,7 @@ const _hoisted_12$2 = {
   key: 3,
   class: "download-complete"
 };
-const _hoisted_13$2 = /* @__PURE__ */ _withScopeId$j(() => /* @__PURE__ */ createBaseVNode("i", {
+const _hoisted_13$2 = /* @__PURE__ */ _withScopeId$i(() => /* @__PURE__ */ createBaseVNode("i", {
   class: "pi pi-check",
   style: { "color": "var(--green-500)" }
 }, null, -1));
@@ -38021,7 +37988,7 @@ const _hoisted_15$1 = {
   key: 4,
   class: "download-error"
 };
-const _hoisted_16$1 = /* @__PURE__ */ _withScopeId$j(() => /* @__PURE__ */ createBaseVNode("i", {
+const _hoisted_16$1 = /* @__PURE__ */ _withScopeId$i(() => /* @__PURE__ */ createBaseVNode("i", {
   class: "pi pi-times",
   style: { "color": "var(--red-600)" }
 }, null, -1));
@@ -38169,9 +38136,9 @@ const _sfc_main$F = /* @__PURE__ */ defineComponent({
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock("div", _hoisted_1$W, [
         _hoisted_2$F,
-        _hoisted_3$n,
+        _hoisted_3$m,
         createBaseVNode("p", _hoisted_4$f, [
-          createVNode(unref(script$G), {
+          createVNode(unref(script$F), {
             class: "model-path-select-checkbox",
             modelValue: showFolderSelect.value,
             "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => showFolderSelect.value = $event),
@@ -38204,7 +38171,7 @@ const _sfc_main$F = /* @__PURE__ */ defineComponent({
                 slotProps.option.error ? (openBlock(), createElementBlock("div", _hoisted_8$3, toDisplayString$1(slotProps.option.error), 1)) : createCommentVNode("", true)
               ]),
               createBaseVNode("div", _hoisted_9$3, [
-                slotProps.option.action && !slotProps.option.downloading && !slotProps.option.completed && !slotProps.option.error && showFolderSelect.value ? (openBlock(), createBlock(unref(script$C), {
+                slotProps.option.action && !slotProps.option.downloading && !slotProps.option.completed && !slotProps.option.error && showFolderSelect.value ? (openBlock(), createBlock(unref(script$B), {
                   key: 0,
                   class: "model-path-select",
                   modelValue: slotProps.option.folderPath,
@@ -38233,11 +38200,11 @@ const _sfc_main$F = /* @__PURE__ */ defineComponent({
   }
 });
 const MissingModelsWarning = /* @__PURE__ */ _export_sfc(_sfc_main$F, [["__scopeId", "data-v-d0515260"]]);
-var theme$n = /* @__PURE__ */ __name(function theme12(_ref) {
+var theme$m = /* @__PURE__ */ __name(function theme13(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-tabs {\n    display: flex;\n    flex-direction: column;\n}\n\n.p-tablist {\n    display: flex;\n    position: relative;\n}\n\n.p-tabs-scrollable > .p-tablist {\n    overflow: hidden;\n}\n\n.p-tablist-viewport {\n    overflow-x: auto;\n    overflow-y: hidden;\n    scroll-behavior: smooth;\n    scrollbar-width: none;\n    overscroll-behavior: contain auto;\n}\n\n.p-tablist-viewport::-webkit-scrollbar {\n    display: none;\n}\n\n.p-tablist-tab-list {\n    position: relative;\n    display: flex;\n    background: ".concat(dt2("tabs.tablist.background"), ";\n    border-style: solid;\n    border-color: ").concat(dt2("tabs.tablist.border.color"), ";\n    border-width: ").concat(dt2("tabs.tablist.border.width"), ";\n}\n\n.p-tablist-content {\n    flex-grow: 1;\n}\n\n.p-tablist-nav-button {\n    all: unset;\n    position: absolute !important;\n    flex-shrink: 0;\n    top: 0;\n    z-index: 2;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    background: ").concat(dt2("tabs.nav.button.background"), ";\n    color: ").concat(dt2("tabs.nav.button.color"), ";\n    width: ").concat(dt2("tabs.nav.button.width"), ";\n    transition: color ").concat(dt2("tabs.transition.duration"), ", outline-color ").concat(dt2("tabs.transition.duration"), ", box-shadow ").concat(dt2("tabs.transition.duration"), ";\n    box-shadow: ").concat(dt2("tabs.nav.button.shadow"), ";\n    outline-color: transparent;\n    cursor: pointer;\n}\n\n.p-tablist-nav-button:focus-visible {\n    z-index: 1;\n    box-shadow: ").concat(dt2("tabs.nav.button.focus.ring.shadow"), ";\n    outline: ").concat(dt2("tabs.nav.button.focus.ring.width"), " ").concat(dt2("tabs.nav.button.focus.ring.style"), " ").concat(dt2("tabs.nav.button.focus.ring.color"), ";\n    outline-offset: ").concat(dt2("tabs.nav.button.focus.ring.offset"), ";\n}\n\n.p-tablist-nav-button:hover {\n    color: ").concat(dt2("tabs.nav.button.hover.color"), ";\n}\n\n.p-tablist-prev-button {\n    left: 0;\n}\n\n.p-tablist-next-button {\n    right: 0;\n}\n\n.p-tab {\n    flex-shrink: 0;\n    cursor: pointer;\n    user-select: none;\n    position: relative;\n    border-style: solid;\n    white-space: nowrap;\n    background: ").concat(dt2("tabs.tab.background"), ";\n    border-width: ").concat(dt2("tabs.tab.border.width"), ";\n    border-color: ").concat(dt2("tabs.tab.border.color"), ";\n    color: ").concat(dt2("tabs.tab.color"), ";\n    padding: ").concat(dt2("tabs.tab.padding"), ";\n    font-weight: ").concat(dt2("tabs.tab.font.weight"), ";\n    transition: background ").concat(dt2("tabs.transition.duration"), ", border-color ").concat(dt2("tabs.transition.duration"), ", color ").concat(dt2("tabs.transition.duration"), ", outline-color ").concat(dt2("tabs.transition.duration"), ", box-shadow ").concat(dt2("tabs.transition.duration"), ";\n    margin: ").concat(dt2("tabs.tab.margin"), ";\n    outline-color: transparent;\n}\n\n.p-tab:not(.p-disabled):focus-visible {\n    z-index: 1;\n    box-shadow: ").concat(dt2("tabs.tab.focus.ring.shadow"), ";\n    outline: ").concat(dt2("tabs.tab.focus.ring.width"), " ").concat(dt2("tabs.tab.focus.ring.style"), " ").concat(dt2("tabs.tab.focus.ring.color"), ";\n    outline-offset: ").concat(dt2("tabs.tab.focus.ring.offset"), ";\n}\n\n.p-tab:not(.p-tab-active):not(.p-disabled):hover {\n    background: ").concat(dt2("tabs.tab.hover.background"), ";\n    border-color: ").concat(dt2("tabs.tab.hover.border.color"), ";\n    color: ").concat(dt2("tabs.tab.hover.color"), ";\n}\n\n.p-tab-active {\n    background: ").concat(dt2("tabs.tab.active.background"), ";\n    border-color: ").concat(dt2("tabs.tab.active.border.color"), ";\n    color: ").concat(dt2("tabs.tab.active.color"), ";\n}\n\n.p-tabpanels {\n    background: ").concat(dt2("tabs.tabpanel.background"), ";\n    color: ").concat(dt2("tabs.tabpanel.color"), ";\n    padding: ").concat(dt2("tabs.tabpanel.padding"), ";\n    outline: 0 none;\n}\n\n.p-tabpanel:focus-visible {\n    box-shadow: ").concat(dt2("tabs.tabpanel.focus.ring.shadow"), ";\n    outline: ").concat(dt2("tabs.tabpanel.focus.ring.width"), " ").concat(dt2("tabs.tabpanel.focus.ring.style"), " ").concat(dt2("tabs.tabpanel.focus.ring.color"), ";\n    outline-offset: ").concat(dt2("tabs.tabpanel.focus.ring.offset"), ";\n}\n\n.p-tablist-active-bar {\n    z-index: 1;\n    display: block;\n    position: absolute;\n    bottom: ").concat(dt2("tabs.active.bar.bottom"), ";\n    height: ").concat(dt2("tabs.active.bar.height"), ";\n    background: ").concat(dt2("tabs.active.bar.background"), ";\n    transition: 250ms cubic-bezier(0.35, 0, 0.25, 1);\n}\n");
 }, "theme");
-var classes$p = {
+var classes$o = {
   root: /* @__PURE__ */ __name(function root7(_ref2) {
     var props = _ref2.props;
     return ["p-tabs p-component", {
@@ -38247,10 +38214,10 @@ var classes$p = {
 };
 var TabsStyle = BaseStyle.extend({
   name: "tabs",
-  theme: theme$n,
-  classes: classes$p
+  theme: theme$m,
+  classes: classes$o
 });
-var script$1$o = {
+var script$1$n = {
   name: "BaseTabs",
   "extends": script$U,
   props: {
@@ -38280,16 +38247,16 @@ var script$1$o = {
     }
   },
   style: TabsStyle,
-  provide: /* @__PURE__ */ __name(function provide12() {
+  provide: /* @__PURE__ */ __name(function provide13() {
     return {
       $pcTabs: this,
       $parentInstance: this
     };
   }, "provide")
 };
-var script$B = {
+var script$A = {
   name: "Tabs",
-  "extends": script$1$o,
+  "extends": script$1$n,
   inheritAttrs: false,
   emits: ["update:value"],
   data: /* @__PURE__ */ __name(function data6() {
@@ -38321,46 +38288,46 @@ var script$B = {
     }, "isVertical")
   }
 };
-function render$A(_ctx, _cache, $props, $setup, $data, $options) {
+function render$z(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", mergeProps({
     "class": _ctx.cx("root")
   }, _ctx.ptmi("root")), [renderSlot(_ctx.$slots, "default")], 16);
 }
-__name(render$A, "render$A");
-script$B.render = render$A;
-var classes$o = {
+__name(render$z, "render$z");
+script$A.render = render$z;
+var classes$n = {
   root: "p-tabpanels"
 };
 var TabPanelsStyle = BaseStyle.extend({
   name: "tabpanels",
-  classes: classes$o
+  classes: classes$n
 });
-var script$1$n = {
+var script$1$m = {
   name: "BaseTabPanels",
   "extends": script$U,
   props: {},
   style: TabPanelsStyle,
-  provide: /* @__PURE__ */ __name(function provide13() {
+  provide: /* @__PURE__ */ __name(function provide14() {
     return {
       $pcTabPanels: this,
       $parentInstance: this
     };
   }, "provide")
 };
-var script$A = {
+var script$z = {
   name: "TabPanels",
-  "extends": script$1$n,
+  "extends": script$1$m,
   inheritAttrs: false
 };
-function render$z(_ctx, _cache, $props, $setup, $data, $options) {
+function render$y(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", mergeProps({
     "class": _ctx.cx("root"),
     role: "presentation"
   }, _ctx.ptmi("root")), [renderSlot(_ctx.$slots, "default")], 16);
 }
-__name(render$z, "render$z");
-script$A.render = render$z;
-var classes$n = {
+__name(render$y, "render$y");
+script$z.render = render$y;
+var classes$m = {
   root: /* @__PURE__ */ __name(function root8(_ref) {
     var instance = _ref.instance;
     return ["p-tabpanel", {
@@ -38370,9 +38337,9 @@ var classes$n = {
 };
 var TabPanelStyle = BaseStyle.extend({
   name: "tabpanel",
-  classes: classes$n
+  classes: classes$m
 });
-var script$1$m = {
+var script$1$l = {
   name: "BaseTabPanel",
   "extends": script$U,
   props: {
@@ -38401,16 +38368,16 @@ var script$1$m = {
     disabled: Boolean
   },
   style: TabPanelStyle,
-  provide: /* @__PURE__ */ __name(function provide14() {
+  provide: /* @__PURE__ */ __name(function provide15() {
     return {
       $pcTabPanel: this,
       $parentInstance: this
     };
   }, "provide")
 };
-var script$z = {
+var script$y = {
   name: "TabPanel",
-  "extends": script$1$m,
+  "extends": script$1$l,
   inheritAttrs: false,
   inject: ["$pcTabs"],
   computed: {
@@ -38449,7 +38416,7 @@ var script$z = {
     }, "ptParams")
   }
 };
-function render$y(_ctx, _cache, $props, $setup, $data, $options) {
+function render$x(_ctx, _cache, $props, $setup, $data, $options) {
   var _$options$$pcTabs, _$options$$pcTabs2;
   return !$options.$pcTabs ? renderSlot(_ctx.$slots, "default", {
     key: 0
@@ -38472,9 +38439,9 @@ function render$y(_ctx, _cache, $props, $setup, $data, $options) {
     a11yAttrs: $options.a11yAttrs
   })], 64));
 }
-__name(render$y, "render$y");
-script$z.render = render$y;
-var theme$m = /* @__PURE__ */ __name(function theme13(_ref) {
+__name(render$x, "render$x");
+script$y.render = render$x;
+var theme$l = /* @__PURE__ */ __name(function theme14(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-divider-horizontal {\n    display: flex;\n    width: 100%;\n    position: relative;\n    align-items: center;\n    margin: ".concat(dt2("divider.horizontal.margin"), ";\n    padding: ").concat(dt2("divider.horizontal.padding"), ';\n}\n\n.p-divider-horizontal:before {\n    position: absolute;\n    display: block;\n    top: 50%;\n    left: 0;\n    width: 100%;\n    content: "";\n    border-top: 1px solid ').concat(dt2("divider.border.color"), ";\n}\n\n.p-divider-horizontal .p-divider-content {\n    padding: ").concat(dt2("divider.horizontal.content.padding"), ";\n}\n\n.p-divider-vertical {\n    min-height: 100%;\n    margin: 0 1rem;\n    display: flex;\n    position: relative;\n    justify-content: center;\n    margin: ").concat(dt2("divider.vertical.margin"), ";\n    padding: ").concat(dt2("divider.vertical.padding"), ';\n}\n\n.p-divider-vertical:before {\n    position: absolute;\n    display: block;\n    top: 0;\n    left: 50%;\n    height: 100%;\n    content: "";\n    border-left: 1px solid ').concat(dt2("divider.border.color"), ";\n}\n\n.p-divider.p-divider-vertical .p-divider-content {\n    padding: ").concat(dt2("divider.vertical.content.padding"), ";\n}\n\n.p-divider-content {\n    z-index: 1;\n    background: ").concat(dt2("divider.content.background"), ";\n    color: ").concat(dt2("divider.content.color"), ";\n}\n\n.p-divider-solid.p-divider-horizontal:before {\n    border-top-style: solid;\n}\n\n.p-divider-solid.p-divider-vertical:before {\n    border-left-style: solid;\n}\n\n.p-divider-dashed.p-divider-horizontal:before {\n    border-top-style: dashed;\n}\n\n.p-divider-dashed.p-divider-vertical:before {\n    border-left-style: dashed;\n}\n\n.p-divider-dotted.p-divider-horizontal:before {\n    border-top-style: dotted;\n}\n\n.p-divider-dotted.p-divider-vertical:before {\n    border-left-style: dotted;\n}\n");
 }, "theme");
@@ -38487,7 +38454,7 @@ var inlineStyles$3 = {
     };
   }, "root")
 };
-var classes$m = {
+var classes$l = {
   root: /* @__PURE__ */ __name(function root10(_ref3) {
     var props = _ref3.props;
     return ["p-divider p-component", "p-divider-" + props.layout, "p-divider-" + props.type, {
@@ -38508,11 +38475,11 @@ var classes$m = {
 };
 var DividerStyle = BaseStyle.extend({
   name: "divider",
-  theme: theme$m,
-  classes: classes$m,
+  theme: theme$l,
+  classes: classes$l,
   inlineStyles: inlineStyles$3
 });
-var script$1$l = {
+var script$1$k = {
   name: "BaseDivider",
   "extends": script$U,
   props: {
@@ -38530,20 +38497,20 @@ var script$1$l = {
     }
   },
   style: DividerStyle,
-  provide: /* @__PURE__ */ __name(function provide15() {
+  provide: /* @__PURE__ */ __name(function provide16() {
     return {
       $pcDivider: this,
       $parentInstance: this
     };
   }, "provide")
 };
-var script$y = {
+var script$x = {
   name: "Divider",
-  "extends": script$1$l,
+  "extends": script$1$k,
   inheritAttrs: false
 };
 var _hoisted_1$V = ["aria-orientation"];
-function render$x(_ctx, _cache, $props, $setup, $data, $options) {
+function render$w(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", mergeProps({
     "class": _ctx.cx("root"),
     style: _ctx.sx("root"),
@@ -38554,13 +38521,13 @@ function render$x(_ctx, _cache, $props, $setup, $data, $options) {
     "class": _ctx.cx("content")
   }, _ctx.ptm("content")), [renderSlot(_ctx.$slots, "default")], 16)) : createCommentVNode("", true)], 16, _hoisted_1$V);
 }
-__name(render$x, "render$x");
-script$y.render = render$x;
-var theme$l = /* @__PURE__ */ __name(function theme14(_ref) {
+__name(render$w, "render$w");
+script$x.render = render$w;
+var theme$k = /* @__PURE__ */ __name(function theme15(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-scrollpanel-content-container {\n    overflow: hidden;\n    width: 100%;\n    height: 100%;\n    position: relative;\n    z-index: 1;\n    float: left;\n}\n\n.p-scrollpanel-content {\n    height: calc(100% + calc(2 * ".concat(dt2("scrollpanel.bar.size"), "));\n    width: calc(100% + calc(2 * ").concat(dt2("scrollpanel.bar.size"), "));\n    padding: 0 calc(2 * ").concat(dt2("scrollpanel.bar.size"), ") calc(2 * ").concat(dt2("scrollpanel.bar.size"), ") 0;\n    position: relative;\n    overflow: auto;\n    box-sizing: border-box;\n    scrollbar-width: none;\n}\n\n.p-scrollpanel-content::-webkit-scrollbar {\n    display: none;\n}\n\n.p-scrollpanel-bar {\n    position: relative;\n    border-radius: ").concat(dt2("scrollpanel.bar.border.radius"), ";\n    z-index: 2;\n    cursor: pointer;\n    opacity: 0;\n    outline-color: transparent;\n    transition: outline-color ").concat(dt2("scrollpanel.transition.duration"), ";\n    background: ").concat(dt2("scrollpanel.bar.background"), ";\n    border: 0 none;\n    transition: outline-color ").concat(dt2("scrollpanel.transition.duration"), ", opacity ").concat(dt2("scrollpanel.transition.duration"), ";\n}\n\n.p-scrollpanel-bar:focus-visible {\n    box-shadow: ").concat(dt2("scrollpanel.bar.focus.ring.shadow"), ";\n    outline: ").concat(dt2("scrollpanel.barfocus.ring.width"), " ").concat(dt2("scrollpanel.bar.focus.ring.style"), " ").concat(dt2("scrollpanel.bar.focus.ring.color"), ";\n    outline-offset: ").concat(dt2("scrollpanel.barfocus.ring.offset"), ";\n}\n\n.p-scrollpanel-bar-y {\n    width: ").concat(dt2("scrollpanel.bar.size"), ";\n    top: 0;\n}\n\n.p-scrollpanel-bar-x {\n    height: ").concat(dt2("scrollpanel.bar.size"), ";\n    bottom: 0;\n}\n\n.p-scrollpanel-hidden {\n    visibility: hidden;\n}\n\n.p-scrollpanel:hover .p-scrollpanel-bar,\n.p-scrollpanel:active .p-scrollpanel-bar {\n    opacity: 1;\n}\n\n.p-scrollpanel-grabbed {\n    user-select: none;\n}\n");
 }, "theme");
-var classes$l = {
+var classes$k = {
   root: "p-scrollpanel p-component",
   contentContainer: "p-scrollpanel-content-container",
   content: "p-scrollpanel-content",
@@ -38569,10 +38536,10 @@ var classes$l = {
 };
 var ScrollPanelStyle = BaseStyle.extend({
   name: "scrollpanel",
-  theme: theme$l,
-  classes: classes$l
+  theme: theme$k,
+  classes: classes$k
 });
-var script$1$k = {
+var script$1$j = {
   name: "BaseScrollPanel",
   "extends": script$U,
   props: {
@@ -38582,16 +38549,16 @@ var script$1$k = {
     }
   },
   style: ScrollPanelStyle,
-  provide: /* @__PURE__ */ __name(function provide16() {
+  provide: /* @__PURE__ */ __name(function provide17() {
     return {
       $pcScrollPanel: this,
       $parentInstance: this
     };
   }, "provide")
 };
-var script$x = {
+var script$w = {
   name: "ScrollPanel",
-  "extends": script$1$k,
+  "extends": script$1$j,
   inheritAttrs: false,
   initialized: false,
   documentResizeListener: null,
@@ -38890,8 +38857,8 @@ var script$x = {
 };
 var _hoisted_1$U = ["id"];
 var _hoisted_2$E = ["aria-controls", "aria-valuenow"];
-var _hoisted_3$m = ["aria-controls", "aria-valuenow"];
-function render$w(_ctx, _cache, $props, $setup, $data, $options) {
+var _hoisted_3$l = ["aria-controls", "aria-valuenow"];
+function render$v(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", mergeProps({
     "class": _ctx.cx("root")
   }, _ctx.ptmi("root")), [createBaseVNode("div", mergeProps({
@@ -38953,11 +38920,11 @@ function render$w(_ctx, _cache, $props, $setup, $data, $options) {
     })
   }, _ctx.ptm("bary"), {
     "data-pc-group-section": "bar"
-  }), null, 16, _hoisted_3$m)], 16);
+  }), null, 16, _hoisted_3$l)], 16);
 }
-__name(render$w, "render$w");
-script$x.render = render$w;
-var script$w = {
+__name(render$v, "render$v");
+script$w.render = render$v;
+var script$v = {
   name: "AngleDownIcon",
   "extends": script$T
 };
@@ -38966,7 +38933,7 @@ var _hoisted_1$T = /* @__PURE__ */ createBaseVNode("path", {
   fill: "currentColor"
 }, null, -1);
 var _hoisted_2$D = [_hoisted_1$T];
-function render$v(_ctx, _cache, $props, $setup, $data, $options) {
+function render$u(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
     height: "14",
@@ -38975,9 +38942,9 @@ function render$v(_ctx, _cache, $props, $setup, $data, $options) {
     xmlns: "http://www.w3.org/2000/svg"
   }, _ctx.pti()), _hoisted_2$D, 16);
 }
-__name(render$v, "render$v");
-script$w.render = render$v;
-var script$v = {
+__name(render$u, "render$u");
+script$v.render = render$u;
+var script$u = {
   name: "AngleUpIcon",
   "extends": script$T
 };
@@ -38986,7 +38953,7 @@ var _hoisted_1$S = /* @__PURE__ */ createBaseVNode("path", {
   fill: "currentColor"
 }, null, -1);
 var _hoisted_2$C = [_hoisted_1$S];
-function render$u(_ctx, _cache, $props, $setup, $data, $options) {
+function render$t(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
     height: "14",
@@ -38995,13 +38962,13 @@ function render$u(_ctx, _cache, $props, $setup, $data, $options) {
     xmlns: "http://www.w3.org/2000/svg"
   }, _ctx.pti()), _hoisted_2$C, 16);
 }
-__name(render$u, "render$u");
-script$v.render = render$u;
-var theme$k = /* @__PURE__ */ __name(function theme15(_ref) {
+__name(render$t, "render$t");
+script$u.render = render$t;
+var theme$j = /* @__PURE__ */ __name(function theme16(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-inputnumber {\n    display: inline-flex;\n    position: relative;\n}\n\n.p-inputnumber-button {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    flex: 0 0 auto;\n    cursor: pointer;\n    background: ".concat(dt2("inputnumber.button.background"), ";\n    color: ").concat(dt2("inputnumber.button.color"), ";\n    width: ").concat(dt2("inputnumber.button.width"), ";\n    transition: background ").concat(dt2("inputnumber.transition.duration"), ", color ").concat(dt2("inputnumber.transition.duration"), ", border-color ").concat(dt2("inputnumber.transition.duration"), ", outline-color ").concat(dt2("inputnumber.transition.duration"), ";\n}\n\n.p-inputnumber-button:hover {\n    background: ").concat(dt2("inputnumber.button.hover.background"), ";\n    color: ").concat(dt2("inputnumber.button.hover.color"), ";\n}\n\n.p-inputnumber-button:active {\n    background: ").concat(dt2("inputnumber.button.active.background"), ";\n    color: ").concat(dt2("inputnumber.button.active.color"), ";\n}\n\n.p-inputnumber-stacked .p-inputnumber-button {\n    position: relative;\n    border: 0 none;\n}\n\n.p-inputnumber-stacked .p-inputnumber-button-group {\n    display: flex;\n    flex-direction: column;\n    position: absolute;\n    top: 1px;\n    right: 1px;\n    height: calc(100% - 2px);\n    z-index: 1;\n}\n\n.p-inputnumber-stacked .p-inputnumber-increment-button {\n    padding: 0;\n    border-top-right-radius: calc(").concat(dt2("inputnumber.button.border.radius"), " - 1px);\n}\n\n.p-inputnumber-stacked .p-inputnumber-decrement-button {\n    padding: 0;\n    border-bottom-right-radius: calc(").concat(dt2("inputnumber.button.border.radius"), " - 1px);\n}\n\n.p-inputnumber-stacked .p-inputnumber-button {\n    flex: 1 1 auto;\n    border: 0 none;\n}\n\n.p-inputnumber-horizontal .p-inputnumber-button {\n    border: 1px solid ").concat(dt2("inputnumber.button.border.color"), ";\n}\n\n.p-inputnumber-horizontal .p-inputnumber-button:hover {\n    border-color: ").concat(dt2("inputnumber.button.hover.border.color"), ";\n}\n\n.p-inputnumber-horizontal .p-inputnumber-button:active {\n    border-color: ").concat(dt2("inputnumber.button.active.border.color"), ";\n}\n\n.p-inputnumber-horizontal .p-inputnumber-increment-button {\n    order: 3;\n    border-top-right-radius: ").concat(dt2("inputnumber.button.border.radius"), ";\n    border-bottom-right-radius: ").concat(dt2("inputnumber.button.border.radius"), ";\n    border-left: 0 none;\n}\n\n.p-inputnumber-horizontal .p-inputnumber-input {\n    order: 2;\n    border-radius: 0;\n}\n\n.p-inputnumber-horizontal .p-inputnumber-decrement-button {\n    order: 1;\n    border-top-left-radius: ").concat(dt2("inputnumber.button.border.radius"), ";\n    border-bottom-left-radius: ").concat(dt2("inputnumber.button.border.radius"), ";\n    border-right: 0 none;\n}\n\n.p-inputnumber-vertical {\n    flex-direction: column;\n}\n\n.p-inputnumber-vertical .p-inputnumber-button {\n    border: 1px solid ").concat(dt2("inputnumber.button.border.color"), ";\n    padding: ").concat(dt2("inputnumber.button.vertical.padding"), "; 0;\n}\n\n.p-inputnumber-vertical .p-inputnumber-button:hover {\n    border-color: ").concat(dt2("inputnumber.button.hover.border.color"), ";\n}\n\n.p-inputnumber-vertical .p-inputnumber-button:active {\n    border-color: ").concat(dt2("inputnumber.button.active.border.color"), ";\n}\n\n.p-inputnumber-vertical .p-inputnumber-increment-button {\n    order: 1;\n    border-top-left-radius: ").concat(dt2("inputnumber.button.border.radius"), ";\n    border-top-right-radius: ").concat(dt2("inputnumber.button.border.radius"), ";\n    width: 100%;\n    border-bottom: 0 none;\n}\n\n.p-inputnumber-vertical .p-inputnumber-input {\n    order: 2;\n    border-radius: 0;\n    text-align: center;\n}\n\n.p-inputnumber-vertical .p-inputnumber-decrement-button {\n    order: 3;\n    border-bottom-left-radius: ").concat(dt2("inputnumber.button.border.radius"), ";\n    border-bottom-right-radius: ").concat(dt2("inputnumber.button.border.radius"), ";\n    width: 100%;\n    border-top: 0 none;\n}\n\n.p-inputnumber-input {\n    flex: 1 1 auto;\n}\n\n.p-inputnumber-fluid {\n    width: 100%;\n}\n\n.p-inputnumber-fluid .p-inputnumber-input {\n    width: 1%;\n}\n\n.p-inputnumber-fluid.p-inputnumber-vertical .p-inputnumber-input {\n    width: 100%;\n}\n");
 }, "theme");
-var classes$k = {
+var classes$j = {
   root: /* @__PURE__ */ __name(function root11(_ref2) {
     var instance = _ref2.instance, props = _ref2.props;
     return ["p-inputnumber p-component p-inputwrapper", {
@@ -39030,10 +38997,10 @@ var classes$k = {
 };
 var InputNumberStyle = BaseStyle.extend({
   name: "inputnumber",
-  theme: theme$k,
-  classes: classes$k
+  theme: theme$j,
+  classes: classes$j
 });
-var script$1$j = {
+var script$1$i = {
   name: "BaseInputNumber",
   "extends": script$U,
   props: {
@@ -39190,7 +39157,7 @@ var script$1$j = {
     }
   },
   style: InputNumberStyle,
-  provide: /* @__PURE__ */ __name(function provide17() {
+  provide: /* @__PURE__ */ __name(function provide18() {
     return {
       $pcInputNumber: this,
       $parentInstance: this
@@ -39279,9 +39246,9 @@ function _arrayLikeToArray$9(r, a) {
   return n;
 }
 __name(_arrayLikeToArray$9, "_arrayLikeToArray$9");
-var script$u = {
+var script$t = {
   name: "InputNumber",
-  "extends": script$1$j,
+  "extends": script$1$i,
   inheritAttrs: false,
   emits: ["update:modelValue", "input", "focus", "blur"],
   inject: {
@@ -40108,15 +40075,15 @@ var script$u = {
   },
   components: {
     InputText: script$N,
-    AngleUpIcon: script$v,
-    AngleDownIcon: script$w
+    AngleUpIcon: script$u,
+    AngleDownIcon: script$v
   }
 };
 var _hoisted_1$R = ["disabled"];
 var _hoisted_2$B = ["disabled"];
-var _hoisted_3$l = ["disabled"];
+var _hoisted_3$k = ["disabled"];
 var _hoisted_4$e = ["disabled"];
-function render$t(_ctx, _cache, $props, $setup, $data, $options) {
+function render$s(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_InputText = resolveComponent("InputText");
   return openBlock(), createElementBlock("span", mergeProps({
     "class": _ctx.cx("root")
@@ -40201,7 +40168,7 @@ function render$t(_ctx, _cache, $props, $setup, $data, $options) {
       }, _ctx.ptm("incrementIcon"), {
         "data-pc-section": "incrementicon"
       }), null, 16, ["class"]))];
-    })], 16, _hoisted_3$l)) : createCommentVNode("", true)];
+    })], 16, _hoisted_3$k)) : createCommentVNode("", true)];
   }), renderSlot(_ctx.$slots, "decrementbutton", {
     listeners: $options.downButtonListeners
   }, function() {
@@ -40222,9 +40189,9 @@ function render$t(_ctx, _cache, $props, $setup, $data, $options) {
     })], 16, _hoisted_4$e)) : createCommentVNode("", true)];
   })], 16);
 }
-__name(render$t, "render$t");
-script$u.render = render$t;
-var theme$j = /* @__PURE__ */ __name(function theme16(_ref) {
+__name(render$s, "render$s");
+script$t.render = render$s;
+var theme$i = /* @__PURE__ */ __name(function theme17(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-toggleswitch {\n    display: inline-block;\n    width: ".concat(dt2("toggleswitch.width"), ";\n    height: ").concat(dt2("toggleswitch.height"), ";\n}\n\n.p-toggleswitch-input {\n    cursor: pointer;\n    appearance: none;\n    position: absolute;\n    top: 0;\n    left: 0;\n    width: 100%;\n    height: 100%;\n    padding: 0;\n    margin: 0;\n    opacity: 0;\n    z-index: 1;\n    outline: 0 none;\n    border-radius: ").concat(dt2("toggleswitch.border.radius"), ";\n}\n\n.p-toggleswitch-slider {\n    display: inline-block;\n    cursor: pointer;\n    width: 100%;\n    height: 100%;\n    border-width: ").concat(dt2("toggleswitch.border.width"), ";\n    border-style: solid;\n    border-color: ").concat(dt2("toggleswitch.border.color"), ";\n    background: ").concat(dt2("toggleswitch.background"), ";\n    transition: background ").concat(dt2("toggleswitch.transition.duration"), ", color ").concat(dt2("toggleswitch.transition.duration"), ", border-color ").concat(dt2("toggleswitch.transition.duration"), ", outline-color ").concat(dt2("toggleswitch.transition.duration"), ", box-shadow ").concat(dt2("toggleswitch.transition.duration"), ";\n    border-radius: ").concat(dt2("toggleswitch.border.radius"), ";\n    outline-color: transparent;\n    box-shadow: ").concat(dt2("toggleswitch.shadow"), ';\n}\n\n.p-toggleswitch-slider:before {\n    position: absolute;\n    content: "";\n    top: 50%;\n    background: ').concat(dt2("toggleswitch.handle.background"), ";\n    width: ").concat(dt2("toggleswitch.handle.size"), ";\n    height: ").concat(dt2("toggleswitch.handle.size"), ";\n    left: ").concat(dt2("toggleswitch.gap"), ";\n    margin-top: calc(-1 * calc(").concat(dt2("toggleswitch.handle.size"), " / 2));\n    border-radius: ").concat(dt2("toggleswitch.handle.border.radius"), ";\n    transition: background ").concat(dt2("toggleswitch.transition.duration"), ", left ").concat(dt2("toggleswitch.slide.duration"), ";\n}\n\n.p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider {\n    background: ").concat(dt2("toggleswitch.checked.background"), ";\n    border-color: ").concat(dt2("toggleswitch.checked.border.color"), ";\n}\n\n.p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider:before {\n    background: ").concat(dt2("toggleswitch.handle.checked.background"), ";\n    left: calc(").concat(dt2("toggleswitch.width"), " - calc(").concat(dt2("toggleswitch.handle.size"), " + ").concat(dt2("toggleswitch.gap"), "));\n}\n\n.p-toggleswitch:not(.p-disabled):has(.p-toggleswitch-input:hover) .p-toggleswitch-slider {\n    background: ").concat(dt2("toggleswitch.hover.background"), ";\n    border-color: ").concat(dt2("toggleswitch.hover.border.color"), ";\n}\n\n.p-toggleswitch:not(.p-disabled):has(.p-toggleswitch-input:hover) .p-toggleswitch-slider:before {\n    background: ").concat(dt2("toggleswitch.handle.hover.background"), ";\n}\n\n.p-toggleswitch:not(.p-disabled):has(.p-toggleswitch-input:hover).p-toggleswitch-checked .p-toggleswitch-slider {\n    background: ").concat(dt2("toggleswitch.checked.hover.background"), ";\n    border-color: ").concat(dt2("toggleswitch.checked.hover.border.color"), ";\n}\n\n.p-toggleswitch:not(.p-disabled):has(.p-toggleswitch-input:hover).p-toggleswitch-checked .p-toggleswitch-slider:before {\n    background: ").concat(dt2("toggleswitch.handle.checked.hover.background"), ";\n}\n\n.p-toggleswitch:not(.p-disabled):has(.p-toggleswitch-input:focus-visible) .p-toggleswitch-slider {\n    box-shadow: ").concat(dt2("toggleswitch.focus.ring.shadow"), ";\n    outline: ").concat(dt2("toggleswitch.focus.ring.width"), " ").concat(dt2("toggleswitch.focus.ring.style"), " ").concat(dt2("toggleswitch.focus.ring.color"), ";\n    outline-offset: ").concat(dt2("toggleswitch.focus.ring.offset"), ";\n}\n\n.p-toggleswitch.p-invalid > .p-toggleswitch-slider {\n    border-color: ").concat(dt2("toggleswitch.invalid.border.color"), ";\n}\n\n.p-toggleswitch.p-disabled {\n    opacity: 1;\n}\n\n.p-toggleswitch.p-disabled .p-toggleswitch-slider {\n    background: ").concat(dt2("toggleswitch.disabled.background"), ";\n}\n\n.p-toggleswitch.p-disabled .p-toggleswitch-slider:before {\n    background: ").concat(dt2("toggleswitch.handle.disabled.background"), ";\n}\n");
 }, "theme");
@@ -40233,7 +40200,7 @@ var inlineStyles$2 = {
     position: "relative"
   }
 };
-var classes$j = {
+var classes$i = {
   root: /* @__PURE__ */ __name(function root12(_ref2) {
     var instance = _ref2.instance, props = _ref2.props;
     return ["p-toggleswitch p-component", {
@@ -40247,11 +40214,11 @@ var classes$j = {
 };
 var ToggleSwitchStyle = BaseStyle.extend({
   name: "toggleswitch",
-  theme: theme$j,
-  classes: classes$j,
+  theme: theme$i,
+  classes: classes$i,
   inlineStyles: inlineStyles$2
 });
-var script$1$i = {
+var script$1$h = {
   name: "BaseToggleSwitch",
   "extends": script$U,
   props: {
@@ -40305,16 +40272,16 @@ var script$1$i = {
     }
   },
   style: ToggleSwitchStyle,
-  provide: /* @__PURE__ */ __name(function provide18() {
+  provide: /* @__PURE__ */ __name(function provide19() {
     return {
       $pcToggleSwitch: this,
       $parentInstance: this
     };
   }, "provide")
 };
-var script$t = {
+var script$s = {
   name: "ToggleSwitch",
-  "extends": script$1$i,
+  "extends": script$1$h,
   inheritAttrs: false,
   emits: ["update:modelValue", "change", "focus", "blur"],
   methods: {
@@ -40349,7 +40316,7 @@ var script$t = {
 };
 var _hoisted_1$Q = ["data-p-checked", "data-p-disabled"];
 var _hoisted_2$A = ["id", "checked", "tabindex", "disabled", "readonly", "aria-checked", "aria-labelledby", "aria-label", "aria-invalid"];
-function render$s(_ctx, _cache, $props, $setup, $data, $options) {
+function render$r(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", mergeProps({
     "class": _ctx.cx("root"),
     style: _ctx.sx("root")
@@ -40383,13 +40350,13 @@ function render$s(_ctx, _cache, $props, $setup, $data, $options) {
     "class": _ctx.cx("slider")
   }, $options.getPTOptions("slider")), null, 16)], 16, _hoisted_1$Q);
 }
-__name(render$s, "render$s");
-script$t.render = render$s;
-var theme$i = /* @__PURE__ */ __name(function theme17(_ref) {
+__name(render$r, "render$r");
+script$s.render = render$r;
+var theme$h = /* @__PURE__ */ __name(function theme18(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-tag {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    background: ".concat(dt2("tag.primary.background"), ";\n    color: ").concat(dt2("tag.primary.color"), ";\n    font-size: ").concat(dt2("tag.font.size"), ";\n    font-weight: ").concat(dt2("tag.font.weight"), ";\n    padding: ").concat(dt2("tag.padding"), ";\n    border-radius: ").concat(dt2("tag.border.radius"), ";\n    gap: ").concat(dt2("tag.gap"), ";\n}\n\n.p-tag-icon {\n    font-size: ").concat(dt2("tag.icon.size"), ";\n    width: ").concat(dt2("tag.icon.size"), ";\n    height:").concat(dt2("tag.icon.size"), ";\n}\n\n.p-tag-rounded {\n    border-radius: ").concat(dt2("tag.rounded.border.radius"), ";\n}\n\n.p-tag-success {\n    background: ").concat(dt2("tag.success.background"), ";\n    color: ").concat(dt2("tag.success.color"), ";\n}\n\n.p-tag-info {\n    background: ").concat(dt2("tag.info.background"), ";\n    color: ").concat(dt2("tag.info.color"), ";\n}\n\n.p-tag-warn {\n    background: ").concat(dt2("tag.warn.background"), ";\n    color: ").concat(dt2("tag.warn.color"), ";\n}\n\n.p-tag-danger {\n    background: ").concat(dt2("tag.danger.background"), ";\n    color: ").concat(dt2("tag.danger.color"), ";\n}\n\n.p-tag-secondary {\n    background: ").concat(dt2("tag.secondary.background"), ";\n    color: ").concat(dt2("tag.secondary.color"), ";\n}\n\n.p-tag-contrast {\n    background: ").concat(dt2("tag.contrast.background"), ";\n    color: ").concat(dt2("tag.contrast.color"), ";\n}\n");
 }, "theme");
-var classes$i = {
+var classes$h = {
   root: /* @__PURE__ */ __name(function root13(_ref2) {
     var props = _ref2.props;
     return ["p-tag p-component", {
@@ -40407,10 +40374,10 @@ var classes$i = {
 };
 var TagStyle = BaseStyle.extend({
   name: "tag",
-  theme: theme$i,
-  classes: classes$i
+  theme: theme$h,
+  classes: classes$h
 });
-var script$1$h = {
+var script$1$g = {
   name: "BaseTag",
   "extends": script$U,
   props: {
@@ -40420,19 +40387,19 @@ var script$1$h = {
     icon: String
   },
   style: TagStyle,
-  provide: /* @__PURE__ */ __name(function provide19() {
+  provide: /* @__PURE__ */ __name(function provide20() {
     return {
       $pcTag: this,
       $parentInstance: this
     };
   }, "provide")
 };
-var script$s = {
+var script$r = {
   name: "Tag",
-  "extends": script$1$h,
+  "extends": script$1$g,
   inheritAttrs: false
 };
-function render$r(_ctx, _cache, $props, $setup, $data, $options) {
+function render$q(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("span", mergeProps({
     "class": _ctx.cx("root")
   }, _ctx.ptmi("root")), [_ctx.$slots.icon ? (openBlock(), createBlock(resolveDynamicComponent(_ctx.$slots.icon), mergeProps({
@@ -40449,8 +40416,8 @@ function render$r(_ctx, _cache, $props, $setup, $data, $options) {
     }, _ctx.ptm("label")), toDisplayString$1(_ctx.value), 17)];
   }) : createCommentVNode("", true)], 16);
 }
-__name(render$r, "render$r");
-script$s.render = render$r;
+__name(render$q, "render$q");
+script$r.render = render$q;
 const _sfc_main$E = /* @__PURE__ */ defineComponent({
   __name: "CustomSettingValue",
   props: {
@@ -40477,7 +40444,7 @@ const _sfc_main$E = /* @__PURE__ */ defineComponent({
     };
   }
 });
-var theme$h = /* @__PURE__ */ __name(function theme18(_ref) {
+var theme$g = /* @__PURE__ */ __name(function theme19(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-slider {\n    position: relative;\n    background: ".concat(dt2("slider.track.background"), ";\n    border-radius: ").concat(dt2("slider.border.radius"), ";\n}\n\n.p-slider-handle {\n    cursor: grab;\n    touch-action: none;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    height: ").concat(dt2("slider.handle.height"), ";\n    width: ").concat(dt2("slider.handle.width"), ";\n    background: ").concat(dt2("slider.handle.background"), ";\n    border-radius: ").concat(dt2("slider.handle.border.radius"), ";\n    transition: background ").concat(dt2("slider.transition.duration"), ", color ").concat(dt2("slider.transition.duration"), ", border-color ").concat(dt2("slider.transition.duration"), ", box-shadow ").concat(dt2("slider.transition.duration"), ", outline-color ").concat(dt2("slider.transition.duration"), ';\n    outline-color: transparent;\n}\n\n.p-slider-handle::before {\n    content: "";\n    width: ').concat(dt2("slider.handle.content.width"), ";\n    height: ").concat(dt2("slider.handle.content.height"), ";\n    display: block;\n    background: ").concat(dt2("slider.handle.content.background"), ";\n    border-radius: ").concat(dt2("slider.handle.content.border.radius"), ";\n    box-shadow: ").concat(dt2("slider.handle.content.shadow"), ";\n    transition: background ").concat(dt2("slider.transition.duration"), ";\n}\n\n.p-slider:not(.p-disabled) .p-slider-handle:hover {\n    background: ").concat(dt2("slider.handle.hover.background"), ";\n}\n\n.p-slider:not(.p-disabled) .p-slider-handle:hover::before {\n    background: ").concat(dt2("slider.handle.content.hover.background"), ";\n}\n\n.p-slider-handle:focus-visible {\n    border-color: ").concat(dt2("slider.handle.focus.border.color"), ";\n    box-shadow: ").concat(dt2("slider.handle.focus.ring.shadow"), ";\n    outline: ").concat(dt2("slider.handle.focus.ring.width"), " ").concat(dt2("slider.handle.focus.ring.style"), " ").concat(dt2("slider.handle.focus.ring.color"), ";\n    outline-offset: ").concat(dt2("slider.handle.focus.ring.offset"), ";\n}\n\n.p-slider-range {\n    display: block;\n    background: ").concat(dt2("slider.range.background"), ";\n    border-radius: ").concat(dt2("slider.border.radius"), ";\n}\n\n.p-slider.p-slider-horizontal {\n    height: ").concat(dt2("slider.track.size"), ";\n}\n\n.p-slider-horizontal .p-slider-range {\n    top: 0;\n    left: 0;\n    height: 100%;\n}\n\n.p-slider-horizontal .p-slider-handle {\n    top: 50%;\n    margin-top: calc(-1 * calc(").concat(dt2("slider.handle.height"), " / 2));\n    margin-left: calc(-1 * calc(").concat(dt2("slider.handle.width"), " / 2));\n}\n\n.p-slider-vertical {\n    min-height: 100px;\n    width: ").concat(dt2("slider.track.size"), ";\n}\n\n.p-slider-vertical .p-slider-handle {\n    left: 50%;\n    margin-left: calc(-1 * calc(").concat(dt2("slider.handle.width"), " / 2));\n    margin-bottom: calc(-1 * calc(").concat(dt2("slider.handle.height"), " / 2));\n}\n\n.p-slider-vertical .p-slider-range {\n    bottom: 0;\n    left: 0;\n    width: 100%;\n}\n");
 }, "theme");
@@ -40489,7 +40456,7 @@ var inlineStyles$1 = {
     position: "absolute"
   }
 };
-var classes$h = {
+var classes$g = {
   root: /* @__PURE__ */ __name(function root14(_ref2) {
     var props = _ref2.props;
     return ["p-slider p-component", {
@@ -40503,11 +40470,11 @@ var classes$h = {
 };
 var SliderStyle = BaseStyle.extend({
   name: "slider",
-  theme: theme$h,
-  classes: classes$h,
+  theme: theme$g,
+  classes: classes$g,
   inlineStyles: inlineStyles$1
 });
-var script$1$g = {
+var script$1$f = {
   name: "BaseSlider",
   "extends": script$U,
   props: {
@@ -40550,7 +40517,7 @@ var script$1$g = {
     }
   },
   style: SliderStyle,
-  provide: /* @__PURE__ */ __name(function provide20() {
+  provide: /* @__PURE__ */ __name(function provide21() {
     return {
       $pcSlider: this,
       $parentInstance: this
@@ -40587,9 +40554,9 @@ function _arrayLikeToArray$8(r, a) {
   return n;
 }
 __name(_arrayLikeToArray$8, "_arrayLikeToArray$8");
-var script$r = {
+var script$q = {
   name: "Slider",
-  "extends": script$1$g,
+  "extends": script$1$f,
   inheritAttrs: false,
   emits: ["update:modelValue", "change", "slideend"],
   dragging: false,
@@ -40851,8 +40818,8 @@ var script$r = {
 };
 var _hoisted_1$P = ["tabindex", "aria-valuemin", "aria-valuenow", "aria-valuemax", "aria-labelledby", "aria-label", "aria-orientation"];
 var _hoisted_2$z = ["tabindex", "aria-valuemin", "aria-valuenow", "aria-valuemax", "aria-labelledby", "aria-label", "aria-orientation"];
-var _hoisted_3$k = ["tabindex", "aria-valuemin", "aria-valuenow", "aria-valuemax", "aria-labelledby", "aria-label", "aria-orientation"];
-function render$q(_ctx, _cache, $props, $setup, $data, $options) {
+var _hoisted_3$j = ["tabindex", "aria-valuemin", "aria-valuenow", "aria-valuemax", "aria-labelledby", "aria-label", "aria-orientation"];
+function render$p(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", mergeProps({
     "class": _ctx.cx("root"),
     onClick: _cache[15] || (_cache[15] = function() {
@@ -40944,10 +40911,10 @@ function render$q(_ctx, _cache, $props, $setup, $data, $options) {
     "aria-labelledby": _ctx.ariaLabelledby,
     "aria-label": _ctx.ariaLabel,
     "aria-orientation": _ctx.orientation
-  }, _ctx.ptm("endHandler")), null, 16, _hoisted_3$k)) : createCommentVNode("", true)], 16);
+  }, _ctx.ptm("endHandler")), null, 16, _hoisted_3$j)) : createCommentVNode("", true)], 16);
 }
-__name(render$q, "render$q");
-script$r.render = render$q;
+__name(render$p, "render$p");
+script$q.render = render$p;
 const _hoisted_1$O = { class: "input-slider flex flex-row items-center gap-2" };
 const _sfc_main$D = /* @__PURE__ */ defineComponent({
   __name: "InputSlider",
@@ -40984,7 +40951,7 @@ const _sfc_main$D = /* @__PURE__ */ defineComponent({
     }, "updateValue");
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock("div", _hoisted_1$O, [
-        createVNode(unref(script$r), {
+        createVNode(unref(script$q), {
           modelValue: _ctx.modelValue,
           "onUpdate:modelValue": updateValue3,
           class: normalizeClass(["slider-part", _ctx.sliderClass]),
@@ -40992,7 +40959,7 @@ const _sfc_main$D = /* @__PURE__ */ defineComponent({
           max: _ctx.max,
           step: _ctx.step
         }, null, 8, ["modelValue", "class", "min", "max", "step"]),
-        createVNode(unref(script$u), {
+        createVNode(unref(script$t), {
           modelValue: _ctx.modelValue,
           "onUpdate:modelValue": updateValue3,
           class: normalizeClass(["input-part", _ctx.inputClass]),
@@ -41062,10 +41029,10 @@ function formatMemory(value3) {
   return `${mb} MB`;
 }
 __name(formatMemory, "formatMemory");
-const _withScopeId$i = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-04f094d4"), n = n(), popScopeId(), n), "_withScopeId$i");
+const _withScopeId$h = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-04f094d4"), n = n(), popScopeId(), n), "_withScopeId$h");
 const _hoisted_1$N = { class: "setting-group" };
 const _hoisted_2$y = { class: "setting-label flex flex-grow items-center" };
-const _hoisted_3$j = { class: "text-[var(--p-text-muted-color)]" };
+const _hoisted_3$i = { class: "text-[var(--p-text-muted-color)]" };
 const _hoisted_4$d = {
   key: 2,
   class: "pi pi-info-circle bg-transparent"
@@ -41112,13 +41079,13 @@ const _sfc_main$C = /* @__PURE__ */ defineComponent({
       }
       switch (setting.type) {
         case "boolean":
-          return script$t;
+          return script$s;
         case "number":
-          return script$u;
+          return script$t;
         case "slider":
           return _sfc_main$D;
         case "combo":
-          return script$C;
+          return script$B;
         default:
           return script$N;
       }
@@ -41127,7 +41094,7 @@ const _sfc_main$C = /* @__PURE__ */ defineComponent({
     return (_ctx, _cache) => {
       const _directive_tooltip = resolveDirective("tooltip");
       return openBlock(), createElementBlock("div", _hoisted_1$N, [
-        _ctx.divider ? (openBlock(), createBlock(unref(script$y), { key: 0 })) : createCommentVNode("", true),
+        _ctx.divider ? (openBlock(), createBlock(unref(script$x), { key: 0 })) : createCommentVNode("", true),
         createBaseVNode("h3", null, toDisplayString$1(unref(formatCamelCase)(_ctx.group.label)), 1),
         (openBlock(true), createElementBlock(Fragment, null, renderList(_ctx.group.settings, (setting) => {
           return openBlock(), createElementBlock("div", {
@@ -41135,12 +41102,12 @@ const _sfc_main$C = /* @__PURE__ */ defineComponent({
             class: "setting-item flex items-center mb-4"
           }, [
             createBaseVNode("div", _hoisted_2$y, [
-              createBaseVNode("span", _hoisted_3$j, [
-                setting.experimental ? (openBlock(), createBlock(unref(script$s), {
+              createBaseVNode("span", _hoisted_3$i, [
+                setting.experimental ? (openBlock(), createBlock(unref(script$r), {
                   key: 0,
                   value: _ctx.$t("experimental")
                 }, null, 8, ["value"])) : createCommentVNode("", true),
-                setting.deprecated ? (openBlock(), createBlock(unref(script$s), {
+                setting.deprecated ? (openBlock(), createBlock(unref(script$r), {
                   key: 1,
                   value: _ctx.$t("deprecated"),
                   severity: "danger"
@@ -41166,7 +41133,7 @@ const _sfc_main$C = /* @__PURE__ */ defineComponent({
   }
 });
 const SettingGroup = /* @__PURE__ */ _export_sfc(_sfc_main$C, [["__scopeId", "data-v-04f094d4"]]);
-var script$q = {
+var script$p = {
   name: "TimesCircleIcon",
   "extends": script$T
 };
@@ -41177,7 +41144,7 @@ var _hoisted_1$M = /* @__PURE__ */ createBaseVNode("path", {
   fill: "currentColor"
 }, null, -1);
 var _hoisted_2$x = [_hoisted_1$M];
-function render$p(_ctx, _cache, $props, $setup, $data, $options) {
+function render$o(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
     height: "14",
@@ -41186,13 +41153,13 @@ function render$p(_ctx, _cache, $props, $setup, $data, $options) {
     xmlns: "http://www.w3.org/2000/svg"
   }, _ctx.pti()), _hoisted_2$x, 16);
 }
-__name(render$p, "render$p");
-script$q.render = render$p;
-var theme$g = /* @__PURE__ */ __name(function theme19(_ref) {
+__name(render$o, "render$o");
+script$p.render = render$o;
+var theme$f = /* @__PURE__ */ __name(function theme20(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-chip {\n    display: inline-flex;\n    align-items: center;\n    background: ".concat(dt2("chip.background"), ";\n    color: ").concat(dt2("chip.color"), ";\n    border-radius: ").concat(dt2("chip.border.radius"), ";\n    padding: ").concat(dt2("chip.padding.y"), " ").concat(dt2("chip.padding.x"), ";\n    gap: ").concat(dt2("chip.gap"), ";\n}\n\n.p-chip-icon {\n    color: ").concat(dt2("chip.icon.color"), ";\n    font-size: ").concat(dt2("chip.icon.font.size"), ";\n    width: ").concat(dt2("chip.icon.size"), ";\n    height: ").concat(dt2("chip.icon.size"), ";\n}\n\n.p-chip-image {\n    border-radius: 50%;\n    width: ").concat(dt2("chip.image.width"), ";\n    height: ").concat(dt2("chip.image.height"), ";\n    margin-left: calc(-1 * ").concat(dt2("chip.padding.y"), ");\n}\n\n.p-chip:has(.p-chip-remove-icon) {\n    padding-right: ").concat(dt2("chip.padding.y"), ";\n}\n\n.p-chip:has(.p-chip-image) {\n    padding-top: calc(").concat(dt2("chip.padding.y"), " / 2);\n    padding-bottom: calc(").concat(dt2("chip.padding.y"), " / 2);\n}\n\n.p-chip-remove-icon {\n    cursor: pointer;\n    font-size: ").concat(dt2("chip.remove.icon.size"), ";\n    width: ").concat(dt2("chip.remove.icon.size"), ";\n    height: ").concat(dt2("chip.remove.icon.size"), ";\n    color: ").concat(dt2("chip.remove.icon.color"), ";\n    border-radius: 50%;\n    transition: outline-color ").concat(dt2("chip.transition.duration"), ", box-shadow ").concat(dt2("chip.transition.duration"), ";\n    outline-color: transparent;\n}\n\n.p-chip-remove-icon:focus-visible {\n    box-shadow: ").concat(dt2("chip.remove.icon.focus.ring.shadow"), ";\n    outline: ").concat(dt2("chip.remove.icon.focus.ring.width"), " ").concat(dt2("chip.remove.icon.focus.ring.style"), " ").concat(dt2("chip.remove.icon.focus.ring.color"), ";\n    outline-offset: ").concat(dt2("chip.remove.icon.focus.ring.offset"), ";\n}\n");
 }, "theme");
-var classes$g = {
+var classes$f = {
   root: "p-chip p-component",
   image: "p-chip-image",
   icon: "p-chip-icon",
@@ -41201,10 +41168,10 @@ var classes$g = {
 };
 var ChipStyle = BaseStyle.extend({
   name: "chip",
-  theme: theme$g,
-  classes: classes$g
+  theme: theme$f,
+  classes: classes$f
 });
-var script$1$f = {
+var script$1$e = {
   name: "BaseChip",
   "extends": script$U,
   props: {
@@ -41230,16 +41197,16 @@ var script$1$f = {
     }
   },
   style: ChipStyle,
-  provide: /* @__PURE__ */ __name(function provide21() {
+  provide: /* @__PURE__ */ __name(function provide22() {
     return {
       $pcChip: this,
       $parentInstance: this
     };
   }, "provide")
 };
-var script$p = {
+var script$o = {
   name: "Chip",
-  "extends": script$1$f,
+  "extends": script$1$e,
   inheritAttrs: false,
   emits: ["remove"],
   data: /* @__PURE__ */ __name(function data9() {
@@ -41259,12 +41226,12 @@ var script$p = {
     }, "close")
   },
   components: {
-    TimesCircleIcon: script$q
+    TimesCircleIcon: script$p
   }
 };
 var _hoisted_1$L = ["aria-label"];
 var _hoisted_2$w = ["src"];
-function render$o(_ctx, _cache, $props, $setup, $data, $options) {
+function render$n(_ctx, _cache, $props, $setup, $data, $options) {
   return $data.visible ? (openBlock(), createElementBlock("div", mergeProps({
     key: 0,
     "class": _ctx.cx("root"),
@@ -41298,8 +41265,8 @@ function render$o(_ctx, _cache, $props, $setup, $data, $options) {
     }, _ctx.ptm("removeIcon")), null, 16, ["class", "onClick", "onKeydown"]))];
   }) : createCommentVNode("", true)], 16, _hoisted_1$L)) : createCommentVNode("", true);
 }
-__name(render$o, "render$o");
-script$p.render = render$o;
+__name(render$n, "render$n");
+script$o.render = render$n;
 const _sfc_main$B = /* @__PURE__ */ defineComponent({
   __name: "SearchFilterChip",
   props: {
@@ -41310,7 +41277,7 @@ const _sfc_main$B = /* @__PURE__ */ defineComponent({
   emits: ["remove"],
   setup(__props) {
     return (_ctx, _cache) => {
-      return openBlock(), createBlock(unref(script$p), {
+      return openBlock(), createBlock(unref(script$o), {
         removable: "",
         onRemove: _cache[0] || (_cache[0] = ($event) => _ctx.$emit("remove", $event))
       }, {
@@ -41332,7 +41299,7 @@ const _sfc_main$B = /* @__PURE__ */ defineComponent({
   }
 });
 const SearchFilterChip = /* @__PURE__ */ _export_sfc(_sfc_main$B, [["__scopeId", "data-v-a4c03005"]]);
-const _withScopeId$h = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-f28148d1"), n = n(), popScopeId(), n), "_withScopeId$h");
+const _withScopeId$g = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-f28148d1"), n = n(), popScopeId(), n), "_withScopeId$g");
 const _hoisted_1$K = {
   key: 0,
   class: "search-filters pt-2 flex flex-wrap gap-2"
@@ -41408,107 +41375,6 @@ const _sfc_main$A = /* @__PURE__ */ defineComponent({
   }
 });
 const SearchBox = /* @__PURE__ */ _export_sfc(_sfc_main$A, [["__scopeId", "data-v-f28148d1"]]);
-var theme$f = /* @__PURE__ */ __name(function theme20(_ref) {
-  var dt2 = _ref.dt;
-  return "\n.p-card {\n    background: ".concat(dt2("card.background"), ";\n    color: ").concat(dt2("card.color"), ";\n    box-shadow: ").concat(dt2("card.shadow"), ";\n    border-radius: ").concat(dt2("card.border.radius"), ";\n    display: flex;\n    flex-direction: column;\n}\n\n.p-card-caption {\n    display: flex;\n    flex-direction: column;\n    gap: ").concat(dt2("card.caption.gap"), ";\n}\n\n.p-card-body {\n    padding: ").concat(dt2("card.body.padding"), ";\n    display: flex;\n    flex-direction: column;\n    gap: ").concat(dt2("card.body.gap"), ";\n}\n\n.p-card-title {\n    font-size: ").concat(dt2("card.title.font.size"), ";\n    font-weight: ").concat(dt2("card.title.font.weight"), ";\n}\n\n.p-card-subtitle {\n    color: ").concat(dt2("card.subtitle.color"), ";\n}\n");
-}, "theme");
-var classes$f = {
-  root: "p-card p-component",
-  header: "p-card-header",
-  body: "p-card-body",
-  caption: "p-card-caption",
-  title: "p-card-title",
-  subtitle: "p-card-subtitle",
-  content: "p-card-content",
-  footer: "p-card-footer"
-};
-var CardStyle = BaseStyle.extend({
-  name: "card",
-  theme: theme$f,
-  classes: classes$f
-});
-var script$1$e = {
-  name: "BaseCard",
-  "extends": script$U,
-  style: CardStyle,
-  provide: /* @__PURE__ */ __name(function provide22() {
-    return {
-      $pcCard: this,
-      $parentInstance: this
-    };
-  }, "provide")
-};
-var script$o = {
-  name: "Card",
-  "extends": script$1$e,
-  inheritAttrs: false
-};
-function render$n(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock("div", mergeProps({
-    "class": _ctx.cx("root")
-  }, _ctx.ptmi("root")), [_ctx.$slots.header ? (openBlock(), createElementBlock("div", mergeProps({
-    key: 0,
-    "class": _ctx.cx("header")
-  }, _ctx.ptm("header")), [renderSlot(_ctx.$slots, "header")], 16)) : createCommentVNode("", true), createBaseVNode("div", mergeProps({
-    "class": _ctx.cx("body")
-  }, _ctx.ptm("body")), [_ctx.$slots.title || _ctx.$slots.subtitle ? (openBlock(), createElementBlock("div", mergeProps({
-    key: 0,
-    "class": _ctx.cx("caption")
-  }, _ctx.ptm("caption")), [_ctx.$slots.title ? (openBlock(), createElementBlock("div", mergeProps({
-    key: 0,
-    "class": _ctx.cx("title")
-  }, _ctx.ptm("title")), [renderSlot(_ctx.$slots, "title")], 16)) : createCommentVNode("", true), _ctx.$slots.subtitle ? (openBlock(), createElementBlock("div", mergeProps({
-    key: 1,
-    "class": _ctx.cx("subtitle")
-  }, _ctx.ptm("subtitle")), [renderSlot(_ctx.$slots, "subtitle")], 16)) : createCommentVNode("", true)], 16)) : createCommentVNode("", true), createBaseVNode("div", mergeProps({
-    "class": _ctx.cx("content")
-  }, _ctx.ptm("content")), [renderSlot(_ctx.$slots, "content")], 16), _ctx.$slots.footer ? (openBlock(), createElementBlock("div", mergeProps({
-    key: 1,
-    "class": _ctx.cx("footer")
-  }, _ctx.ptm("footer")), [renderSlot(_ctx.$slots, "footer")], 16)) : createCommentVNode("", true)], 16)], 16);
-}
-__name(render$n, "render$n");
-script$o.render = render$n;
-const _withScopeId$g = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-c19e9e10"), n = n(), popScopeId(), n), "_withScopeId$g");
-const _hoisted_1$J = { class: "no-results-placeholder" };
-const _hoisted_2$v = { class: "flex flex-col items-center" };
-const _hoisted_3$i = { class: "whitespace-pre-line text-center" };
-const _sfc_main$z = /* @__PURE__ */ defineComponent({
-  __name: "NoResultsPlaceholder",
-  props: {
-    icon: {},
-    title: {},
-    message: {},
-    buttonLabel: {}
-  },
-  emits: ["action"],
-  setup(__props) {
-    return (_ctx, _cache) => {
-      return openBlock(), createElementBlock("div", _hoisted_1$J, [
-        createVNode(unref(script$o), null, {
-          content: withCtx(() => [
-            createBaseVNode("div", _hoisted_2$v, [
-              createBaseVNode("i", {
-                class: normalizeClass(_ctx.icon),
-                style: { "font-size": "3rem", "margin-bottom": "1rem" }
-              }, null, 2),
-              createBaseVNode("h3", null, toDisplayString$1(_ctx.title), 1),
-              createBaseVNode("p", _hoisted_3$i, toDisplayString$1(_ctx.message), 1),
-              _ctx.buttonLabel ? (openBlock(), createBlock(unref(script$I), {
-                key: 0,
-                label: _ctx.buttonLabel,
-                onClick: _cache[0] || (_cache[0] = ($event) => _ctx.$emit("action")),
-                class: "p-button-text"
-              }, null, 8, ["label"])) : createCommentVNode("", true)
-            ])
-          ]),
-          _: 1
-        })
-      ]);
-    };
-  }
-});
-const NoResultsPlaceholder = /* @__PURE__ */ _export_sfc(_sfc_main$z, [["__scopeId", "data-v-c19e9e10"]]);
 const useSystemStatsStore = /* @__PURE__ */ defineStore("systemStats", () => {
   const systemStats = ref(null);
   const isLoading = ref(false);
@@ -41537,11 +41403,11 @@ var script$n = {
   name: "ChevronLeftIcon",
   "extends": script$T
 };
-var _hoisted_1$I = /* @__PURE__ */ createBaseVNode("path", {
+var _hoisted_1$J = /* @__PURE__ */ createBaseVNode("path", {
   d: "M9.61296 13C9.50997 13.0005 9.40792 12.9804 9.3128 12.9409C9.21767 12.9014 9.13139 12.8433 9.05902 12.7701L3.83313 7.54416C3.68634 7.39718 3.60388 7.19795 3.60388 6.99022C3.60388 6.78249 3.68634 6.58325 3.83313 6.43628L9.05902 1.21039C9.20762 1.07192 9.40416 0.996539 9.60724 1.00012C9.81032 1.00371 10.0041 1.08597 10.1477 1.22959C10.2913 1.37322 10.3736 1.56698 10.3772 1.77005C10.3808 1.97313 10.3054 2.16968 10.1669 2.31827L5.49496 6.99022L10.1669 11.6622C10.3137 11.8091 10.3962 12.0084 10.3962 12.2161C10.3962 12.4238 10.3137 12.6231 10.1669 12.7701C10.0945 12.8433 10.0083 12.9014 9.91313 12.9409C9.81801 12.9804 9.71596 13.0005 9.61296 13Z",
   fill: "currentColor"
 }, null, -1);
-var _hoisted_2$u = [_hoisted_1$I];
+var _hoisted_2$v = [_hoisted_1$J];
 function render$m(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
@@ -41549,7 +41415,7 @@ function render$m(_ctx, _cache, $props, $setup, $data, $options) {
     viewBox: "0 0 14 14",
     fill: "none",
     xmlns: "http://www.w3.org/2000/svg"
-  }, _ctx.pti()), _hoisted_2$u, 16);
+  }, _ctx.pti()), _hoisted_2$v, 16);
 }
 __name(render$m, "render$m");
 script$n.render = render$m;
@@ -41557,11 +41423,11 @@ var script$m = {
   name: "ChevronRightIcon",
   "extends": script$T
 };
-var _hoisted_1$H = /* @__PURE__ */ createBaseVNode("path", {
+var _hoisted_1$I = /* @__PURE__ */ createBaseVNode("path", {
   d: "M4.38708 13C4.28408 13.0005 4.18203 12.9804 4.08691 12.9409C3.99178 12.9014 3.9055 12.8433 3.83313 12.7701C3.68634 12.6231 3.60388 12.4238 3.60388 12.2161C3.60388 12.0084 3.68634 11.8091 3.83313 11.6622L8.50507 6.99022L3.83313 2.31827C3.69467 2.16968 3.61928 1.97313 3.62287 1.77005C3.62645 1.56698 3.70872 1.37322 3.85234 1.22959C3.99596 1.08597 4.18972 1.00371 4.3928 1.00012C4.59588 0.996539 4.79242 1.07192 4.94102 1.21039L10.1669 6.43628C10.3137 6.58325 10.3962 6.78249 10.3962 6.99022C10.3962 7.19795 10.3137 7.39718 10.1669 7.54416L4.94102 12.7701C4.86865 12.8433 4.78237 12.9014 4.68724 12.9409C4.59212 12.9804 4.49007 13.0005 4.38708 13Z",
   fill: "currentColor"
 }, null, -1);
-var _hoisted_2$t = [_hoisted_1$H];
+var _hoisted_2$u = [_hoisted_1$I];
 function render$l(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("svg", mergeProps({
     width: "14",
@@ -41569,7 +41435,7 @@ function render$l(_ctx, _cache, $props, $setup, $data, $options) {
     viewBox: "0 0 14 14",
     fill: "none",
     xmlns: "http://www.w3.org/2000/svg"
-  }, _ctx.pti()), _hoisted_2$t, 16);
+  }, _ctx.pti()), _hoisted_2$u, 16);
 }
 __name(render$l, "render$l");
 script$m.render = render$l;
@@ -41977,8 +41843,8 @@ function _toPrimitive$7(t, r) {
   return ("string" === r ? String : Number)(t);
 }
 __name(_toPrimitive$7, "_toPrimitive$7");
-var _hoisted_1$G = ["tabindex", "aria-label"];
-var _hoisted_2$s = ["data-p-active", "data-p-disabled", "data-pc-index"];
+var _hoisted_1$H = ["tabindex", "aria-label"];
+var _hoisted_2$t = ["data-p-active", "data-p-disabled", "data-pc-index"];
 var _hoisted_3$h = ["id", "tabindex", "aria-disabled", "aria-selected", "aria-controls", "onClick", "onKeydown"];
 var _hoisted_4$c = ["tabindex", "aria-label"];
 var _hoisted_5$9 = ["id", "aria-labelledby", "data-pc-index", "data-p-active"];
@@ -42006,7 +41872,7 @@ function render$k(_ctx, _cache, $props, $setup, $data, $options) {
       "aria-hidden": "true",
       "class": _ctx.prevIcon
     }, _ctx.ptm("prevIcon")), null, 16, ["class"]))];
-  })], 16, _hoisted_1$G)), [[_directive_ripple]]) : createCommentVNode("", true), createBaseVNode("div", mergeProps({
+  })], 16, _hoisted_1$H)), [[_directive_ripple]]) : createCommentVNode("", true), createBaseVNode("div", mergeProps({
     ref: "content",
     "class": _ctx.cx("navContent"),
     onScroll: _cache[1] || (_cache[1] = function() {
@@ -42051,7 +41917,7 @@ function render$k(_ctx, _cache, $props, $setup, $data, $options) {
       ref_for: true
     }, $options.getTabPT(tab, "headerTitle", index2)), toDisplayString$1(tab.props.header), 17)) : createCommentVNode("", true), tab.children && tab.children.header ? (openBlock(), createBlock(resolveDynamicComponent(tab.children.header), {
       key: 1
-    })) : createCommentVNode("", true)], 16, _hoisted_3$h)), [[_directive_ripple]])], 16, _hoisted_2$s);
+    })) : createCommentVNode("", true)], 16, _hoisted_3$h)), [[_directive_ripple]])], 16, _hoisted_2$t);
   }), 128)), createBaseVNode("li", mergeProps({
     ref: "inkbar",
     "class": _ctx.cx("inkbar"),
@@ -42098,9 +41964,9 @@ function render$k(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render$k, "render$k");
 script$l.render = render$k;
-const _hoisted_1$F = { class: "grid grid-cols-2 gap-2" };
-const _hoisted_2$r = { class: "font-medium" };
-const _sfc_main$y = /* @__PURE__ */ defineComponent({
+const _hoisted_1$G = { class: "grid grid-cols-2 gap-2" };
+const _hoisted_2$s = { class: "font-medium" };
+const _sfc_main$z = /* @__PURE__ */ defineComponent({
   __name: "DeviceInfo",
   props: {
     device: {}
@@ -42124,12 +41990,12 @@ const _sfc_main$y = /* @__PURE__ */ defineComponent({
       return value3;
     }, "formatValue");
     return (_ctx, _cache) => {
-      return openBlock(), createElementBlock("div", _hoisted_1$F, [
+      return openBlock(), createElementBlock("div", _hoisted_1$G, [
         (openBlock(), createElementBlock(Fragment, null, renderList(deviceColumns, (col) => {
           return openBlock(), createElementBlock(Fragment, {
             key: col.field
           }, [
-            createBaseVNode("div", _hoisted_2$r, toDisplayString$1(_ctx.$t(col.header)), 1),
+            createBaseVNode("div", _hoisted_2$s, toDisplayString$1(_ctx.$t(col.header)), 1),
             createBaseVNode("div", null, toDisplayString$1(formatValue2(props.device[col.field], col.field)), 1)
           ], 64);
         }), 64))
@@ -42137,13 +42003,13 @@ const _sfc_main$y = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _hoisted_1$E = { class: "system-stats" };
-const _hoisted_2$q = { class: "mb-6" };
+const _hoisted_1$F = { class: "system-stats" };
+const _hoisted_2$r = { class: "mb-6" };
 const _hoisted_3$g = { class: "text-2xl font-semibold mb-4" };
 const _hoisted_4$b = { class: "grid grid-cols-2 gap-2" };
 const _hoisted_5$8 = { class: "font-medium" };
 const _hoisted_6$6 = { class: "text-2xl font-semibold mb-4" };
-const _sfc_main$x = /* @__PURE__ */ defineComponent({
+const _sfc_main$y = /* @__PURE__ */ defineComponent({
   __name: "SystemStatsPanel",
   props: {
     stats: {}
@@ -42170,8 +42036,8 @@ const _sfc_main$x = /* @__PURE__ */ defineComponent({
       return value3;
     }, "formatValue");
     return (_ctx, _cache) => {
-      return openBlock(), createElementBlock("div", _hoisted_1$E, [
-        createBaseVNode("div", _hoisted_2$q, [
+      return openBlock(), createElementBlock("div", _hoisted_1$F, [
+        createBaseVNode("div", _hoisted_2$r, [
           createBaseVNode("h2", _hoisted_3$g, toDisplayString$1(_ctx.$t("systemInfo")), 1),
           createBaseVNode("div", _hoisted_4$b, [
             (openBlock(), createElementBlock(Fragment, null, renderList(systemColumns, (col) => {
@@ -42184,25 +42050,25 @@ const _sfc_main$x = /* @__PURE__ */ defineComponent({
             }), 64))
           ])
         ]),
-        createVNode(unref(script$y)),
+        createVNode(unref(script$x)),
         createBaseVNode("div", null, [
           createBaseVNode("h2", _hoisted_6$6, toDisplayString$1(_ctx.$t("devices")), 1),
           props.stats.devices.length > 1 ? (openBlock(), createBlock(unref(script$l), { key: 0 }, {
             default: withCtx(() => [
               (openBlock(true), createElementBlock(Fragment, null, renderList(props.stats.devices, (device) => {
-                return openBlock(), createBlock(unref(script$z), {
+                return openBlock(), createBlock(unref(script$y), {
                   key: device.index,
                   header: device.name
                 }, {
                   default: withCtx(() => [
-                    createVNode(_sfc_main$y, { device }, null, 8, ["device"])
+                    createVNode(_sfc_main$z, { device }, null, 8, ["device"])
                   ]),
                   _: 2
                 }, 1032, ["header"]);
               }), 128))
             ]),
             _: 1
-          })) : (openBlock(), createBlock(_sfc_main$y, {
+          })) : (openBlock(), createBlock(_sfc_main$z, {
             key: 1,
             device: props.stats.devices[0]
           }, null, 8, ["device"]))
@@ -42211,10 +42077,10 @@ const _sfc_main$x = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _hoisted_1$D = { class: "text-2xl font-bold mb-2" };
-const _hoisted_2$p = { class: "space-y-2" };
+const _hoisted_1$E = { class: "text-2xl font-bold mb-2" };
+const _hoisted_2$q = { class: "space-y-2" };
 const _hoisted_3$f = ["href"];
-const _sfc_main$w = /* @__PURE__ */ defineComponent({
+const _sfc_main$x = /* @__PURE__ */ defineComponent({
   __name: "AboutPanel",
   setup(__props) {
     const systemStatsStore = useSystemStatsStore();
@@ -42247,8 +42113,8 @@ const _sfc_main$w = /* @__PURE__ */ defineComponent({
     });
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock("div", null, [
-        createBaseVNode("h2", _hoisted_1$D, toDisplayString$1(_ctx.$t("about")), 1),
-        createBaseVNode("div", _hoisted_2$p, [
+        createBaseVNode("h2", _hoisted_1$E, toDisplayString$1(_ctx.$t("about")), 1),
+        createBaseVNode("div", _hoisted_2$q, [
           (openBlock(true), createElementBlock(Fragment, null, renderList(links.value, (link) => {
             return openBlock(), createElementBlock("a", {
               key: link.url,
@@ -42257,7 +42123,7 @@ const _sfc_main$w = /* @__PURE__ */ defineComponent({
               rel: "noopener noreferrer",
               class: "inline-flex items-center no-underline"
             }, [
-              createVNode(unref(script$s), { class: "mr-2" }, {
+              createVNode(unref(script$r), { class: "mr-2" }, {
                 icon: withCtx(() => [
                   createBaseVNode("i", {
                     class: normalizeClass([link.icon, "mr-2 text-xl"])
@@ -42271,8 +42137,8 @@ const _sfc_main$w = /* @__PURE__ */ defineComponent({
             ], 8, _hoisted_3$f);
           }), 128))
         ]),
-        createVNode(unref(script$y)),
-        unref(systemStatsStore).systemStats ? (openBlock(), createBlock(_sfc_main$x, {
+        createVNode(unref(script$x)),
+        unref(systemStatsStore).systemStats ? (openBlock(), createBlock(_sfc_main$y, {
           key: 0,
           stats: unref(systemStatsStore).systemStats
         }, null, 8, ["stats"])) : createCommentVNode("", true)
@@ -42281,18 +42147,18 @@ const _sfc_main$w = /* @__PURE__ */ defineComponent({
   }
 });
 const _withScopeId$f = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-63951e2f"), n = n(), popScopeId(), n), "_withScopeId$f");
-const _hoisted_1$C = { class: "settings-container" };
-const _hoisted_2$o = { key: 0 };
+const _hoisted_1$D = { class: "settings-container" };
+const _hoisted_2$p = { key: 0 };
 const _hoisted_3$e = /* @__PURE__ */ _withScopeId$f(() => /* @__PURE__ */ createBaseVNode("div", null, "Loading keybinding panel...", -1));
 const _hoisted_4$a = /* @__PURE__ */ _withScopeId$f(() => /* @__PURE__ */ createBaseVNode("div", null, "Loading extension panel...", -1));
-const _sfc_main$v = /* @__PURE__ */ defineComponent({
+const _sfc_main$w = /* @__PURE__ */ defineComponent({
   __name: "SettingDialogContent",
   setup(__props) {
     const KeybindingPanel = /* @__PURE__ */ defineAsyncComponent(
-      () => __vitePreload(() => import("./KeybindingPanel-YkUFoiMw.js"), true ? __vite__mapDeps([0,1,2,3]) : void 0, import.meta.url)
+      () => __vitePreload(() => import("./KeybindingPanel-Dm_3sBT5.js"), true ? __vite__mapDeps([0,1,2,3]) : void 0, import.meta.url)
     );
     const ExtensionPanel = /* @__PURE__ */ defineAsyncComponent(
-      () => __vitePreload(() => import("./ExtensionPanel-DZLYjWBj.js"), true ? __vite__mapDeps([4,1,2]) : void 0, import.meta.url)
+      () => __vitePreload(() => import("./ExtensionPanel-BmKi_NKS.js"), true ? __vite__mapDeps([4,1,2]) : void 0, import.meta.url)
     );
     const aboutPanelNode = {
       key: "about",
@@ -42372,8 +42238,8 @@ const _sfc_main$v = /* @__PURE__ */ defineComponent({
       () => inSearch.value ? "Search Results" : activeCategory.value?.label
     );
     return (_ctx, _cache) => {
-      return openBlock(), createElementBlock("div", _hoisted_1$C, [
-        createVNode(unref(script$x), { class: "settings-sidebar flex-shrink-0 p-2 w-64" }, {
+      return openBlock(), createElementBlock("div", _hoisted_1$D, [
+        createVNode(unref(script$w), { class: "settings-sidebar flex-shrink-0 p-2 w-64" }, {
           default: withCtx(() => [
             createVNode(SearchBox, {
               class: "settings-search-box w-full mb-2",
@@ -42394,19 +42260,19 @@ const _sfc_main$v = /* @__PURE__ */ defineComponent({
           ]),
           _: 1
         }),
-        createVNode(unref(script$y), { layout: "vertical" }),
-        createVNode(unref(script$x), { class: "settings-content flex-grow" }, {
+        createVNode(unref(script$x), { layout: "vertical" }),
+        createVNode(unref(script$w), { class: "settings-content flex-grow" }, {
           default: withCtx(() => [
-            createVNode(unref(script$B), { value: tabValue.value }, {
+            createVNode(unref(script$A), { value: tabValue.value }, {
               default: withCtx(() => [
-                createVNode(unref(script$A), { class: "settings-tab-panels" }, {
+                createVNode(unref(script$z), { class: "settings-tab-panels" }, {
                   default: withCtx(() => [
-                    createVNode(unref(script$z), {
+                    createVNode(unref(script$y), {
                       key: "search-results",
                       value: "Search Results"
                     }, {
                       default: withCtx(() => [
-                        searchResults.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_2$o, [
+                        searchResults.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_2$p, [
                           (openBlock(true), createElementBlock(Fragment, null, renderList(searchResults.value, (group, i2) => {
                             return openBlock(), createBlock(SettingGroup, {
                               key: group.label,
@@ -42424,7 +42290,7 @@ const _sfc_main$v = /* @__PURE__ */ defineComponent({
                       _: 1
                     }),
                     (openBlock(true), createElementBlock(Fragment, null, renderList(categories.value, (category) => {
-                      return openBlock(), createBlock(unref(script$z), {
+                      return openBlock(), createBlock(unref(script$y), {
                         key: category.key,
                         value: category.label
                       }, {
@@ -42443,16 +42309,16 @@ const _sfc_main$v = /* @__PURE__ */ defineComponent({
                         _: 2
                       }, 1032, ["value"]);
                     }), 128)),
-                    createVNode(unref(script$z), {
+                    createVNode(unref(script$y), {
                       key: "about",
                       value: "About"
                     }, {
                       default: withCtx(() => [
-                        createVNode(_sfc_main$w)
+                        createVNode(_sfc_main$x)
                       ]),
                       _: 1
                     }),
-                    createVNode(unref(script$z), {
+                    createVNode(unref(script$y), {
                       key: "keybinding",
                       value: "Keybinding"
                     }, {
@@ -42469,7 +42335,7 @@ const _sfc_main$v = /* @__PURE__ */ defineComponent({
                       ]),
                       _: 1
                     }),
-                    createVNode(unref(script$z), {
+                    createVNode(unref(script$y), {
                       key: "extension",
                       value: "Extension"
                     }, {
@@ -42499,20 +42365,20 @@ const _sfc_main$v = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const SettingDialogContent = /* @__PURE__ */ _export_sfc(_sfc_main$v, [["__scopeId", "data-v-63951e2f"]]);
-const _sfc_main$u = {};
+const SettingDialogContent = /* @__PURE__ */ _export_sfc(_sfc_main$w, [["__scopeId", "data-v-63951e2f"]]);
+const _sfc_main$v = {};
 const _withScopeId$e = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-3f3c5ee5"), n = n(), popScopeId(), n), "_withScopeId$e");
-const _hoisted_1$B = /* @__PURE__ */ _withScopeId$e(() => /* @__PURE__ */ createBaseVNode("i", { class: "pi pi-cog" }, null, -1));
+const _hoisted_1$C = /* @__PURE__ */ _withScopeId$e(() => /* @__PURE__ */ createBaseVNode("i", { class: "pi pi-cog" }, null, -1));
 function _sfc_render$1(_ctx, _cache) {
   return openBlock(), createElementBlock("div", null, [
     createBaseVNode("h2", null, [
-      _hoisted_1$B,
+      _hoisted_1$C,
       createBaseVNode("span", null, toDisplayString$1(_ctx.$t("settings")), 1)
     ])
   ]);
 }
 __name(_sfc_render$1, "_sfc_render$1");
-const SettingDialogHeader = /* @__PURE__ */ _export_sfc(_sfc_main$u, [["render", _sfc_render$1], ["__scopeId", "data-v-3f3c5ee5"]]);
+const SettingDialogHeader = /* @__PURE__ */ _export_sfc(_sfc_main$v, [["render", _sfc_render$1], ["__scopeId", "data-v-3f3c5ee5"]]);
 var isVue2$1 = false;
 var isVue3$1 = true;
 var Vue2$1 = void 0;
@@ -51927,7 +51793,7 @@ function useToast() {
   return PrimeVueToast;
 }
 __name(useToast, "useToast");
-const _sfc_main$t = /* @__PURE__ */ defineComponent({
+const _sfc_main$u = /* @__PURE__ */ defineComponent({
   __name: "FindIssueButton",
   props: {
     errorMessage: {},
@@ -51953,12 +51819,12 @@ const _sfc_main$t = /* @__PURE__ */ defineComponent({
   }
 });
 const _withScopeId$d = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-25398546"), n = n(), popScopeId(), n), "_withScopeId$d");
-const _hoisted_1$A = { class: "comfy-error-report" };
-const _hoisted_2$n = { class: "wrapper-pre" };
+const _hoisted_1$B = { class: "comfy-error-report" };
+const _hoisted_2$o = { class: "wrapper-pre" };
 const _hoisted_3$d = { class: "action-container" };
 const repoOwner = "comfyanonymous";
 const repoName = "ComfyUI";
-const _sfc_main$s = /* @__PURE__ */ defineComponent({
+const _sfc_main$t = /* @__PURE__ */ defineComponent({
   __name: "ExecutionErrorDialogContent",
   props: {
     error: {}
@@ -52078,7 +51944,7 @@ ${workflowText}
           title: props.error.node_type,
           message: props.error.exception_message
         }, null, 8, ["title", "message"]),
-        createBaseVNode("div", _hoisted_1$A, [
+        createBaseVNode("div", _hoisted_1$B, [
           withDirectives(createVNode(unref(script$I), {
             label: _ctx.$t("showReport"),
             onClick: showReport,
@@ -52087,17 +51953,17 @@ ${workflowText}
             [vShow, !reportOpen.value]
           ]),
           reportOpen.value ? (openBlock(), createElementBlock(Fragment, { key: 0 }, [
-            createVNode(unref(script$y)),
-            createVNode(unref(script$x), { style: { "width": "100%", "height": "400px", "max-width": "80vw" } }, {
+            createVNode(unref(script$x)),
+            createVNode(unref(script$w), { style: { "width": "100%", "height": "400px", "max-width": "80vw" } }, {
               default: withCtx(() => [
-                createBaseVNode("pre", _hoisted_2$n, toDisplayString$1(reportContent.value), 1)
+                createBaseVNode("pre", _hoisted_2$o, toDisplayString$1(reportContent.value), 1)
               ]),
               _: 1
             }),
-            createVNode(unref(script$y))
+            createVNode(unref(script$x))
           ], 64)) : createCommentVNode("", true),
           createBaseVNode("div", _hoisted_3$d, [
-            createVNode(_sfc_main$t, {
+            createVNode(_sfc_main$u, {
               errorMessage: props.error.exception_message,
               repoOwner,
               repoName
@@ -52114,7 +51980,7 @@ ${workflowText}
     };
   }
 });
-const ExecutionErrorDialogContent = /* @__PURE__ */ _export_sfc(_sfc_main$s, [["__scopeId", "data-v-25398546"]]);
+const ExecutionErrorDialogContent = /* @__PURE__ */ _export_sfc(_sfc_main$t, [["__scopeId", "data-v-25398546"]]);
 var theme$d = /* @__PURE__ */ __name(function theme22(_ref) {
   var dt2 = _ref.dt;
   return '\n.p-progressspinner {\n    position: relative;\n    margin: 0 auto;\n    width: 100px;\n    height: 100px;\n    display: inline-block;\n}\n\n.p-progressspinner::before {\n    content: "";\n    display: block;\n    padding-top: 100%;\n}\n\n.p-progressspinner-spin {\n    height: 100%;\n    transform-origin: center center;\n    width: 100%;\n    position: absolute;\n    top: 0;\n    bottom: 0;\n    left: 0;\n    right: 0;\n    margin: auto;\n    animation: p-progressspinner-rotate 2s linear infinite;\n}\n\n.p-progressspinner-circle {\n    stroke-dasharray: 89, 200;\n    stroke-dashoffset: 0;\n    stroke: '.concat(dt2("progressspinner.color.1"), ";\n    animation: p-progressspinner-dash 1.5s ease-in-out infinite, p-progressspinner-color 6s ease-in-out infinite;\n    stroke-linecap: round;\n}\n\n@keyframes p-progressspinner-rotate {\n    100% {\n        transform: rotate(360deg);\n    }\n}\n@keyframes p-progressspinner-dash {\n    0% {\n        stroke-dasharray: 1, 200;\n        stroke-dashoffset: 0;\n    }\n    50% {\n        stroke-dasharray: 89, 200;\n        stroke-dashoffset: -35px;\n    }\n    100% {\n        stroke-dasharray: 89, 200;\n        stroke-dashoffset: -124px;\n    }\n}\n@keyframes p-progressspinner-color {\n    100%,\n    0% {\n        stroke: ").concat(dt2("progressspinner.color.1"), ";\n    }\n    40% {\n        stroke: ").concat(dt2("progressspinner.color.2"), ";\n    }\n    66% {\n        stroke: ").concat(dt2("progressspinner.color.3"), ";\n    }\n    80%,\n    90% {\n        stroke: ").concat(dt2("progressspinner.color.4"), ";\n    }\n}\n");
@@ -52166,7 +52032,7 @@ var script$k = {
     }, "svgStyle")
   }
 };
-var _hoisted_1$z = ["fill", "stroke-width"];
+var _hoisted_1$A = ["fill", "stroke-width"];
 function render$j(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", mergeProps({
     "class": _ctx.cx("root"),
@@ -52183,7 +52049,7 @@ function render$j(_ctx, _cache, $props, $setup, $data, $options) {
     fill: _ctx.fill,
     "stroke-width": _ctx.strokeWidth,
     strokeMiterlimit: "10"
-  }, _ctx.ptm("circle")), null, 16, _hoisted_1$z)], 16))], 16);
+  }, _ctx.ptm("circle")), null, 16, _hoisted_1$A)], 16))], 16);
 }
 __name(render$j, "render$j");
 script$k.render = render$j;
@@ -58215,11 +58081,11 @@ if (__INTLIFY_PROD_DEVTOOLS__) {
 }
 if (false) ;
 const _withScopeId$c = /* @__PURE__ */ __name((n) => (pushScopeId("data-v-98830966"), n = n(), popScopeId(), n), "_withScopeId$c");
-const _hoisted_1$y = {
+const _hoisted_1$z = {
   class: "flex flex-wrap content-around justify-around gap-4 mt-4",
   "data-testid": "template-workflows-content"
 };
-const _hoisted_2$m = ["data-testid"];
+const _hoisted_2$n = ["data-testid"];
 const _hoisted_3$c = ["onClick"];
 const _hoisted_4$9 = ["src"];
 const _hoisted_5$7 = /* @__PURE__ */ _withScopeId$c(() => /* @__PURE__ */ createBaseVNode("a", null, [
@@ -58227,7 +58093,7 @@ const _hoisted_5$7 = /* @__PURE__ */ _withScopeId$c(() => /* @__PURE__ */ create
     /* @__PURE__ */ createBaseVNode("i", { class: "pi pi-play-circle" })
   ])
 ], -1));
-const _sfc_main$r = /* @__PURE__ */ defineComponent({
+const _sfc_main$s = /* @__PURE__ */ defineComponent({
   __name: "TemplateWorkflowsContent",
   setup(__props) {
     const { t } = useI18n();
@@ -58248,13 +58114,13 @@ const _sfc_main$r = /* @__PURE__ */ defineComponent({
       return false;
     }, "loadWorkflow");
     return (_ctx, _cache) => {
-      return openBlock(), createElementBlock("div", _hoisted_1$y, [
+      return openBlock(), createElementBlock("div", _hoisted_1$z, [
         (openBlock(), createElementBlock(Fragment, null, renderList(templates, (template) => {
           return createBaseVNode("div", {
             key: template,
             "data-testid": `template-workflow-${template}`
           }, [
-            createVNode(unref(script$o), null, {
+            createVNode(unref(script$H), null, {
               header: withCtx(() => [
                 createBaseVNode("div", {
                   class: "relative overflow-hidden rounded-lg cursor-pointer",
@@ -58276,13 +58142,13 @@ const _sfc_main$r = /* @__PURE__ */ defineComponent({
               ]),
               _: 2
             }, 1024)
-          ], 8, _hoisted_2$m);
+          ], 8, _hoisted_2$n);
         }), 64))
       ]);
     };
   }
 });
-const TemplateWorkflowsContent = /* @__PURE__ */ _export_sfc(_sfc_main$r, [["__scopeId", "data-v-98830966"]]);
+const TemplateWorkflowsContent = /* @__PURE__ */ _export_sfc(_sfc_main$s, [["__scopeId", "data-v-98830966"]]);
 var theme$c = /* @__PURE__ */ __name(function theme23(_ref) {
   var dt2 = _ref.dt;
   return "\n.p-floatlabel {\n    display: block;\n    position: relative;\n}\n\n.p-floatlabel label {\n    position: absolute;\n    pointer-events: none;\n    top: 50%;\n    margin-top: -.5rem;\n    transition-property: all;\n    transition-timing-function: ease;\n    line-height: 1;\n    left: 0.75rem;\n    color: ".concat(dt2("floatlabel.color"), ";\n    transition-duration: ").concat(dt2("floatlabel.transition.duration"), ";\n}\n\n.p-floatlabel:has(textarea) label {\n    top: 1rem;\n}\n\n.p-floatlabel:has(input:focus) label,\n.p-floatlabel:has(input.p-filled) label,\n.p-floatlabel:has(input:-webkit-autofill) label,\n.p-floatlabel:has(textarea:focus) label,\n.p-floatlabel:has(textarea.p-filled) label,\n.p-floatlabel:has(.p-inputwrapper-focus) label,\n.p-floatlabel:has(.p-inputwrapper-filled) label {\n    top: -.75rem;\n    font-size: 12px;\n    color: ").concat(dt2("floatlabel.focus.color"), ";\n}\n\n.p-floatlabel .p-placeholder,\n.p-floatlabel input::placeholder,\n.p-floatlabel .p-inputtext::placeholder {\n    opacity: 0;\n    transition-property: all;\n    transition-timing-function: ease;\n}\n\n.p-floatlabel .p-focus .p-placeholder,\n.p-floatlabel input:focus::placeholder,\n.p-floatlabel .p-inputtext:focus::placeholder {\n    opacity: 1;\n    transition-property: all;\n    transition-timing-function: ease;\n}\n\n.p-floatlabel > .p-invalid + label {\n    color: ").concat(dt2("floatlabel.invalid.color"), ";\n}\n");
@@ -58319,8 +58185,8 @@ function render$i(_ctx, _cache, $props, $setup, $data, $options) {
 }
 __name(render$i, "render$i");
 script$j.render = render$i;
-const _hoisted_1$x = { class: "prompt-dialog-content flex flex-col gap-2 pt-8" };
-const _sfc_main$q = /* @__PURE__ */ defineComponent({
+const _hoisted_1$y = { class: "prompt-dialog-content flex flex-col gap-2 pt-8" };
+const _sfc_main$r = /* @__PURE__ */ defineComponent({
   __name: "PromptDialogContent",
   props: {
     message: {},
@@ -58341,7 +58207,7 @@ const _sfc_main$q = /* @__PURE__ */ defineComponent({
       inputElement.setSelectionRange(0, inputElement.value.length);
     }, "selectAllText");
     return (_ctx, _cache) => {
-      return openBlock(), createElementBlock("div", _hoisted_1$x, [
+      return openBlock(), createElementBlock("div", _hoisted_1$y, [
         createVNode(unref(script$j), null, {
           default: withCtx(() => [
             createVNode(unref(script$N), {
@@ -58369,6 +58235,7 @@ const _sfc_main$q = /* @__PURE__ */ defineComponent({
 });
 const messages = {
   en: {
+    terminal: "Terminal",
     videoFailedToLoad: "Video failed to load",
     extensionName: "Extension Name",
     reloadToApplyChanges: "Reload to apply changes",
@@ -58455,7 +58322,8 @@ const messages = {
       refresh: "Refresh node definitions",
       clipspace: "Open Clipspace",
       resetView: "Reset canvas view",
-      clear: "Clear workflow"
+      clear: "Clear workflow",
+      toggleBottomPanel: "Toggle Bottom Panel"
     },
     templateWorkflows: {
       title: "Get Started with a Template",
@@ -58476,6 +58344,7 @@ const messages = {
     }
   },
   zh: {
+    terminal: "终端",
     videoFailedToLoad: "视频加载失败",
     extensionName: "扩展名称",
     reloadToApplyChanges: "重新加载以应用更改",
@@ -58563,7 +58432,8 @@ const messages = {
       refresh: "刷新节点",
       clipspace: "打开剪贴板",
       resetView: "重置画布视图",
-      clear: "清空工作流"
+      clear: "清空工作流",
+      toggleBottomPanel: "底部面板"
     },
     templateWorkflows: {
       title: "从模板开始",
@@ -58584,6 +58454,7 @@ const messages = {
     }
   },
   ru: {
+    terminal: "Терминал",
     videoFailedToLoad: "Видео не удалось загрузить",
     extensionName: "Название расширения",
     reloadToApplyChanges: "Перезагрузите, чтобы применить изменения",
@@ -58704,10 +58575,7 @@ function showLoadWorkflowWarning(props) {
   const dialogStore = useDialogStore();
   dialogStore.showDialog({
     component: LoadWorkflowWarning,
-    props,
-    dialogComponentProps: {
-      maximizable: true
-    }
+    props
   });
 }
 __name(showLoadWorkflowWarning, "showLoadWorkflowWarning");
@@ -58754,7 +58622,7 @@ async function showPromptDialog({
   return new Promise((resolve2) => {
     dialogStore.showDialog({
       title,
-      component: _sfc_main$q,
+      component: _sfc_main$r,
       props: {
         message: message2,
         defaultValue,
@@ -59274,7 +59142,6 @@ class ComfyUI {
       $el("button", {
         id: "comfy-clipspace-button",
         textContent: "Clipspace",
-        // @ts-expect-error Move to ComfyApp
         onclick: /* @__PURE__ */ __name(() => app$1.openClipspace(), "onclick")
       }),
       $el("button", {
@@ -59670,6 +59537,74 @@ class ComfyLogging {
 window.comfyAPI = window.comfyAPI || {};
 window.comfyAPI.logging = window.comfyAPI.logging || {};
 window.comfyAPI.logging.ComfyLogging = ComfyLogging;
+var NodeSlotType = /* @__PURE__ */ ((NodeSlotType2) => {
+  NodeSlotType2[NodeSlotType2["INPUT"] = 1] = "INPUT";
+  NodeSlotType2[NodeSlotType2["OUTPUT"] = 2] = "OUTPUT";
+  return NodeSlotType2;
+})(NodeSlotType || {});
+var RenderShape = /* @__PURE__ */ ((RenderShape2) => {
+  RenderShape2[RenderShape2["BOX"] = 1] = "BOX";
+  RenderShape2[RenderShape2["ROUND"] = 2] = "ROUND";
+  RenderShape2[RenderShape2["CIRCLE"] = 3] = "CIRCLE";
+  RenderShape2[RenderShape2["CARD"] = 4] = "CARD";
+  RenderShape2[RenderShape2["ARROW"] = 5] = "ARROW";
+  RenderShape2[RenderShape2["GRID"] = 6] = "GRID";
+  RenderShape2[RenderShape2["HollowCircle"] = 7] = "HollowCircle";
+  return RenderShape2;
+})(RenderShape || {});
+var LinkDirection = /* @__PURE__ */ ((LinkDirection2) => {
+  LinkDirection2[LinkDirection2["NONE"] = 0] = "NONE";
+  LinkDirection2[LinkDirection2["UP"] = 1] = "UP";
+  LinkDirection2[LinkDirection2["DOWN"] = 2] = "DOWN";
+  LinkDirection2[LinkDirection2["LEFT"] = 3] = "LEFT";
+  LinkDirection2[LinkDirection2["RIGHT"] = 4] = "RIGHT";
+  LinkDirection2[LinkDirection2["CENTER"] = 5] = "CENTER";
+  return LinkDirection2;
+})(LinkDirection || {});
+var LinkRenderType = /* @__PURE__ */ ((LinkRenderType2) => {
+  LinkRenderType2[LinkRenderType2["HIDDEN_LINK"] = -1] = "HIDDEN_LINK";
+  LinkRenderType2[LinkRenderType2["STRAIGHT_LINK"] = 0] = "STRAIGHT_LINK";
+  LinkRenderType2[LinkRenderType2["LINEAR_LINK"] = 1] = "LINEAR_LINK";
+  LinkRenderType2[LinkRenderType2["SPLINE_LINK"] = 2] = "SPLINE_LINK";
+  return LinkRenderType2;
+})(LinkRenderType || {});
+var TitleMode = /* @__PURE__ */ ((TitleMode2) => {
+  TitleMode2[TitleMode2["NORMAL_TITLE"] = 0] = "NORMAL_TITLE";
+  TitleMode2[TitleMode2["NO_TITLE"] = 1] = "NO_TITLE";
+  TitleMode2[TitleMode2["TRANSPARENT_TITLE"] = 2] = "TRANSPARENT_TITLE";
+  TitleMode2[TitleMode2["AUTOHIDE_TITLE"] = 3] = "AUTOHIDE_TITLE";
+  return TitleMode2;
+})(TitleMode || {});
+var LGraphEventMode = /* @__PURE__ */ ((LGraphEventMode2) => {
+  LGraphEventMode2[LGraphEventMode2["ALWAYS"] = 0] = "ALWAYS";
+  LGraphEventMode2[LGraphEventMode2["ON_EVENT"] = 1] = "ON_EVENT";
+  LGraphEventMode2[LGraphEventMode2["NEVER"] = 2] = "NEVER";
+  LGraphEventMode2[LGraphEventMode2["ON_TRIGGER"] = 3] = "ON_TRIGGER";
+  LGraphEventMode2[LGraphEventMode2["BYPASS"] = 4] = "BYPASS";
+  return LGraphEventMode2;
+})(LGraphEventMode || {});
+function distance(a, b) {
+  return Math.sqrt(
+    (b[0] - a[0]) * (b[0] - a[0]) + (b[1] - a[1]) * (b[1] - a[1])
+  );
+}
+__name(distance, "distance");
+function isPointInRectangle(point, rect) {
+  return rect[0] < point[0] && rect[0] + rect[2] > point[0] && rect[1] < point[1] && rect[1] + rect[3] > point[1];
+}
+__name(isPointInRectangle, "isPointInRectangle");
+function isInsideRectangle(x2, y2, left, top, width2, height) {
+  return left < x2 && left + width2 > x2 && top < y2 && top + height > y2;
+}
+__name(isInsideRectangle, "isInsideRectangle");
+function overlapBounding(a, b) {
+  const aRight = a[0] + a[2];
+  const aBottom = a[1] + a[3];
+  const bRight = b[0] + b[2];
+  const bBottom = b[1] + b[3];
+  return a[0] > bRight || a[1] > bBottom || aRight < b[0] || aBottom < b[1] ? false : true;
+}
+__name(overlapBounding, "overlapBounding");
 var BadgePosition = /* @__PURE__ */ ((BadgePosition2) => {
   BadgePosition2["TopLeft"] = "top-left";
   BadgePosition2["TopRight"] = "top-right";
@@ -59737,47 +59672,6 @@ class LGraphBadge {
     ctx.restore();
   }
 }
-var RenderShape = /* @__PURE__ */ ((RenderShape2) => {
-  RenderShape2[RenderShape2["BOX"] = 1] = "BOX";
-  RenderShape2[RenderShape2["ROUND"] = 2] = "ROUND";
-  RenderShape2[RenderShape2["CIRCLE"] = 3] = "CIRCLE";
-  RenderShape2[RenderShape2["CARD"] = 4] = "CARD";
-  RenderShape2[RenderShape2["ARROW"] = 5] = "ARROW";
-  RenderShape2[RenderShape2["GRID"] = 6] = "GRID";
-  RenderShape2[RenderShape2["HollowCircle"] = 7] = "HollowCircle";
-  return RenderShape2;
-})(RenderShape || {});
-var LinkDirection = /* @__PURE__ */ ((LinkDirection2) => {
-  LinkDirection2[LinkDirection2["NONE"] = 0] = "NONE";
-  LinkDirection2[LinkDirection2["UP"] = 1] = "UP";
-  LinkDirection2[LinkDirection2["DOWN"] = 2] = "DOWN";
-  LinkDirection2[LinkDirection2["LEFT"] = 3] = "LEFT";
-  LinkDirection2[LinkDirection2["RIGHT"] = 4] = "RIGHT";
-  LinkDirection2[LinkDirection2["CENTER"] = 5] = "CENTER";
-  return LinkDirection2;
-})(LinkDirection || {});
-function distance(a, b) {
-  return Math.sqrt(
-    (b[0] - a[0]) * (b[0] - a[0]) + (b[1] - a[1]) * (b[1] - a[1])
-  );
-}
-__name(distance, "distance");
-function isPointInRectangle(point, rect) {
-  return rect[0] < point[0] && rect[0] + rect[2] > point[0] && rect[1] < point[1] && rect[1] + rect[3] > point[1];
-}
-__name(isPointInRectangle, "isPointInRectangle");
-function isInsideRectangle(x2, y2, left, top, width2, height) {
-  return left < x2 && left + width2 > x2 && top < y2 && top + height > y2;
-}
-__name(isInsideRectangle, "isInsideRectangle");
-function overlapBounding(a, b) {
-  const aRight = a[0] + a[2];
-  const aBottom = a[1] + a[3];
-  const bRight = b[0] + b[2];
-  const bBottom = b[1] + b[3];
-  return a[0] > bRight || a[1] > bBottom || aRight < b[0] || aBottom < b[1] ? false : true;
-}
-__name(overlapBounding, "overlapBounding");
 class LLink {
   static {
     __name(this, "LLink");
@@ -59880,7 +59774,6 @@ class LGraphNode {
   color;
   bgcolor;
   boxcolor;
-  shape;
   exec_version;
   action_call;
   execute_triggered;
@@ -59913,6 +59806,30 @@ class LGraphNode {
   has_errors;
   removable;
   block_delete;
+  get shape() {
+    return this._shape;
+  }
+  set shape(v2) {
+    switch (v2) {
+      case "default":
+        delete this._shape;
+        break;
+      case "box":
+        this._shape = RenderShape.BOX;
+        break;
+      case "round":
+        this._shape = RenderShape.ROUND;
+        break;
+      case "circle":
+        this._shape = RenderShape.CIRCLE;
+        break;
+      case "card":
+        this._shape = RenderShape.CARD;
+        break;
+      default:
+        this._shape = v2;
+    }
+  }
   constructor(title) {
     this._ctor(title);
   }
@@ -60547,7 +60464,7 @@ class LGraphNode {
   addOutputs(array) {
     for (let i2 = 0; i2 < array.length; ++i2) {
       const info = array[i2];
-      const o = { name: info[0], type: info[1], link: null };
+      const o = { name: info[0], type: info[1], links: null };
       if (array[2]) {
         for (const j in info[2]) {
           o[j] = info[2][j];
@@ -60919,50 +60836,60 @@ class LGraphNode {
     return -1;
   }
   findInputSlotFree(optsIn) {
-    const optsDef = {
-      returnObj: false,
-      typesNotAccepted: []
-    };
-    const opts = Object.assign(optsDef, optsIn || {});
-    if (!this.inputs) return -1;
-    for (let i2 = 0, l = this.inputs.length; i2 < l; ++i2) {
-      if (this.inputs[i2].link) continue;
-      if (opts.typesNotAccepted?.includes?.(this.inputs[i2].type)) continue;
-      return !opts.returnObj ? i2 : this.inputs[i2];
-    }
-    return -1;
+    return this.#findFreeSlot(this.inputs, optsIn);
   }
   findOutputSlotFree(optsIn) {
-    const optsDef = {
+    return this.#findFreeSlot(this.outputs, optsIn);
+  }
+  /**
+   * Finds the next free slot
+   * @param slots The slots to search, i.e. this.inputs or this.outputs
+   * @param options Options
+   */
+  #findFreeSlot(slots, options3) {
+    const defaults2 = {
       returnObj: false,
       typesNotAccepted: []
     };
-    const opts = Object.assign(optsDef, optsIn || {});
-    if (!this.outputs) return -1;
-    for (let i2 = 0, l = this.outputs.length; i2 < l; ++i2) {
-      if (this.outputs[i2].links) continue;
-      if (opts.typesNotAccepted?.includes?.(this.outputs[i2].type)) continue;
-      return !opts.returnObj ? i2 : this.outputs[i2];
+    const opts = Object.assign(defaults2, options3 || {});
+    const length = slots?.length;
+    if (!(length > 0)) return -1;
+    for (let i2 = 0; i2 < length; ++i2) {
+      const slot = slots[i2];
+      if (!slot || slot.link || slot.links?.length) continue;
+      if (opts.typesNotAccepted?.includes?.(slot.type)) continue;
+      return !opts.returnObj ? i2 : slot;
     }
     return -1;
   }
   findInputSlotByType(type, returnObj, preferFreeSlot, doNotUseOccupied) {
-    return returnObj ? this.findSlotByType(true, type, true, preferFreeSlot, doNotUseOccupied) : this.findSlotByType(true, type, false, preferFreeSlot, doNotUseOccupied);
+    return this.#findSlotByType(this.inputs, type, returnObj, preferFreeSlot, doNotUseOccupied);
   }
   findOutputSlotByType(type, returnObj, preferFreeSlot, doNotUseOccupied) {
-    return returnObj ? this.findSlotByType(false, type, true, preferFreeSlot, doNotUseOccupied) : this.findSlotByType(false, type, false, preferFreeSlot, doNotUseOccupied);
+    return this.#findSlotByType(this.outputs, type, returnObj, preferFreeSlot, doNotUseOccupied);
   }
   findSlotByType(input, type, returnObj, preferFreeSlot, doNotUseOccupied) {
-    input ||= false;
-    returnObj ||= false;
-    preferFreeSlot ||= false;
-    doNotUseOccupied ||= false;
-    const slots = input ? this.inputs : this.outputs;
-    if (!slots) return -1;
+    return input ? this.#findSlotByType(this.inputs, type, returnObj, preferFreeSlot, doNotUseOccupied) : this.#findSlotByType(this.outputs, type, returnObj, preferFreeSlot, doNotUseOccupied);
+  }
+  /**
+   * Finds a matching slot from those provided, returning the slot itself or its index in {@link slots}.
+   * @param slots Slots to search (this.inputs or this.outputs)
+   * @param type Type of slot to look for
+   * @param returnObj If true, returns the slot itself.  Otherwise, the index.
+   * @param preferFreeSlot Prefer a free slot, but if none are found, fall back to an occupied slot.
+   * @param doNotUseOccupied Do not fall back to occupied slots.
+   * @see {findSlotByType}
+   * @see {findOutputSlotByType}
+   * @see {findInputSlotByType}
+   * @returns If a match is found, the slot if returnObj is true, otherwise the index.  If no matches are found, -1
+   */
+  #findSlotByType(slots, type, returnObj, preferFreeSlot, doNotUseOccupied) {
+    const length = slots?.length;
+    if (!length) return -1;
     if (type == "" || type == "*") type = 0;
     const sourceTypes = String(type).toLowerCase().split(",");
     let occupiedSlot = null;
-    for (let i2 = 0, l = slots.length; i2 < l; ++i2) {
+    for (let i2 = 0; i2 < length; ++i2) {
       const slot = slots[i2];
       const destTypes = slot.type == "0" || slot.type == "*" ? ["0"] : String(slot.type).toLowerCase().split(",");
       for (const sourceType of sourceTypes) {
@@ -60970,7 +60897,7 @@ class LGraphNode {
         for (const destType of destTypes) {
           const dest = destType == "_event_" ? LiteGraph.EVENT : destType;
           if (source == dest || source === "*" || dest === "*") {
-            if (preferFreeSlot && (slot.links?.length > 0 || slot.link != null)) {
+            if (preferFreeSlot && (slot.links?.length || slot.link != null)) {
               occupiedSlot ??= returnObj ? slot : i2;
               continue;
             }
@@ -60979,252 +60906,202 @@ class LGraphNode {
         }
       }
     }
-    return doNotUseOccupied ? -1 : occupiedSlot;
+    return doNotUseOccupied ? -1 : occupiedSlot ?? -1;
+  }
+  /**
+   * Determines the slot index to connect to when attempting to connect by type.
+   * 
+   * @param findInputs If true, searches for an input.  Otherwise, an output.
+   * @param node The node at the other end of the connection.
+   * @param slotType The type of slot at the other end of the connection.
+   * @param options Search restrictions to adhere to.
+   * @see {connectByType}
+   * @see {connectByTypeOutput}
+   */
+  findConnectByTypeSlot(findInputs, node22, slotType, options3) {
+    if (options3 && typeof options3 === "object") {
+      if ("firstFreeIfInputGeneralInCase" in options3) options3.wildcardToTyped = !!options3.firstFreeIfInputGeneralInCase;
+      if ("firstFreeIfOutputGeneralInCase" in options3) options3.wildcardToTyped = !!options3.firstFreeIfOutputGeneralInCase;
+      if ("generalTypeInCase" in options3) options3.typedToWildcard = !!options3.generalTypeInCase;
+    }
+    const optsDef = {
+      createEventInCase: true,
+      wildcardToTyped: true,
+      typedToWildcard: true
+    };
+    const opts = Object.assign(optsDef, options3);
+    if (node22 && typeof node22 === "number") {
+      node22 = this.graph.getNodeById(node22);
+    }
+    const slot = node22.findSlotByType(findInputs, slotType, false, true);
+    if (slot >= 0 && slot !== null) return slot;
+    if (opts.createEventInCase && slotType == LiteGraph.EVENT) {
+      if (findInputs) return -1;
+      if (LiteGraph.do_add_triggers_slots) return node22.addOnExecutedOutput();
+    }
+    if (opts.typedToWildcard) {
+      const generalSlot = node22.findSlotByType(findInputs, 0, false, true, true);
+      if (generalSlot >= 0) return generalSlot;
+    }
+    if (opts.wildcardToTyped && (slotType == 0 || slotType == "*" || slotType == "")) {
+      const find2 = findInputs ? node22.findInputSlotFree : node22.findOutputSlotFree;
+      const nonEventSlot = find2({ typesNotAccepted: [LiteGraph.EVENT] });
+      if (nonEventSlot >= 0) return nonEventSlot;
+    }
+    console.debug("no way to connect type: ", slotType, " to node: ", node22);
+    return null;
   }
   /**
    * connect this node output to the input of another node BY TYPE
-   * @param {number_or_string} slot (could be the number of the slot or the string with the name of the slot)
-   * @param {LGraphNode} node the target node
-   * @param {string} target_type the input slot type of the target node
+   * @param {number} slot (could be the number of the slot or the string with the name of the slot)
+   * @param {LGraphNode} target_node the target node
+   * @param {string} target_slotType the input slot type of the target node
    * @return {Object} the link_info is created, otherwise null
    */
   connectByType(slot, target_node, target_slotType, optsIn) {
-    optsIn = optsIn || {};
-    const optsDef = {
-      createEventInCase: true,
-      firstFreeIfOutputGeneralInCase: true,
-      generalTypeInCase: true
-    };
-    const opts = Object.assign(optsDef, optsIn);
-    if (target_node && typeof target_node === "number") {
-      target_node = this.graph.getNodeById(target_node);
-    }
-    let target_slot = target_node.findInputSlotByType(target_slotType, false, true);
-    if (target_slot >= 0 && target_slot !== null) {
-      return this.connect(slot, target_node, target_slot);
-    } else {
-      if (opts.createEventInCase && target_slotType == LiteGraph.EVENT) {
-        return this.connect(slot, target_node, -1);
-      }
-      if (opts.generalTypeInCase) {
-        target_slot = target_node.findInputSlotByType(0, false, true, true);
-        if (target_slot >= 0) {
-          return this.connect(slot, target_node, target_slot);
-        }
-      }
-      if (opts.firstFreeIfOutputGeneralInCase && (target_slotType == 0 || target_slotType == "*" || target_slotType == "")) {
-        target_slot = target_node.findInputSlotFree({ typesNotAccepted: [LiteGraph.EVENT] });
-        if (target_slot >= 0) {
-          return this.connect(slot, target_node, target_slot);
-        }
-      }
-      console.debug("no way to connect type: ", target_slotType, " to targetNODE ", target_node);
-      return null;
-    }
+    const slotIndex = this.findConnectByTypeSlot(true, target_node, target_slotType, optsIn);
+    if (slotIndex !== null) return this.connect(slot, target_node, slotIndex);
+    return null;
   }
   /**
    * connect this node input to the output of another node BY TYPE
-   * @param {number_or_string} slot (could be the number of the slot or the string with the name of the slot)
-   * @param {LGraphNode} node the target node
-   * @param {string} target_type the output slot type of the target node
+   * @method connectByType
+   * @param {number | string} slot (could be the number of the slot or the string with the name of the slot)
+   * @param {LGraphNode} source_node the target node
+   * @param {string} source_slotType the output slot type of the target node
    * @return {Object} the link_info is created, otherwise null
    */
   connectByTypeOutput(slot, source_node, source_slotType, optsIn) {
-    optsIn = optsIn || {};
-    const optsDef = {
-      createEventInCase: true,
-      firstFreeIfInputGeneralInCase: true,
-      generalTypeInCase: true
-    };
-    const opts = Object.assign(optsDef, optsIn);
-    if (source_node && typeof source_node === "number") {
-      source_node = this.graph.getNodeById(source_node);
+    if (typeof optsIn === "object") {
+      if ("firstFreeIfInputGeneralInCase" in optsIn) optsIn.wildcardToTyped = !!optsIn.firstFreeIfInputGeneralInCase;
+      if ("generalTypeInCase" in optsIn) optsIn.typedToWildcard = !!optsIn.generalTypeInCase;
     }
-    let source_slot = source_node.findOutputSlotByType(source_slotType, false, true);
-    if (source_slot >= 0 && source_slot !== null) {
-      return source_node.connect(source_slot, this, slot);
-    } else {
-      if (opts.generalTypeInCase) {
-        source_slot = source_node.findOutputSlotByType(0, false, true, true);
-        if (source_slot >= 0) {
-          return source_node.connect(source_slot, this, slot);
-        }
-      }
-      if (opts.createEventInCase && source_slotType == LiteGraph.EVENT) {
-        if (LiteGraph.do_add_triggers_slots) {
-          source_slot = source_node.addOnExecutedOutput();
-          return source_node.connect(source_slot, this, slot);
-        }
-      }
-      if (opts.firstFreeIfInputGeneralInCase && (source_slotType == 0 || source_slotType == "*" || source_slotType == "")) {
-        source_slot = source_node.findOutputSlotFree({ typesNotAccepted: [LiteGraph.EVENT] });
-        if (source_slot >= 0) {
-          return source_node.connect(source_slot, this, slot);
-        }
-      }
-      console.debug("no way to connect byOUT type: ", source_slotType, " to sourceNODE ", source_node);
-      return null;
-    }
+    const slotIndex = this.findConnectByTypeSlot(false, source_node, source_slotType, optsIn);
+    if (slotIndex !== null) return source_node.connect(slotIndex, this, slot);
+    return null;
   }
   /**
-   * connect this node output to the input of another node
-   * @param {number_or_string} slot (could be the number of the slot or the string with the name of the slot)
-   * @param {LGraphNode} node the target node
-   * @param {number_or_string} target_slot the input slot of the target node (could be the number of the slot or the string with the name of the slot, or -1 to connect a trigger)
+   * Connect an output of this node to an input of another node
+   * @param {number | string} slot (could be the number of the slot or the string with the name of the slot)
+   * @param {LGraphNode} target_node the target node
+   * @param {number | string} target_slot the input slot of the target node (could be the number of the slot or the string with the name of the slot, or -1 to connect a trigger)
    * @return {Object} the link_info is created, otherwise null
    */
   connect(slot, target_node, target_slot) {
-    target_slot = target_slot || 0;
+    let targetIndex;
     if (!this.graph) {
-      console.log(
-        "Connect: Error, node doesn't belong to any graph. Nodes must be added first to a graph before connecting them."
-      );
+      console.log("Connect: Error, node doesn't belong to any graph. Nodes must be added first to a graph before connecting them.");
       return null;
     }
     if (typeof slot === "string") {
       slot = this.findOutputSlot(slot);
       if (slot == -1) {
-        if (LiteGraph.debug) {
-          console.log("Connect: Error, no slot of name " + slot);
-        }
+        if (LiteGraph.debug) console.log("Connect: Error, no slot of name " + slot);
         return null;
       }
     } else if (!this.outputs || slot >= this.outputs.length) {
-      if (LiteGraph.debug) {
-        console.log("Connect: Error, slot number not found");
-      }
+      if (LiteGraph.debug) console.log("Connect: Error, slot number not found");
       return null;
     }
     if (target_node && typeof target_node === "number") {
       target_node = this.graph.getNodeById(target_node);
     }
-    if (!target_node) {
-      throw "target node is null";
-    }
-    if (target_node == this) {
-      return null;
-    }
+    if (!target_node) throw "target node is null";
+    if (target_node == this) return null;
     if (typeof target_slot === "string") {
-      target_slot = target_node.findInputSlot(target_slot);
-      if (target_slot == -1) {
-        if (LiteGraph.debug) {
-          console.log(
-            "Connect: Error, no slot of name " + target_slot
-          );
-        }
+      targetIndex = target_node.findInputSlot(target_slot);
+      if (targetIndex == -1) {
+        if (LiteGraph.debug) console.log("Connect: Error, no slot of name " + targetIndex);
         return null;
       }
     } else if (target_slot === LiteGraph.EVENT) {
       if (LiteGraph.do_add_triggers_slots) {
         target_node.changeMode(LiteGraph.ON_TRIGGER);
-        target_slot = target_node.findInputSlot("onTrigger");
+        targetIndex = target_node.findInputSlot("onTrigger");
       } else {
         return null;
       }
-    } else if (!target_node.inputs || target_slot >= target_node.inputs.length) {
-      if (LiteGraph.debug) {
-        console.log("Connect: Error, slot number not found");
-      }
+    } else if (typeof target_slot === "number") {
+      targetIndex = target_slot;
+    } else {
+      targetIndex = 0;
+    }
+    if (target_node.onBeforeConnectInput) {
+      const requestedIndex = target_node.onBeforeConnectInput(targetIndex, target_slot);
+      targetIndex = typeof requestedIndex === "number" ? requestedIndex : null;
+    }
+    if (targetIndex === null || !target_node.inputs || targetIndex >= target_node.inputs.length) {
+      if (LiteGraph.debug) console.log("Connect: Error, slot number not found");
       return null;
     }
     let changed = false;
-    const input = target_node.inputs[target_slot];
+    const input = target_node.inputs[targetIndex];
     let link_info = null;
     const output = this.outputs[slot];
-    if (!this.outputs[slot]) {
-      return null;
-    }
-    if (target_node.onBeforeConnectInput) {
-      target_slot = target_node.onBeforeConnectInput(target_slot);
-    }
-    if (target_slot === false || target_slot === null || !LiteGraph.isValidConnection(output.type, input.type)) {
+    if (!this.outputs[slot]) return null;
+    if (!LiteGraph.isValidConnection(output.type, input.type)) {
       this.setDirtyCanvas(false, true);
-      if (changed)
-        this.graph.connectionChange(this);
+      if (changed) this.graph.connectionChange(this, link_info);
       return null;
     }
-    if (target_node.onConnectInput) {
-      if (target_node.onConnectInput(target_slot, output.type, output, this, slot) === false) {
-        return null;
-      }
-    }
-    if (this.onConnectOutput) {
-      if (this.onConnectOutput(slot, input.type, input, target_node, target_slot) === false) {
-        return null;
-      }
-    }
-    if (target_node.inputs[target_slot] && target_node.inputs[target_slot].link != null) {
+    if (target_node.onConnectInput?.(targetIndex, output.type, output, this, slot) === false)
+      return null;
+    if (this.onConnectOutput?.(slot, input.type, input, target_node, targetIndex) === false)
+      return null;
+    if (target_node.inputs[targetIndex]?.link != null) {
       this.graph.beforeChange();
-      target_node.disconnectInput(target_slot);
+      target_node.disconnectInput(targetIndex);
       changed = true;
     }
-    if (output.links !== null && output.links.length) {
-      switch (output.type) {
-        case LiteGraph.EVENT:
-          if (!LiteGraph.allow_multi_output_for_events) {
-            this.graph.beforeChange();
-            this.disconnectOutput(slot);
-            changed = true;
-          }
-          break;
+    if (output.links?.length) {
+      if (output.type === LiteGraph.EVENT && !LiteGraph.allow_multi_output_for_events) {
+        this.graph.beforeChange();
+        this.disconnectOutput(slot, false, { doProcessChange: false });
+        changed = true;
       }
     }
-    let nextId;
-    if (LiteGraph.use_uuids)
-      nextId = LiteGraph.uuidv4();
-    else
-      nextId = ++this.graph.last_link_id;
+    const nextId = LiteGraph.use_uuids ? LiteGraph.uuidv4() : ++this.graph.last_link_id;
     link_info = new LLink(
       nextId,
       input.type || output.type,
       this.id,
       slot,
       target_node.id,
-      target_slot
+      targetIndex
     );
     this.graph.links[link_info.id] = link_info;
-    if (output.links == null) {
-      output.links = [];
-    }
+    output.links ??= [];
     output.links.push(link_info.id);
-    target_node.inputs[target_slot].link = link_info.id;
-    if (this.graph) {
-      this.graph._version++;
-    }
-    if (this.onConnectionsChange) {
-      this.onConnectionsChange(
-        LiteGraph.OUTPUT,
-        slot,
-        true,
-        link_info,
-        output
-      );
-    }
-    if (target_node.onConnectionsChange) {
-      target_node.onConnectionsChange(
-        LiteGraph.INPUT,
-        target_slot,
-        true,
-        link_info,
-        input
-      );
-    }
-    if (this.graph && this.graph.onNodeConnectionChange) {
-      this.graph.onNodeConnectionChange(
-        LiteGraph.INPUT,
-        target_node,
-        target_slot,
-        this,
-        slot
-      );
-      this.graph.onNodeConnectionChange(
-        LiteGraph.OUTPUT,
-        this,
-        slot,
-        target_node,
-        target_slot
-      );
-    }
+    target_node.inputs[targetIndex].link = link_info.id;
+    if (this.graph) this.graph._version++;
+    this.onConnectionsChange?.(
+      LiteGraph.OUTPUT,
+      slot,
+      true,
+      link_info,
+      output
+    );
+    target_node.onConnectionsChange?.(
+      LiteGraph.INPUT,
+      targetIndex,
+      true,
+      link_info,
+      input
+    );
+    this.graph?.onNodeConnectionChange?.(
+      LiteGraph.INPUT,
+      target_node,
+      targetIndex,
+      this,
+      slot
+    );
+    this.graph?.onNodeConnectionChange?.(
+      LiteGraph.OUTPUT,
+      this,
+      slot,
+      target_node,
+      targetIndex
+    );
     this.setDirtyCanvas(false, true);
     this.graph.afterChange();
     this.graph.connectionChange(this);
@@ -61526,6 +61403,221 @@ class LGraphNode {
     }
   }
 }
+class LGraphGroup {
+  static {
+    __name(this, "LGraphGroup");
+  }
+  color;
+  title;
+  font;
+  font_size;
+  _bounding;
+  _pos;
+  _size;
+  _nodes;
+  graph;
+  flags;
+  selected;
+  constructor(title) {
+    this._ctor(title);
+  }
+  _ctor(title) {
+    this.title = title || "Group";
+    this.font_size = LiteGraph.DEFAULT_GROUP_FONT || 24;
+    this.color = LGraphCanvas.node_colors.pale_blue ? LGraphCanvas.node_colors.pale_blue.groupcolor : "#AAA";
+    this._bounding = new Float32Array([10, 10, 140, 80]);
+    this._pos = this._bounding.subarray(0, 2);
+    this._size = this._bounding.subarray(2, 4);
+    this._nodes = [];
+    this.graph = null;
+    this.flags = {};
+  }
+  /** Position of the group, as x,y co-ordinates in graph space */
+  get pos() {
+    return this._pos;
+  }
+  set pos(v2) {
+    if (!v2 || v2.length < 2) return;
+    this._pos[0] = v2[0];
+    this._pos[1] = v2[1];
+  }
+  /** Size of the group, as width,height in graph units */
+  get size() {
+    return this._size;
+  }
+  set size(v2) {
+    if (!v2 || v2.length < 2) return;
+    this._size[0] = Math.max(140, v2[0]);
+    this._size[1] = Math.max(80, v2[1]);
+  }
+  get nodes() {
+    return this._nodes;
+  }
+  get titleHeight() {
+    return this.font_size * 1.4;
+  }
+  get pinned() {
+    return !!this.flags.pinned;
+  }
+  pin() {
+    this.flags.pinned = true;
+  }
+  unpin() {
+    delete this.flags.pinned;
+  }
+  configure(o) {
+    this.title = o.title;
+    this._bounding.set(o.bounding);
+    this.color = o.color;
+    this.flags = o.flags || this.flags;
+    if (o.font_size) this.font_size = o.font_size;
+  }
+  serialize() {
+    const b = this._bounding;
+    return {
+      title: this.title,
+      bounding: [
+        Math.round(b[0]),
+        Math.round(b[1]),
+        Math.round(b[2]),
+        Math.round(b[3])
+      ],
+      color: this.color,
+      font_size: this.font_size,
+      flags: this.flags
+    };
+  }
+  /**
+   * Draws the group on the canvas
+   * @param {LGraphCanvas} graphCanvas
+   * @param {CanvasRenderingContext2D} ctx
+   */
+  draw(graphCanvas, ctx) {
+    const padding = 4;
+    ctx.fillStyle = this.color;
+    ctx.strokeStyle = this.color;
+    const [x2, y2] = this._pos;
+    const [width2, height] = this._size;
+    ctx.globalAlpha = 0.25 * graphCanvas.editor_alpha;
+    ctx.beginPath();
+    ctx.rect(x2 + 0.5, y2 + 0.5, width2, height);
+    ctx.fill();
+    ctx.globalAlpha = graphCanvas.editor_alpha;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2 + width2, y2 + height);
+    ctx.lineTo(x2 + width2 - 10, y2 + height);
+    ctx.lineTo(x2 + width2, y2 + height - 10);
+    ctx.fill();
+    const font_size = this.font_size || LiteGraph.DEFAULT_GROUP_FONT_SIZE;
+    ctx.font = font_size + "px Arial";
+    ctx.textAlign = "left";
+    ctx.fillText(this.title + (this.pinned ? "📌" : ""), x2 + padding, y2 + font_size);
+    if (LiteGraph.highlight_selected_group && this.selected) {
+      graphCanvas.drawSelectionBounding(ctx, this._bounding, {
+        shape: LiteGraph.BOX_SHAPE,
+        title_height: this.titleHeight,
+        title_mode: LiteGraph.NORMAL_TITLE,
+        fgcolor: this.color,
+        padding
+      });
+    }
+  }
+  resize(width2, height) {
+    if (this.pinned) return;
+    this._size[0] = width2;
+    this._size[1] = height;
+  }
+  move(deltax, deltay, ignore_nodes = false) {
+    if (this.pinned) return;
+    this._pos[0] += deltax;
+    this._pos[1] += deltay;
+    if (ignore_nodes) return;
+    for (let i2 = 0; i2 < this._nodes.length; ++i2) {
+      const node22 = this._nodes[i2];
+      node22.pos[0] += deltax;
+      node22.pos[1] += deltay;
+    }
+  }
+  recomputeInsideNodes() {
+    this._nodes.length = 0;
+    const nodes = this.graph._nodes;
+    const node_bounding = new Float32Array(4);
+    for (let i2 = 0; i2 < nodes.length; ++i2) {
+      const node22 = nodes[i2];
+      node22.getBounding(node_bounding);
+      if (!overlapBounding(this._bounding, node_bounding))
+        continue;
+      this._nodes.push(node22);
+    }
+  }
+  /**
+   * Add nodes to the group and adjust the group's position and size accordingly
+   * @param {LGraphNode[]} nodes - The nodes to add to the group
+   * @param {number} [padding=10] - The padding around the group
+   * @returns {void}
+   */
+  addNodes(nodes, padding = 10) {
+    if (!this._nodes && nodes.length === 0) return;
+    const allNodes = [...this._nodes || [], ...nodes];
+    const bounds = allNodes.reduce((acc, node22) => {
+      const [x2, y2] = node22.pos;
+      const [width2, height] = node22.size;
+      const isReroute = node22.type === "Reroute";
+      const isCollapsed = node22.flags?.collapsed;
+      const top = y2 - (isReroute ? 0 : LiteGraph.NODE_TITLE_HEIGHT);
+      const bottom = isCollapsed ? top + LiteGraph.NODE_TITLE_HEIGHT : y2 + height;
+      const right = isCollapsed && node22._collapsed_width ? x2 + Math.round(node22._collapsed_width) : x2 + width2;
+      return {
+        left: Math.min(acc.left, x2),
+        top: Math.min(acc.top, top),
+        right: Math.max(acc.right, right),
+        bottom: Math.max(acc.bottom, bottom)
+      };
+    }, { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
+    this.pos = [
+      bounds.left - padding,
+      bounds.top - padding - this.titleHeight
+    ];
+    this.size = [
+      bounds.right - bounds.left + padding * 2,
+      bounds.bottom - bounds.top + padding * 2 + this.titleHeight
+    ];
+  }
+  getMenuOptions() {
+    return [
+      {
+        content: this.pinned ? "Unpin" : "Pin",
+        callback: /* @__PURE__ */ __name(() => {
+          if (this.pinned) this.unpin();
+          else this.pin();
+          this.setDirtyCanvas(false, true);
+        }, "callback")
+      },
+      null,
+      { content: "Title", callback: LGraphCanvas.onShowPropertyEditor },
+      {
+        content: "Color",
+        has_submenu: true,
+        callback: LGraphCanvas.onMenuNodeColors
+      },
+      {
+        content: "Font size",
+        property: "font_size",
+        type: "Number",
+        callback: LGraphCanvas.onShowPropertyEditor
+      },
+      null,
+      { content: "Remove", callback: LGraphCanvas.onMenuNodeRemove }
+    ];
+  }
+  isPointInTitlebar(x2, y2) {
+    const b = this._bounding;
+    return isInsideRectangle(x2, y2, b[0], b[1], b[2], this.titleHeight);
+  }
+  isPointInside = LGraphNode.prototype.isPointInside;
+  setDirtyCanvas = LGraphNode.prototype.setDirtyCanvas;
+}
 var SlotType = /* @__PURE__ */ ((SlotType2) => {
   SlotType2["Array"] = "array";
   SlotType2[SlotType2["Event"] = -1] = "Event";
@@ -61557,7 +61649,8 @@ function drawSlot(ctx, slot, pos2, {
   horizontal: horizontal2 = false,
   low_quality = false,
   render_text = true,
-  do_stroke = false
+  do_stroke = false,
+  highlight = false
 } = {}) {
   const originalFillStyle = ctx.fillStyle;
   const originalStrokeStyle = ctx.strokeStyle;
@@ -61603,9 +61696,9 @@ function drawSlot(ctx, slot, pos2, {
         doStroke = true;
         ctx.lineWidth = 3;
         ctx.strokeStyle = ctx.fillStyle;
-        radius = 3;
+        radius = highlight ? 4 : 3;
       } else {
-        radius = 4;
+        radius = highlight ? 5 : 4;
       }
       ctx.arc(pos2[0], pos2[1], radius, 0, Math.PI * 2);
     }
@@ -61636,945 +61729,13 @@ function drawSlot(ctx, slot, pos2, {
   ctx.lineWidth = originalLineWidth;
 }
 __name(drawSlot, "drawSlot");
-class LiteGraphGlobal {
-  static {
-    __name(this, "LiteGraphGlobal");
-  }
-  // Enums
-  SlotShape = SlotShape;
-  SlotDirection = SlotDirection;
-  SlotType = SlotType;
-  LabelPosition = LabelPosition;
-  VERSION = 0.4;
-  CANVAS_GRID_SIZE = 10;
-  NODE_TITLE_HEIGHT = 30;
-  NODE_TITLE_TEXT_Y = 20;
-  NODE_SLOT_HEIGHT = 20;
-  NODE_WIDGET_HEIGHT = 20;
-  NODE_WIDTH = 140;
-  NODE_MIN_WIDTH = 50;
-  NODE_COLLAPSED_RADIUS = 10;
-  NODE_COLLAPSED_WIDTH = 80;
-  NODE_TITLE_COLOR = "#999";
-  NODE_SELECTED_TITLE_COLOR = "#FFF";
-  NODE_TEXT_SIZE = 14;
-  NODE_TEXT_COLOR = "#AAA";
-  NODE_SUBTEXT_SIZE = 12;
-  NODE_DEFAULT_COLOR = "#333";
-  NODE_DEFAULT_BGCOLOR = "#353535";
-  NODE_DEFAULT_BOXCOLOR = "#666";
-  NODE_DEFAULT_SHAPE = "box";
-  NODE_BOX_OUTLINE_COLOR = "#FFF";
-  DEFAULT_SHADOW_COLOR = "rgba(0,0,0,0.5)";
-  DEFAULT_GROUP_FONT = 24;
-  DEFAULT_GROUP_FONT_SIZE;
-  WIDGET_BGCOLOR = "#222";
-  WIDGET_OUTLINE_COLOR = "#666";
-  WIDGET_TEXT_COLOR = "#DDD";
-  WIDGET_SECONDARY_TEXT_COLOR = "#999";
-  LINK_COLOR = "#9A9";
-  // TODO: This is a workaround until LGraphCanvas.link_type_colors is no longer static.
-  static DEFAULT_EVENT_LINK_COLOR = "#A86";
-  EVENT_LINK_COLOR = "#A86";
-  CONNECTING_LINK_COLOR = "#AFA";
-  MAX_NUMBER_OF_NODES = 1e4;
-  //avoid infinite loops
-  DEFAULT_POSITION = [100, 100];
-  //default node position
-  VALID_SHAPES = ["default", "box", "round", "card"];
-  //,"circle"
-  //shapes are used for nodes but also for slots
-  BOX_SHAPE = 1;
-  ROUND_SHAPE = 2;
-  CIRCLE_SHAPE = 3;
-  CARD_SHAPE = 4;
-  ARROW_SHAPE = 5;
-  GRID_SHAPE = 6;
-  // intended for slot arrays
-  //enums
-  INPUT = 1;
-  OUTPUT = 2;
-  EVENT = -1;
-  //for outputs
-  ACTION = -1;
-  //for inputs
-  NODE_MODES = ["Always", "On Event", "Never", "On Trigger"];
-  // helper, will add "On Request" and more in the future
-  NODE_MODES_COLORS = ["#666", "#422", "#333", "#224", "#626"];
-  // use with node_box_coloured_by_mode
-  ALWAYS = 0;
-  ON_EVENT = 1;
-  NEVER = 2;
-  ON_TRIGGER = 3;
-  UP = 1;
-  DOWN = 2;
-  LEFT = 3;
-  RIGHT = 4;
-  CENTER = 5;
-  LINK_RENDER_MODES = ["Straight", "Linear", "Spline"];
-  // helper
-  HIDDEN_LINK = -1;
-  STRAIGHT_LINK = 0;
-  LINEAR_LINK = 1;
-  SPLINE_LINK = 2;
-  NORMAL_TITLE = 0;
-  NO_TITLE = 1;
-  TRANSPARENT_TITLE = 2;
-  AUTOHIDE_TITLE = 3;
-  VERTICAL_LAYOUT = "vertical";
-  // arrange nodes vertically
-  proxy = null;
-  //used to redirect calls
-  node_images_path = "";
-  debug = false;
-  catch_exceptions = true;
-  throw_errors = true;
-  allow_scripts = false;
-  //if set to true some nodes like Formula would be allowed to evaluate code that comes from unsafe sources (like node configuration), which could lead to exploits
-  registered_node_types = {};
-  //nodetypes by string
-  node_types_by_file_extension = {};
-  //used for dropping files in the canvas
-  Nodes = {};
-  //node types by classname
-  Globals = {};
-  //used to store vars between graphs
-  searchbox_extras = {};
-  //used to add extra features to the search box
-  auto_sort_node_types = false;
-  // [true!] If set to true, will automatically sort node types / categories in the context menus
-  node_box_coloured_when_on = false;
-  // [true!] this make the nodes box (top left circle) coloured when triggered (execute/action), visual feedback
-  node_box_coloured_by_mode = false;
-  // [true!] nodebox based on node mode, visual feedback
-  dialog_close_on_mouse_leave = false;
-  // [false on mobile] better true if not touch device, TODO add an helper/listener to close if false
-  dialog_close_on_mouse_leave_delay = 500;
-  shift_click_do_break_link_from = false;
-  // [false!] prefer false if results too easy to break links - implement with ALT or TODO custom keys
-  click_do_break_link_to = false;
-  // [false!]prefer false, way too easy to break links
-  ctrl_alt_click_do_break_link = true;
-  // [true!] who accidentally ctrl-alt-clicks on an in/output? nobody! that's who!
-  search_hide_on_mouse_leave = true;
-  // [false on mobile] better true if not touch device, TODO add an helper/listener to close if false
-  search_filter_enabled = false;
-  // [true!] enable filtering slots type in the search widget, !requires auto_load_slot_types or manual set registered_slot_[in/out]_types and slot_types_[in/out]
-  search_show_all_on_open = true;
-  // [true!] opens the results list when opening the search widget
-  auto_load_slot_types = false;
-  // [if want false, use true, run, get vars values to be statically set, than disable] nodes types and nodeclass association with node types need to be calculated, if dont want this, calculate once and set registered_slot_[in/out]_types and slot_types_[in/out]
-  // set these values if not using auto_load_slot_types
-  registered_slot_in_types = {};
-  // slot types for nodeclass
-  registered_slot_out_types = {};
-  // slot types for nodeclass
-  slot_types_in = [];
-  // slot types IN
-  slot_types_out = [];
-  // slot types OUT
-  // @ts-expect-error
-  slot_types_default_in = [];
-  // specify for each IN slot type a(/many) default node(s), use single string, array, or object (with node, title, parameters, ..) like for search
-  // @ts-expect-error
-  slot_types_default_out = [];
-  // specify for each OUT slot type a(/many) default node(s), use single string, array, or object (with node, title, parameters, ..) like for search
-  alt_drag_do_clone_nodes = false;
-  // [true!] very handy, ALT click to clone and drag the new node
-  do_add_triggers_slots = false;
-  // [true!] will create and connect event slots when using action/events connections, !WILL CHANGE node mode when using onTrigger (enable mode colors), onExecuted does not need this
-  allow_multi_output_for_events = true;
-  // [false!] being events, it is strongly reccomended to use them sequentially, one by one
-  middle_click_slot_add_default_node = false;
-  //[true!] allows to create and connect a ndoe clicking with the third button (wheel)
-  release_link_on_empty_shows_menu = false;
-  //[true!] dragging a link to empty space will open a menu, add from list, search or defaults
-  pointerevents_method = "pointer";
-  // "mouse"|"pointer" use mouse for retrocompatibility issues? (none found @ now)
-  // TODO implement pointercancel, gotpointercapture, lostpointercapture, (pointerover, pointerout if necessary)
-  ctrl_shift_v_paste_connect_unselected_outputs = true;
-  //[true!] allows ctrl + shift + v to paste nodes with the outputs of the unselected nodes connected with the inputs of the newly pasted nodes
-  // if true, all newly created nodes/links will use string UUIDs for their id fields instead of integers.
-  // use this if you must have node IDs that are unique across all graphs and subgraphs.
-  use_uuids = false;
-  // Whether to highlight the bounding box of selected groups
-  highlight_selected_group = false;
-  LGraph;
-  LLink;
-  LGraphNode;
-  LGraphGroup;
-  DragAndScale;
-  LGraphCanvas;
-  ContextMenu;
-  CurveEditor;
-  constructor() {
-    if (typeof performance != "undefined") {
-      this.getTime = performance.now.bind(performance);
-    } else if (typeof Date != "undefined" && Date.now) {
-      this.getTime = Date.now.bind(Date);
-    } else if (typeof process != "undefined") {
-      this.getTime = function() {
-        var t = process.hrtime();
-        return t[0] * 1e-3 + t[1] * 1e-6;
-      };
-    } else {
-      this.getTime = function() {
-        return (/* @__PURE__ */ new Date()).getTime();
-      };
-    }
-  }
-  /**
-   * Register a node class so it can be listed when the user wants to create a new one
-   * @method registerNodeType
-   * @param {String} type name of the node and path
-   * @param {Class} base_class class containing the structure of a node
-   */
-  registerNodeType(type, base_class) {
-    if (!base_class.prototype) {
-      throw "Cannot register a simple object, it must be a class with a prototype";
-    }
-    base_class.type = type;
-    if (LiteGraph.debug) {
-      console.log("Node registered: " + type);
-    }
-    const classname = base_class.name;
-    const pos2 = type.lastIndexOf("/");
-    base_class.category = type.substring(0, pos2);
-    if (!base_class.title) {
-      base_class.title = classname;
-    }
-    for (var i2 in LGraphNode.prototype) {
-      if (!base_class.prototype[i2]) {
-        base_class.prototype[i2] = LGraphNode.prototype[i2];
-      }
-    }
-    const prev2 = this.registered_node_types[type];
-    if (prev2) {
-      console.log("replacing node type: " + type);
-    }
-    if (!Object.prototype.hasOwnProperty.call(base_class.prototype, "shape")) {
-      Object.defineProperty(base_class.prototype, "shape", {
-        set: /* @__PURE__ */ __name(function(v2) {
-          switch (v2) {
-            case "default":
-              delete this._shape;
-              break;
-            case "box":
-              this._shape = LiteGraph.BOX_SHAPE;
-              break;
-            case "round":
-              this._shape = LiteGraph.ROUND_SHAPE;
-              break;
-            case "circle":
-              this._shape = LiteGraph.CIRCLE_SHAPE;
-              break;
-            case "card":
-              this._shape = LiteGraph.CARD_SHAPE;
-              break;
-            default:
-              this._shape = v2;
-          }
-        }, "set"),
-        get: /* @__PURE__ */ __name(function() {
-          return this._shape;
-        }, "get"),
-        enumerable: true,
-        configurable: true
-      });
-      if (base_class.supported_extensions) {
-        for (let i22 in base_class.supported_extensions) {
-          const ext = base_class.supported_extensions[i22];
-          if (ext && ext.constructor === String) {
-            this.node_types_by_file_extension[ext.toLowerCase()] = base_class;
-          }
-        }
-      }
-    }
-    this.registered_node_types[type] = base_class;
-    if (base_class.constructor.name) {
-      this.Nodes[classname] = base_class;
-    }
-    if (this.onNodeTypeRegistered) {
-      this.onNodeTypeRegistered(type, base_class);
-    }
-    if (prev2 && this.onNodeTypeReplaced) {
-      this.onNodeTypeReplaced(type, base_class, prev2);
-    }
-    if (base_class.prototype.onPropertyChange) {
-      console.warn(
-        "LiteGraph node class " + type + " has onPropertyChange method, it must be called onPropertyChanged with d at the end"
-      );
-    }
-    if (this.auto_load_slot_types) {
-      new base_class(base_class.title || "tmpnode");
-    }
-  }
-  /**
-   * removes a node type from the system
-   * @method unregisterNodeType
-   * @param {String|Object} type name of the node or the node constructor itself
-   */
-  unregisterNodeType(type) {
-    const base_class = type.constructor === String ? this.registered_node_types[type] : type;
-    if (!base_class) {
-      throw "node type not found: " + type;
-    }
-    delete this.registered_node_types[base_class.type];
-    if (base_class.constructor.name) {
-      delete this.Nodes[base_class.constructor.name];
-    }
-  }
-  /**
-  * Save a slot type and his node
-  * @method registerSlotType
-  * @param {String|Object} type name of the node or the node constructor itself
-  * @param {String} slot_type name of the slot type (variable type), eg. string, number, array, boolean, ..
-  */
-  registerNodeAndSlotType(type, slot_type, out) {
-    out = out || false;
-    const base_class = type.constructor === String && // @ts-ignore
-    this.registered_node_types[type] !== "anonymous" ? this.registered_node_types[type] : type;
-    const class_type = base_class.constructor.type;
-    let allTypes = [];
-    if (typeof slot_type === "string") {
-      allTypes = slot_type.split(",");
-    } else if (slot_type == this.EVENT || slot_type == this.ACTION) {
-      allTypes = ["_event_"];
-    } else {
-      allTypes = ["*"];
-    }
-    for (let i2 = 0; i2 < allTypes.length; ++i2) {
-      let slotType = allTypes[i2];
-      if (slotType === "") {
-        slotType = "*";
-      }
-      const registerTo = out ? "registered_slot_out_types" : "registered_slot_in_types";
-      if (this[registerTo][slotType] === void 0) {
-        this[registerTo][slotType] = { nodes: [] };
-      }
-      if (!this[registerTo][slotType].nodes.includes(class_type)) {
-        this[registerTo][slotType].nodes.push(class_type);
-      }
-      if (!out) {
-        if (!this.slot_types_in.includes(slotType.toLowerCase())) {
-          this.slot_types_in.push(slotType.toLowerCase());
-          this.slot_types_in.sort();
-        }
-      } else {
-        if (!this.slot_types_out.includes(slotType.toLowerCase())) {
-          this.slot_types_out.push(slotType.toLowerCase());
-          this.slot_types_out.sort();
-        }
-      }
-    }
-  }
-  /**
-   * Create a new nodetype by passing a function, it wraps it with a proper class and generates inputs according to the parameters of the function.
-   * Useful to wrap simple methods that do not require properties, and that only process some input to generate an output.
-   * @method wrapFunctionAsNode
-   * @param {String} name node name with namespace (p.e.: 'math/sum')
-   * @param {Function} func
-   * @param {Array} param_types [optional] an array containing the type of every parameter, otherwise parameters will accept any type
-   * @param {String} return_type [optional] string with the return type, otherwise it will be generic
-   * @param {Object} properties [optional] properties to be configurable
-   */
-  wrapFunctionAsNode(name, func, param_types, return_type, properties) {
-    var params = Array(func.length);
-    var code2 = "";
-    var names = this.getParameterNames(func);
-    for (var i2 = 0; i2 < names.length; ++i2) {
-      code2 += "this.addInput('" + names[i2] + "'," + (param_types && param_types[i2] ? "'" + param_types[i2] + "'" : "0") + ");\n";
-    }
-    code2 += "this.addOutput('out'," + (return_type ? "'" + return_type + "'" : 0) + ");\n";
-    if (properties) {
-      code2 += "this.properties = " + JSON.stringify(properties) + ";\n";
-    }
-    var classobj = Function(code2);
-    classobj.title = name.split("/").pop();
-    classobj.desc = "Generated from " + func.name;
-    classobj.prototype.onExecute = /* @__PURE__ */ __name(function onExecute() {
-      for (var i22 = 0; i22 < params.length; ++i22) {
-        params[i22] = this.getInputData(i22);
-      }
-      var r = func.apply(this, params);
-      this.setOutputData(0, r);
-    }, "onExecute");
-    this.registerNodeType(name, classobj);
-  }
-  /**
-   * Removes all previously registered node's types
-   */
-  clearRegisteredTypes() {
-    this.registered_node_types = {};
-    this.node_types_by_file_extension = {};
-    this.Nodes = {};
-    this.searchbox_extras = {};
-  }
-  /**
-   * Adds this method to all nodetypes, existing and to be created
-   * (You can add it to LGraphNode.prototype but then existing node types wont have it)
-   * @method addNodeMethod
-   * @param {Function} func
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  addNodeMethod(name, func) {
-    LGraphNode.prototype[name] = func;
-    for (var i2 in this.registered_node_types) {
-      var type = this.registered_node_types[i2];
-      if (type.prototype[name]) {
-        type.prototype["_" + name] = type.prototype[name];
-      }
-      type.prototype[name] = func;
-    }
-  }
-  /**
-   * Create a node of a given type with a name. The node is not attached to any graph yet.
-   * @method createNode
-   * @param {String} type full name of the node class. p.e. "math/sin"
-   * @param {String} name a name to distinguish from other nodes
-   * @param {Object} options to set options
-   */
-  createNode(type, title, options3) {
-    var base_class = this.registered_node_types[type];
-    if (!base_class) {
-      if (this.debug) {
-        console.log(
-          'GraphNode type "' + type + '" not registered.'
-        );
-      }
-      return null;
-    }
-    base_class.prototype || base_class;
-    title = title || base_class.title || type;
-    var node22 = null;
-    if (this.catch_exceptions) {
-      try {
-        node22 = new base_class(title);
-      } catch (err) {
-        console.error(err);
-        return null;
-      }
-    } else {
-      node22 = new base_class(title);
-    }
-    node22.type = type;
-    if (!node22.title && title) {
-      node22.title = title;
-    }
-    if (!node22.properties) {
-      node22.properties = {};
-    }
-    if (!node22.properties_info) {
-      node22.properties_info = [];
-    }
-    if (!node22.flags) {
-      node22.flags = {};
-    }
-    if (!node22.size) {
-      node22.size = node22.computeSize();
-    }
-    if (!node22.pos) {
-      node22.pos = this.DEFAULT_POSITION.concat();
-    }
-    if (!node22.mode) {
-      node22.mode = this.ALWAYS;
-    }
-    if (options3) {
-      for (var i2 in options3) {
-        node22[i2] = options3[i2];
-      }
-    }
-    if (node22.onNodeCreated) {
-      node22.onNodeCreated();
-    }
-    return node22;
-  }
-  /**
-   * Returns a registered node type with a given name
-   * @method getNodeType
-   * @param {String} type full name of the node class. p.e. "math/sin"
-   * @return {Class} the node class
-   */
-  getNodeType(type) {
-    return this.registered_node_types[type];
-  }
-  /**
-   * Returns a list of node types matching one category
-   * @method getNodeType
-   * @param {String} category category name
-   * @return {Array} array with all the node classes
-   */
-  getNodeTypesInCategory(category, filter4) {
-    var r = [];
-    for (var i2 in this.registered_node_types) {
-      var type = this.registered_node_types[i2];
-      if (type.filter != filter4) {
-        continue;
-      }
-      if (category == "") {
-        if (type.category == null) {
-          r.push(type);
-        }
-      } else if (type.category == category) {
-        r.push(type);
-      }
-    }
-    if (this.auto_sort_node_types) {
-      r.sort(function(a, b) {
-        return a.title.localeCompare(b.title);
-      });
-    }
-    return r;
-  }
-  /**
-   * Returns a list with all the node type categories
-   * @method getNodeTypesCategories
-   * @param {String} filter only nodes with ctor.filter equal can be shown
-   * @return {Array} array with all the names of the categories
-   */
-  getNodeTypesCategories(filter4) {
-    var categories = { "": 1 };
-    for (var i2 in this.registered_node_types) {
-      var type = this.registered_node_types[i2];
-      if (type.category && !type.skip_list) {
-        if (type.filter != filter4)
-          continue;
-        categories[type.category] = 1;
-      }
-    }
-    var result = [];
-    for (var i2 in categories) {
-      result.push(i2);
-    }
-    return this.auto_sort_node_types ? result.sort() : result;
-  }
-  //debug purposes: reloads all the js scripts that matches a wildcard
-  reloadNodes(folder_wildcard) {
-    var tmp = document.getElementsByTagName("script");
-    var script_files = [];
-    for (var i2 = 0; i2 < tmp.length; i2++) {
-      script_files.push(tmp[i2]);
-    }
-    var docHeadObj = document.getElementsByTagName("head")[0];
-    folder_wildcard = document.location.href + folder_wildcard;
-    for (var i2 = 0; i2 < script_files.length; i2++) {
-      var src = script_files[i2].src;
-      if (!src || src.substr(0, folder_wildcard.length) != folder_wildcard) {
-        continue;
-      }
-      try {
-        if (this.debug) {
-          console.log("Reloading: " + src);
-        }
-        var dynamicScript = document.createElement("script");
-        dynamicScript.type = "text/javascript";
-        dynamicScript.src = src;
-        docHeadObj.appendChild(dynamicScript);
-        docHeadObj.removeChild(script_files[i2]);
-      } catch (err) {
-        if (this.throw_errors) {
-          throw err;
-        }
-        if (this.debug) {
-          console.log("Error while reloading " + src);
-        }
-      }
-    }
-    if (this.debug) {
-      console.log("Nodes reloaded");
-    }
-  }
-  //separated just to improve if it doesn't work
-  cloneObject(obj, target) {
-    if (obj == null) {
-      return null;
-    }
-    var r = JSON.parse(JSON.stringify(obj));
-    if (!target) {
-      return r;
-    }
-    for (var i2 in r) {
-      target[i2] = r[i2];
-    }
-    return target;
-  }
-  /*
-      * https://gist.github.com/jed/982883?permalink_comment_id=852670#gistcomment-852670
-      */
-  uuidv4() {
-    return ("10000000-1000-4000-8000" + -1e11).replace(/[018]/g, (a) => (a ^ Math.random() * 16 >> a / 4).toString(16));
-  }
-  /**
-   * Returns if the types of two slots are compatible (taking into account wildcards, etc)
-   * @method isValidConnection
-   * @param {String} type_a
-   * @param {String} type_b
-   * @return {Boolean} true if they can be connected
-   */
-  isValidConnection(type_a, type_b) {
-    if (type_a == "" || type_a === "*") type_a = 0;
-    if (type_b == "" || type_b === "*") type_b = 0;
-    if (!type_a || !type_b || type_a == type_b || type_a == this.EVENT && type_b == this.ACTION) {
-      return true;
-    }
-    type_a = String(type_a);
-    type_b = String(type_b);
-    type_a = type_a.toLowerCase();
-    type_b = type_b.toLowerCase();
-    if (type_a.indexOf(",") == -1 && type_b.indexOf(",") == -1) {
-      return type_a == type_b;
-    }
-    var supported_types_a = type_a.split(",");
-    var supported_types_b = type_b.split(",");
-    for (var i2 = 0; i2 < supported_types_a.length; ++i2) {
-      for (var j = 0; j < supported_types_b.length; ++j) {
-        if (this.isValidConnection(supported_types_a[i2], supported_types_b[j])) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-  /**
-   * Register a string in the search box so when the user types it it will recommend this node
-   * @method registerSearchboxExtra
-   * @param {String} node_type the node recommended
-   * @param {String} description text to show next to it
-   * @param {Object} data it could contain info of how the node should be configured
-   * @return {Boolean} true if they can be connected
-   */
-  registerSearchboxExtra(node_type, description, data21) {
-    this.searchbox_extras[description.toLowerCase()] = {
-      type: node_type,
-      desc: description,
-      data: data21
-    };
-  }
-  /**
-   * Wrapper to load files (from url using fetch or from file using FileReader)
-   * @method fetchFile
-   * @param {String|File|Blob} url the url of the file (or the file itself)
-   * @param {String} type an string to know how to fetch it: "text","arraybuffer","json","blob"
-   * @param {Function} on_complete callback(data)
-   * @param {Function} on_error in case of an error
-   * @return {FileReader|Promise} returns the object used to
-   */
-  fetchFile(url, type, on_complete, on_error) {
-    if (!url)
-      return null;
-    type = type || "text";
-    if (url.constructor === String) {
-      if (url.substr(0, 4) == "http" && this.proxy) {
-        url = this.proxy + url.substr(url.indexOf(":") + 3);
-      }
-      return fetch(url).then(function(response) {
-        if (!response.ok)
-          throw new Error("File not found");
-        if (type == "arraybuffer")
-          return response.arrayBuffer();
-        else if (type == "text" || type == "string")
-          return response.text();
-        else if (type == "json")
-          return response.json();
-        else if (type == "blob")
-          return response.blob();
-      }).then(function(data21) {
-        if (on_complete)
-          on_complete(data21);
-      }).catch(function(error) {
-        console.error("error fetching file:", url);
-        if (on_error)
-          on_error(error);
-      });
-    } else if (url.constructor === File || url.constructor === Blob) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var v2 = e.target.result;
-        if (type == "json")
-          v2 = JSON.parse(v2);
-        if (on_complete)
-          on_complete(v2);
-      };
-      if (type == "arraybuffer")
-        return reader.readAsArrayBuffer(url);
-      else if (type == "text" || type == "json")
-        return reader.readAsText(url);
-      else if (type == "blob")
-        return reader.readAsBinaryString(url);
-    }
-    return null;
-  }
-  //used to create nodes from wrapping functions
-  getParameterNames(func) {
-    return (func + "").replace(/[/][/].*$/gm, "").replace(/\s+/g, "").replace(/[/][*][^/*]*[*][/]/g, "").split("){", 1)[0].replace(/^[^(]*[(]/, "").replace(/=[^,]+/g, "").split(",").filter(Boolean);
-  }
-  /* helper for interaction: pointer, touch, mouse Listeners
-  used by LGraphCanvas DragAndScale ContextMenu*/
-  pointerListenerAdd(oDOM, sEvIn, fCall, capture = false) {
-    if (!oDOM || !oDOM.addEventListener || !sEvIn || typeof fCall !== "function") {
-      return;
-    }
-    var sMethod = LiteGraph.pointerevents_method;
-    var sEvent = sEvIn;
-    if (sMethod == "pointer" && !window.PointerEvent) {
-      console.warn("sMethod=='pointer' && !window.PointerEvent");
-      console.log("Converting pointer[" + sEvent + "] : down move up cancel enter TO touchstart touchmove touchend, etc ..");
-      switch (sEvent) {
-        case "down": {
-          sMethod = "touch";
-          sEvent = "start";
-          break;
-        }
-        case "move": {
-          sMethod = "touch";
-          break;
-        }
-        case "up": {
-          sMethod = "touch";
-          sEvent = "end";
-          break;
-        }
-        case "cancel": {
-          sMethod = "touch";
-          break;
-        }
-        case "enter": {
-          console.log("debug: Should I send a move event?");
-          break;
-        }
-        default: {
-          console.warn("PointerEvent not available in this browser ? The event " + sEvent + " would not be called");
-        }
-      }
-    }
-    switch (sEvent) {
-      case "down":
-      case "up":
-      case "move":
-      case "over":
-      case "out":
-      case "enter": {
-        oDOM.addEventListener(sMethod + sEvent, fCall, capture);
-      }
-      case "leave":
-      case "cancel":
-      case "gotpointercapture":
-      case "lostpointercapture": {
-        if (sMethod != "mouse") {
-          return oDOM.addEventListener(sMethod + sEvent, fCall, capture);
-        }
-      }
-      default:
-        return oDOM.addEventListener(sEvent, fCall, capture);
-    }
-  }
-  pointerListenerRemove(oDOM, sEvent, fCall, capture = false) {
-    if (!oDOM || !oDOM.removeEventListener || !sEvent || typeof fCall !== "function") {
-      return;
-    }
-    switch (sEvent) {
-      case "down":
-      case "up":
-      case "move":
-      case "over":
-      case "out":
-      case "enter": {
-        if (LiteGraph.pointerevents_method == "pointer" || LiteGraph.pointerevents_method == "mouse") {
-          oDOM.removeEventListener(LiteGraph.pointerevents_method + sEvent, fCall, capture);
-        }
-      }
-      case "leave":
-      case "cancel":
-      case "gotpointercapture":
-      case "lostpointercapture": {
-        if (LiteGraph.pointerevents_method == "pointer") {
-          return oDOM.removeEventListener(LiteGraph.pointerevents_method + sEvent, fCall, capture);
-        }
-      }
-      default:
-        return oDOM.removeEventListener(sEvent, fCall, capture);
-    }
-  }
-  getTime;
-  compareObjects(a, b) {
-    for (var i2 in a) {
-      if (a[i2] != b[i2]) {
-        return false;
-      }
-    }
-    return true;
-  }
-  distance = distance;
-  colorToString(c) {
-    return "rgba(" + Math.round(c[0] * 255).toFixed() + "," + Math.round(c[1] * 255).toFixed() + "," + Math.round(c[2] * 255).toFixed() + "," + (c.length == 4 ? c[3].toFixed(2) : "1.0") + ")";
-  }
-  isInsideRectangle = isInsideRectangle;
-  //[minx,miny,maxx,maxy]
-  growBounding(bounding, x2, y2) {
-    if (x2 < bounding[0]) {
-      bounding[0] = x2;
-    } else if (x2 > bounding[2]) {
-      bounding[2] = x2;
-    }
-    if (y2 < bounding[1]) {
-      bounding[1] = y2;
-    } else if (y2 > bounding[3]) {
-      bounding[3] = y2;
-    }
-  }
-  overlapBounding = overlapBounding;
-  //point inside bounding box
-  isInsideBounding(p2, bb) {
-    if (p2[0] < bb[0][0] || p2[1] < bb[0][1] || p2[0] > bb[1][0] || p2[1] > bb[1][1]) {
-      return false;
-    }
-    return true;
-  }
-  //Convert a hex value to its decimal value - the inputted hex must be in the
-  //	format of a hex triplet - the kind we use for HTML colours. The function
-  //	will return an array with three values.
-  hex2num(hex) {
-    if (hex.charAt(0) == "#") {
-      hex = hex.slice(1);
-    }
-    hex = hex.toUpperCase();
-    var hex_alphabets = "0123456789ABCDEF";
-    var value3 = new Array(3);
-    var k = 0;
-    var int1, int2;
-    for (var i2 = 0; i2 < 6; i2 += 2) {
-      int1 = hex_alphabets.indexOf(hex.charAt(i2));
-      int2 = hex_alphabets.indexOf(hex.charAt(i2 + 1));
-      value3[k] = int1 * 16 + int2;
-      k++;
-    }
-    return value3;
-  }
-  //Give a array with three values as the argument and the function will return
-  //	the corresponding hex triplet.
-  num2hex(triplet) {
-    var hex_alphabets = "0123456789ABCDEF";
-    var hex = "#";
-    var int1, int2;
-    for (var i2 = 0; i2 < 3; i2++) {
-      int1 = triplet[i2] / 16;
-      int2 = triplet[i2] % 16;
-      hex += hex_alphabets.charAt(int1) + hex_alphabets.charAt(int2);
-    }
-    return hex;
-  }
-  closeAllContextMenus(ref_window2) {
-    ref_window2 = ref_window2 || window;
-    var elements = ref_window2.document.querySelectorAll(".litecontextmenu");
-    if (!elements.length) {
-      return;
-    }
-    var result = [];
-    for (var i2 = 0; i2 < elements.length; i2++) {
-      result.push(elements[i2]);
-    }
-    for (var i2 = 0; i2 < result.length; i2++) {
-      if (result[i2].close) {
-        result[i2].close();
-      } else if (result[i2].parentNode) {
-        result[i2].parentNode.removeChild(result[i2]);
-      }
-    }
-  }
-  extendClass(target, origin2) {
-    for (var i2 in origin2) {
-      if (target.hasOwnProperty(i2)) {
-        continue;
-      }
-      target[i2] = origin2[i2];
-    }
-    if (origin2.prototype) {
-      for (var i2 in origin2.prototype) {
-        if (!origin2.prototype.hasOwnProperty(i2)) {
-          continue;
-        }
-        if (target.prototype.hasOwnProperty(i2)) {
-          continue;
-        }
-        if (origin2.prototype.__lookupGetter__(i2)) {
-          target.prototype.__defineGetter__(
-            i2,
-            origin2.prototype.__lookupGetter__(i2)
-          );
-        } else {
-          target.prototype[i2] = origin2.prototype[i2];
-        }
-        if (origin2.prototype.__lookupSetter__(i2)) {
-          target.prototype.__defineSetter__(
-            i2,
-            origin2.prototype.__lookupSetter__(i2)
-          );
-        }
-      }
-    }
-  }
-}
-function loadPolyfills() {
-  if (typeof window != "undefined" && window.CanvasRenderingContext2D && !window.CanvasRenderingContext2D.prototype.roundRect) {
-    window.CanvasRenderingContext2D.prototype.roundRect = function(x2, y2, w2, h2, radius, radius_low) {
-      var top_left_radius = 0;
-      var top_right_radius = 0;
-      var bottom_left_radius = 0;
-      var bottom_right_radius = 0;
-      if (radius === 0) {
-        this.rect(x2, y2, w2, h2);
-        return;
-      }
-      if (radius_low === void 0)
-        radius_low = radius;
-      if (radius != null && radius.constructor === Array) {
-        if (radius.length == 1)
-          top_left_radius = top_right_radius = bottom_left_radius = bottom_right_radius = radius[0];
-        else if (radius.length == 2) {
-          top_left_radius = bottom_right_radius = radius[0];
-          top_right_radius = bottom_left_radius = radius[1];
-        } else if (radius.length == 4) {
-          top_left_radius = radius[0];
-          top_right_radius = radius[1];
-          bottom_left_radius = radius[2];
-          bottom_right_radius = radius[3];
-        } else
-          return;
-      } else {
-        top_left_radius = radius || 0;
-        top_right_radius = radius || 0;
-        bottom_left_radius = radius_low || 0;
-        bottom_right_radius = radius_low || 0;
-      }
-      this.moveTo(x2 + top_left_radius, y2);
-      this.lineTo(x2 + w2 - top_right_radius, y2);
-      this.quadraticCurveTo(x2 + w2, y2, x2 + w2, y2 + top_right_radius);
-      this.lineTo(x2 + w2, y2 + h2 - bottom_right_radius);
-      this.quadraticCurveTo(
-        x2 + w2,
-        y2 + h2,
-        x2 + w2 - bottom_right_radius,
-        y2 + h2
-      );
-      this.lineTo(x2 + bottom_right_radius, y2 + h2);
-      this.quadraticCurveTo(x2, y2 + h2, x2, y2 + h2 - bottom_left_radius);
-      this.lineTo(x2, y2 + bottom_left_radius);
-      this.quadraticCurveTo(x2, y2, x2 + top_left_radius, y2);
-    };
-  }
-  if (typeof window != "undefined" && !window["requestAnimationFrame"]) {
-    window.requestAnimationFrame = // @ts-expect-error Legacy code
-    window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function(callback) {
-      window.setTimeout(callback, 1e3 / 60);
-    };
-  }
-}
-__name(loadPolyfills, "loadPolyfills");
 class DragAndScale {
   static {
     __name(this, "DragAndScale");
   }
+  /** Maximum scale (zoom in) */
   max_scale;
+  /** Minimum scale (zoom out) */
   min_scale;
   offset;
   scale;
@@ -62602,6 +61763,7 @@ class DragAndScale {
       }
     }
   }
+  /** @deprecated Has not been kept up to date */
   bindEvents(element) {
     this.last_mouse = new Float32Array(2);
     this._binded_mouse_callback = this.onMouse.bind(this);
@@ -62620,36 +61782,37 @@ class DragAndScale {
       this.visible_area[0] = this.visible_area[1] = this.visible_area[2] = this.visible_area[3] = 0;
       return;
     }
-    var width2 = this.element.width;
-    var height = this.element.height;
-    var startx = -this.offset[0];
-    var starty = -this.offset[1];
+    let width2 = this.element.width;
+    let height = this.element.height;
+    let startx = -this.offset[0];
+    let starty = -this.offset[1];
     if (viewport) {
       startx += viewport[0] / this.scale;
       starty += viewport[1] / this.scale;
       width2 = viewport[2];
       height = viewport[3];
     }
-    var endx = startx + width2 / this.scale;
-    var endy = starty + height / this.scale;
+    const endx = startx + width2 / this.scale;
+    const endy = starty + height / this.scale;
     this.visible_area[0] = startx;
     this.visible_area[1] = starty;
     this.visible_area[2] = endx - startx;
     this.visible_area[3] = endy - starty;
   }
+  /** @deprecated Has not been kept up to date */
   onMouse(e) {
     if (!this.enabled) {
       return;
     }
-    var canvas = this.element;
-    var rect = canvas.getBoundingClientRect();
-    var x2 = e.clientX - rect.left;
-    var y2 = e.clientY - rect.top;
+    const canvas = this.element;
+    const rect = canvas.getBoundingClientRect();
+    const x2 = e.clientX - rect.left;
+    const y2 = e.clientY - rect.top;
     e.canvasx = x2;
     e.canvasy = y2;
     e.dragging = this.dragging;
-    var is_inside = !this.viewport || this.viewport && x2 >= this.viewport[0] && x2 < this.viewport[0] + this.viewport[2] && y2 >= this.viewport[1] && y2 < this.viewport[1] + this.viewport[3];
-    var ignore = false;
+    const is_inside = !this.viewport || this.viewport && x2 >= this.viewport[0] && x2 < this.viewport[0] + this.viewport[2] && y2 >= this.viewport[1] && y2 < this.viewport[1] + this.viewport[3];
+    let ignore = false;
     if (this.onmouse) {
       ignore = this.onmouse(e);
     }
@@ -62660,8 +61823,8 @@ class DragAndScale {
       LiteGraph.pointerListenerAdd(document, "up", this._binded_mouse_callback);
     } else if (e.type == LiteGraph.pointerevents_method + "move") {
       if (!ignore) {
-        var deltax = x2 - this.last_mouse[0];
-        var deltay = y2 - this.last_mouse[1];
+        const deltax = x2 - this.last_mouse[0];
+        const deltay = y2 - this.last_mouse[1];
         if (this.dragging) {
           this.mouseDrag(deltax, deltay);
         }
@@ -62673,11 +61836,8 @@ class DragAndScale {
       LiteGraph.pointerListenerAdd(canvas, "move", this._binded_mouse_callback);
     } else if (is_inside && (e.type == "mousewheel" || e.type == "wheel" || e.type == "DOMMouseScroll")) {
       e.eventType = "mousewheel";
-      if (e.type == "wheel") {
-        e.wheel = -e.deltaY;
-      } else {
-        e.wheel = e.wheelDeltaY != null ? e.wheelDeltaY : e.detail * -60;
-      }
+      if (e.type == "wheel") e.wheel = -e.deltaY;
+      else e.wheel = e.wheelDeltaY != null ? e.wheelDeltaY : e.detail * -60;
       e.delta = e.wheelDelta ? e.wheelDelta / 40 : e.deltaY ? -e.deltaY / 3 : 0;
       this.changeDeltaScale(1 + e.delta * 0.05);
     }
@@ -62705,12 +61865,11 @@ class DragAndScale {
     out[1] = pos2[1] / this.scale - this.offset[1];
     return out;
   }
+  /** @deprecated Has not been kept up to date */
   mouseDrag(x2, y2) {
     this.offset[0] += x2 / this.scale;
     this.offset[1] += y2 / this.scale;
-    if (this.onredraw) {
-      this.onredraw(this);
-    }
+    this.onredraw?.(this);
   }
   changeScale(value3, zooming_center) {
     if (value3 < this.min_scale) {
@@ -62718,35 +61877,25 @@ class DragAndScale {
     } else if (value3 > this.max_scale) {
       value3 = this.max_scale;
     }
-    if (value3 == this.scale) {
-      return;
-    }
-    if (!this.element) {
-      return;
-    }
-    var rect = this.element.getBoundingClientRect();
-    if (!rect) {
-      return;
-    }
+    if (value3 == this.scale) return;
+    if (!this.element) return;
+    const rect = this.element.getBoundingClientRect();
+    if (!rect) return;
     zooming_center = zooming_center || [
       rect.width * 0.5,
       rect.height * 0.5
     ];
-    var center = this.convertCanvasToOffset(zooming_center);
+    const center = this.convertCanvasToOffset(zooming_center);
     this.scale = value3;
-    if (Math.abs(this.scale - 1) < 0.01) {
-      this.scale = 1;
-    }
-    var new_center = this.convertCanvasToOffset(zooming_center);
-    var delta_offset = [
+    if (Math.abs(this.scale - 1) < 0.01) this.scale = 1;
+    const new_center = this.convertCanvasToOffset(zooming_center);
+    const delta_offset = [
       new_center[0] - center[0],
       new_center[1] - center[1]
     ];
     this.offset[0] += delta_offset[0];
     this.offset[1] += delta_offset[1];
-    if (this.onredraw) {
-      this.onredraw(this);
-    }
+    this.onredraw?.(this);
   }
   changeDeltaScale(value3, zooming_center) {
     this.changeScale(this.scale * value3, zooming_center);
@@ -62761,6 +61910,32 @@ function stringOrNull(value3) {
   return value3 == null ? null : String(value3);
 }
 __name(stringOrNull, "stringOrNull");
+function stringOrEmpty(value3) {
+  return value3 == null ? "" : String(value3);
+}
+__name(stringOrEmpty, "stringOrEmpty");
+function distributeNodes(nodes, horizontal2) {
+  const nodeCount = nodes?.length;
+  if (!(nodeCount > 1)) return;
+  const index2 = horizontal2 ? 0 : 1;
+  let total = 0;
+  let highest = -Infinity;
+  for (const node22 of nodes) {
+    total += node22.size[index2];
+    const high = node22.pos[index2] + node22.size[index2];
+    if (high > highest) highest = high;
+  }
+  const sorted = [...nodes].sort((a, b) => a.pos[index2] - b.pos[index2]);
+  const lowest = sorted[0].pos[index2];
+  const gap = (highest - lowest - total) / (nodeCount - 1);
+  let startAt = lowest;
+  for (let i2 = 0; i2 < nodeCount; i2++) {
+    const node22 = sorted[i2];
+    node22.pos[index2] = startAt + gap * i2;
+    startAt += node22.size[index2];
+  }
+}
+__name(distributeNodes, "distributeNodes");
 class LGraphCanvas {
   static {
     __name(this, "LGraphCanvas");
@@ -62774,12 +61949,8 @@ class LGraphCanvas {
   static #tempA = new Float32Array(2);
   static #tempB = new Float32Array(2);
   static DEFAULT_BACKGROUND_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQBJREFUeNrs1rEKwjAUhlETUkj3vP9rdmr1Ysammk2w5wdxuLgcMHyptfawuZX4pJSWZTnfnu/lnIe/jNNxHHGNn//HNbbv+4dr6V+11uF527arU7+u63qfa/bnmh8sWLBgwYJlqRf8MEptXPBXJXa37BSl3ixYsGDBMliwFLyCV/DeLIMFCxYsWLBMwSt4Be/NggXLYMGCBUvBK3iNruC9WbBgwYJlsGApeAWv4L1ZBgsWLFiwYJmCV/AK3psFC5bBggULloJX8BpdwXuzYMGCBctgwVLwCl7Be7MMFixYsGDBsu8FH1FaSmExVfAxBa/gvVmwYMGCZbBg/W4vAQYA5tRF9QYlv/QAAAAASUVORK5CYII=";
-  // TODO: Remove workaround - this should be instance-based, regardless.  "-1" formerly pointed to LiteGraph.EVENT_LINK_COLOR.
-  static link_type_colors = {
-    "-1": LiteGraphGlobal.DEFAULT_EVENT_LINK_COLOR,
-    number: "#AAA",
-    node: "#DCA"
-  };
+  /** Initialised from LiteGraphGlobal static block to avoid circular dependency. */
+  static link_type_colors;
   static gradients = {};
   //cache of gradients
   static search_limit = -1;
@@ -62897,6 +62068,9 @@ class LGraphCanvas {
   render_time;
   fps;
   selected_nodes;
+  /** @deprecated Temporary implementation only - will be replaced with `selectedItems: Set<Positionable>`. */
+  selectedGroups;
+  isDragging;
   selected_group;
   visible_nodes;
   node_dragged;
@@ -62966,7 +62140,7 @@ class LGraphCanvas {
   constructor(canvas, graph, options3) {
     this.options = options3 = options3 || {};
     this.background_image = LGraphCanvas.DEFAULT_BACKGROUND_IMAGE;
-    if (canvas && canvas.constructor === String) {
+    if (canvas && typeof canvas === "string") {
       canvas = document.querySelector(canvas);
     }
     this.ds = new DragAndScale();
@@ -63230,6 +62404,19 @@ class LGraphCanvas {
     }
     __name(inner_clicked, "inner_clicked");
   }
+  static createDistributeMenu(value3, options3, event2, prev_menu, node22) {
+    new LiteGraph.ContextMenu(["Vertically", "Horizontally"], {
+      event: event2,
+      callback: inner_clicked,
+      parentMenu: prev_menu
+    });
+    function inner_clicked(value22) {
+      const canvas = LGraphCanvas.active_canvas;
+      distributeNodes(Object.values(canvas.selected_nodes), value22 === "Horizontally");
+      canvas.setDirty(true, true);
+    }
+    __name(inner_clicked, "inner_clicked");
+  }
   static onMenuAdd(node22, options3, e, prev_menu, callback) {
     const canvas = LGraphCanvas.active_canvas;
     const ref_window2 = canvas.getCanvasWindow();
@@ -63421,7 +62608,7 @@ class LGraphCanvas {
         return;
       }
       const value3 = v3.value[1];
-      if (value3 && (value3.constructor === Object || value3.constructor === Array)) {
+      if (value3 && (typeof value3 === "object" || Array.isArray(value3))) {
         const entries2 = [];
         for (const i2 in value3) {
           entries2.push({ content: i2, value: value3[i2] });
@@ -63592,10 +62779,10 @@ class LGraphCanvas {
   static getPropertyPrintableValue(value3, values2) {
     if (!values2)
       return String(value3);
-    if (values2.constructor === Array) {
+    if (Array.isArray(values2)) {
       return String(value3);
     }
-    if (values2.constructor === Object) {
+    if (typeof values2 === "object") {
       let desc_value = "";
       for (const k in values2) {
         if (values2[k] != value3)
@@ -63683,7 +62870,7 @@ class LGraphCanvas {
       const color = v2.value ? LGraphCanvas.node_colors[v2.value] : null;
       const fApplyColor = /* @__PURE__ */ __name(function(node3) {
         if (color) {
-          if (node3.constructor === LiteGraph.LGraphGroup) {
+          if (node3 instanceof LGraphGroup) {
             node3.color = color.groupcolor;
           } else {
             node3.color = color.color;
@@ -63808,6 +62995,7 @@ class LGraphCanvas {
     this.fps = 0;
     this.dragging_rectangle = null;
     this.selected_nodes = {};
+    this.selectedGroups = null;
     this.selected_group = null;
     this.visible_nodes = [];
     this.node_dragged = null;
@@ -63897,45 +63085,44 @@ class LGraphCanvas {
     return this.graph;
   }
   /**
-   * assigns a canvas
+   * Sets the current HTML canvas element.
+   * Calls bindEvents to add input event listeners, and (re)creates the background canvas.
    *
-   * @param {Canvas} assigns a canvas (also accepts the ID of the element (not a selector)
+   * @param canvas The canvas element to assign, or its HTML element ID.  If null or undefined, the current reference is cleared.
+   * @param skip_events If true, events on the previous canvas will not be removed.  Has no effect on the first invocation.
    */
   setCanvas(canvas, skip_events) {
-    if (canvas?.constructor === String) {
-      canvas = document.getElementById(canvas);
-      if (!canvas) {
-        throw "Error creating LiteGraph canvas: Canvas not found";
-      }
+    let element;
+    if (typeof canvas === "string") {
+      const el = document.getElementById(canvas);
+      if (!(el instanceof HTMLCanvasElement)) throw "Error creating LiteGraph canvas: Canvas not found";
+      element = el;
+    } else {
+      element = canvas;
     }
-    if (canvas === this.canvas) return;
-    if (!canvas && this.canvas) {
-      if (!skip_events) {
-        this.unbindEvents();
-      }
-    }
-    this.canvas = canvas;
-    this.ds.element = canvas;
-    if (!canvas) return;
-    canvas.className += " lgraphcanvas";
-    canvas.data = this;
-    canvas.tabindex = "1";
+    if (element === this.canvas) return;
+    if (!element && this.canvas && !skip_events) this.unbindEvents();
+    this.canvas = element;
+    this.ds.element = element;
+    if (!element) return;
+    element.className += " lgraphcanvas";
+    element.data = this;
+    element.tabindex = "1";
     this.bgcanvas = null;
     if (!this.bgcanvas) {
       this.bgcanvas = document.createElement("canvas");
       this.bgcanvas.width = this.canvas.width;
       this.bgcanvas.height = this.canvas.height;
     }
-    if (canvas.getContext == null) {
-      if (canvas.localName != "canvas") {
-        throw "Element supplied for LGraphCanvas must be a <canvas> element, you passed a " + // @ts-expect-error
-        canvas.localName;
+    if (element.getContext == null) {
+      if (element.localName != "canvas") {
+        throw "Element supplied for LGraphCanvas must be a <canvas> element, you passed a " + element.localName;
       }
       throw "This browser doesn't support Canvas";
     }
-    const ctx = this.ctx = canvas.getContext("2d");
+    const ctx = this.ctx = element.getContext("2d");
     if (ctx == null) {
-      if (!canvas.webgl_enabled) {
+      if (!element.webgl_enabled) {
         console.warn(
           "This canvas seems to be WebGL, enabling WebGL renderer"
         );
@@ -63968,10 +63155,12 @@ class LGraphCanvas {
     this._mousewheel_callback = this.processMouseWheel.bind(this);
     this._mousemove_callback = this.processMouseMove.bind(this);
     this._mouseup_callback = this.processMouseUp.bind(this);
+    this._mouseout_callback = this.processMouseOut.bind(this);
     LiteGraph.pointerListenerAdd(canvas, "down", this._mousedown_callback, true);
     canvas.addEventListener("mousewheel", this._mousewheel_callback, false);
     LiteGraph.pointerListenerAdd(canvas, "up", this._mouseup_callback, true);
     LiteGraph.pointerListenerAdd(canvas, "move", this._mousemove_callback);
+    canvas.addEventListener("pointerout", this._mouseout_callback);
     canvas.addEventListener("contextmenu", this._doNothing);
     canvas.addEventListener(
       "DOMMouseScroll",
@@ -63998,6 +63187,7 @@ class LGraphCanvas {
     }
     const ref_window2 = this.getCanvasWindow();
     const document2 = ref_window2.document;
+    this.canvas.removeEventListener("pointerout", this._mouseout_callback);
     LiteGraph.pointerListenerRemove(this.canvas, "move", this._mousemove_callback);
     LiteGraph.pointerListenerRemove(this.canvas, "up", this._mouseup_callback);
     LiteGraph.pointerListenerRemove(this.canvas, "down", this._mousedown_callback);
@@ -64115,6 +63305,28 @@ class LGraphCanvas {
     }
     return null;
   }
+  /**
+   * Clears highlight and mouse-over information from nodes that should not have it.
+   * 
+   * Intended to be called when the pointer moves away from a node.
+   * @param {LGraphNode} node The node that the mouse is now over
+   * @param {MouseEvent} e MouseEvent that is triggering this
+   */
+  updateMouseOverNodes(node22, e) {
+    const nodes = this.graph._nodes;
+    const l = nodes.length;
+    for (let i2 = 0; i2 < l; ++i2) {
+      if (nodes[i2].mouseOver && node22 != nodes[i2]) {
+        nodes[i2].mouseOver = null;
+        this._highlight_input = null;
+        this._highlight_pos = null;
+        nodes[i2].lostFocusAt = LiteGraph.getTime();
+        this.node_over?.onMouseLeave?.(e);
+        this.node_over = null;
+        this.dirty_canvas = true;
+      }
+    }
+  }
   processMouseDown(e) {
     if (this.set_canvas_dirty_on_mouse_event)
       this.dirty_canvas = true;
@@ -64157,16 +63369,19 @@ class LGraphCanvas {
         skip_action = true;
       }
       if (LiteGraph.alt_drag_do_clone_nodes && e.altKey && !e.ctrlKey && node22 && this.allow_interaction && !skip_action && !this.read_only) {
-        const cloned = node22.clone();
+        const node_data = node22.clone()?.serialize();
+        const cloned = LiteGraph.createNode(node_data.type);
         if (cloned) {
+          cloned.configure(node_data);
           cloned.pos[0] += 5;
           cloned.pos[1] += 5;
-          this.graph.add(cloned, false, { doCalcSize: false });
+          this.graph.add(cloned, false);
           node22 = cloned;
           skip_action = true;
           if (this.allow_dragnodes) {
             this.graph.beforeChange();
             this.node_dragged = node22;
+            this.isDragging = true;
           }
           if (!this.selected_nodes[node22.id]) {
             this.processNodeSelected(node22, e);
@@ -64211,7 +63426,8 @@ class LGraphCanvas {
                           slot,
                           input,
                           output: null,
-                          pos: pos2
+                          pos: pos2,
+                          direction: node22.horizontal !== true ? LinkDirection.RIGHT : LinkDirection.CENTER
                         });
                       }
                       skip_action = true;
@@ -64351,6 +63567,7 @@ class LGraphCanvas {
             if (this.allow_dragnodes) {
               this.graph.beforeChange();
               this.node_dragged = node22;
+              this.isDragging = true;
             }
             if (!(e.shiftKey && !e.ctrlKey && !e.altKey) || !node22.is_selected) {
               this.processNodeSelected(node22, e);
@@ -64397,6 +63614,7 @@ class LGraphCanvas {
           }
           this.selected_group = this.graph.getGroupOnPos(e.canvasX, e.canvasY);
           this.selected_group_resizing = false;
+          const group = this.selected_group;
           if (this.selected_group && !this.read_only) {
             if (e.ctrlKey) {
               this.dragging_rectangle = null;
@@ -64405,20 +63623,24 @@ class LGraphCanvas {
             if (dist2 * this.ds.scale < 10) {
               this.selected_group_resizing = true;
             } else {
-              this.selected_group.recomputeInsideNodes();
+              const f = group.font_size || LiteGraph.DEFAULT_GROUP_FONT_SIZE;
+              const headerHeight = f * 1.4;
+              if (isInsideRectangle(e.canvasX, e.canvasY, group.pos[0], group.pos[1], group.size[0], headerHeight)) {
+                this.selected_group.recomputeInsideNodes();
+                if (!e.shiftKey && !e.ctrlKey && !e.metaKey) this.deselectAllNodes();
+                this.selectedGroups ??= /* @__PURE__ */ new Set();
+                this.selectedGroups.add(group);
+                group.selected = true;
+                this.isDragging = true;
+                skip_action = true;
+              }
             }
             if (is_double_click) {
-              this.canvas.dispatchEvent(new CustomEvent(
-                "litegraph:canvas",
-                {
-                  bubbles: true,
-                  detail: {
-                    subType: "group-double-click",
-                    originalEvent: e,
-                    group: this.selected_group
-                  }
-                }
-              ));
+              this.emitEvent({
+                subType: "group-double-click",
+                originalEvent: e,
+                group: this.selected_group
+              });
             }
           } else if (is_double_click && !this.read_only) {
             if (this.allow_searchbox) {
@@ -64426,16 +63648,10 @@ class LGraphCanvas {
               e.preventDefault();
               e.stopPropagation();
             }
-            this.canvas.dispatchEvent(new CustomEvent(
-              "litegraph:canvas",
-              {
-                bubbles: true,
-                detail: {
-                  subType: "empty-double-click",
-                  originalEvent: e
-                }
-              }
-            ));
+            this.emitEvent({
+              subType: "empty-double-click",
+              originalEvent: e
+            });
           }
           clicking_canvas_bg = true;
         }
@@ -64568,20 +63784,11 @@ class LGraphCanvas {
       this.dragging_rectangle[2] = e.canvasX - this.dragging_rectangle[0];
       this.dragging_rectangle[3] = e.canvasY - this.dragging_rectangle[1];
       this.dirty_canvas = true;
-    } else if (this.selected_group && !this.read_only) {
-      if (this.selected_group_resizing) {
-        this.selected_group.resize(
-          e.canvasX - this.selected_group.pos[0],
-          e.canvasY - this.selected_group.pos[1]
-        );
-      } else {
-        const deltax = delta2[0] / this.ds.scale;
-        const deltay = delta2[1] / this.ds.scale;
-        this.selected_group.move(deltax, deltay, e.ctrlKey);
-        if (this.selected_group._nodes.length) {
-          this.dirty_canvas = true;
-        }
-      }
+    } else if (this.selected_group_resizing && !this.read_only) {
+      this.selected_group.resize(
+        e.canvasX - this.selected_group.pos[0],
+        e.canvasY - this.selected_group.pos[1]
+      );
       this.dirty_bgcanvas = true;
     } else if (this.dragging_canvas) {
       this.ds.offset[0] += delta2[0] / this.ds.scale;
@@ -64592,36 +63799,36 @@ class LGraphCanvas {
       if (this.connecting_links) {
         this.dirty_canvas = true;
       }
-      for (let i2 = 0, l = this.graph._nodes.length; i2 < l; ++i2) {
-        if (this.graph._nodes[i2].mouseOver && node22 != this.graph._nodes[i2]) {
-          this.graph._nodes[i2].mouseOver = false;
-          if (this.node_over && this.node_over.onMouseLeave) {
-            this.node_over.onMouseLeave(e);
-          }
-          this.node_over = null;
-          this.dirty_canvas = true;
-        }
-      }
+      this.updateMouseOverNodes(node22, e);
       if (node22) {
         if (node22.redraw_on_mouse)
           this.dirty_canvas = true;
+        const pos2 = [0, 0];
+        const inputId = this.isOverNodeInput(node22, e.canvasX, e.canvasY, pos2);
+        const outputId = this.isOverNodeOutput(node22, e.canvasX, e.canvasY, pos2);
         if (!node22.mouseOver) {
-          node22.mouseOver = true;
+          node22.mouseOver = {
+            inputId,
+            outputId
+          };
           this.node_over = node22;
           this.dirty_canvas = true;
           node22.onMouseEnter?.(e);
+        }
+        if (node22.mouseOver.inputId !== inputId || node22.mouseOver.outputId !== outputId) {
+          node22.mouseOver.inputId = inputId;
+          node22.mouseOver.outputId = outputId;
+          this.dirty_canvas = true;
         }
         node22.onMouseMove?.(e, [e.canvasX - node22.pos[0], e.canvasY - node22.pos[1]], this);
         if (this.connecting_links) {
           const firstLink = this.connecting_links[0];
           if (firstLink.output) {
-            const pos2 = this._highlight_input || [0, 0];
             if (this.isOverNodeBox(node22, e.canvasX, e.canvasY)) ;
             else {
-              const slot = this.isOverNodeInput(node22, e.canvasX, e.canvasY, pos2);
-              if (slot != -1 && node22.inputs[slot] && LiteGraph.isValidConnection(firstLink.output.type, node22.inputs[slot].type)) {
+              if (inputId != -1 && node22.inputs[inputId] && LiteGraph.isValidConnection(firstLink.output.type, node22.inputs[inputId].type)) {
                 this._highlight_input = pos2;
-                this._highlight_input_slot = node22.inputs[slot];
+                this._highlight_input_slot = node22.inputs[inputId];
               } else {
                 if (this.getWidgetLinkType) {
                   const overWidget = this.getWidgetAtCursor(node22);
@@ -64640,11 +63847,9 @@ class LGraphCanvas {
               }
             }
           } else if (firstLink.input) {
-            const pos2 = this._highlight_output || [0, 0];
             if (this.isOverNodeBox(node22, e.canvasX, e.canvasY)) ;
             else {
-              const slot = this.isOverNodeOutput(node22, e.canvasX, e.canvasY, pos2);
-              if (slot != -1 && node22.outputs[slot] && LiteGraph.isValidConnection(firstLink.input.type, node22.outputs[slot].type)) {
+              if (outputId != -1 && node22.outputs[outputId] && LiteGraph.isValidConnection(firstLink.input.type, node22.outputs[outputId].type)) {
                 this._highlight_output = pos2;
               } else {
                 this._highlight_output = null;
@@ -64677,12 +63882,29 @@ class LGraphCanvas {
       if (this.node_capturing_input && this.node_capturing_input != node22) {
         this.node_capturing_input.onMouseMove?.(e, [e.canvasX - this.node_capturing_input.pos[0], e.canvasY - this.node_capturing_input.pos[1]], this);
       }
-      if (this.node_dragged && !this.live_mode) {
+      if (this.isDragging && !this.live_mode) {
+        const nodes = /* @__PURE__ */ new Set();
+        const deltax = delta2[0] / this.ds.scale;
+        const deltay = delta2[1] / this.ds.scale;
         for (const i2 in this.selected_nodes) {
           const n = this.selected_nodes[i2];
+          nodes.add(n);
           n.pos[0] += delta2[0] / this.ds.scale;
           n.pos[1] += delta2[1] / this.ds.scale;
           if (!n.is_selected) this.processNodeSelected(n, e);
+        }
+        if (this.selectedGroups) {
+          for (const group of this.selectedGroups) {
+            group.move(deltax, deltay, true);
+            if (!e.ctrlKey) {
+              for (const node3 of group._nodes) {
+                if (!nodes.has(node3)) {
+                  node3.pos[0] += deltax;
+                  node3.pos[1] += deltay;
+                }
+              }
+            }
+          }
         }
         this.dirty_canvas = true;
         this.dirty_bgcanvas = true;
@@ -64706,9 +63928,7 @@ class LGraphCanvas {
    **/
   processMouseUp(e) {
     const is_primary = e.isPrimary === void 0 || e.isPrimary;
-    if (!is_primary) {
-      return false;
-    }
+    if (!is_primary) return false;
     if (!this.graph) return;
     const window2 = this.getCanvasWindow();
     const document2 = window2.document;
@@ -64745,6 +63965,7 @@ class LGraphCanvas {
         this.selected_group = null;
       }
       this.selected_group_resizing = false;
+      this.isDragging = false;
       let node22 = this.graph.getNodeOnPos(
         e.canvasX,
         e.canvasY,
@@ -64777,6 +63998,18 @@ class LGraphCanvas {
             }
             if (to_select.length) {
               this.selectNodes(to_select, e.shiftKey);
+            }
+            if (!e.shiftKey) this.deselectGroups();
+            this.selectedGroups ??= /* @__PURE__ */ new Set();
+            const groups = this.graph.groups;
+            for (const group of groups) {
+              const r = this.dragging_rectangle;
+              const pos2 = group.pos;
+              const size2 = group.size;
+              if (!isInsideRectangle(pos2[0], pos2[1], r[0], r[1], r[2], r[3]) || !isInsideRectangle(pos2[0] + size2[0], pos2[1] + size2[1], r[0], r[1], r[2], r[3])) continue;
+              this.selectedGroups.add(group);
+              group.recomputeInsideNodes();
+              group.selected = true;
             }
           } else {
             this.selectNodes([node22], e.shiftKey || e.ctrlKey || e.metaKey);
@@ -64834,17 +64067,11 @@ class LGraphCanvas {
           const linkReleaseContextExtended = {
             links: this.connecting_links
           };
-          this.canvas.dispatchEvent(new CustomEvent(
-            "litegraph:canvas",
-            {
-              bubbles: true,
-              detail: {
-                subType: "empty-release",
-                originalEvent: e,
-                linkReleaseContext: linkReleaseContextExtended
-              }
-            }
-          ));
+          this.emitEvent({
+            subType: "empty-release",
+            originalEvent: e,
+            linkReleaseContext: linkReleaseContextExtended
+          });
           if (LiteGraph.release_link_on_empty_shows_menu) {
             if (e.shiftKey) {
               if (this.allow_searchbox) {
@@ -64886,7 +64113,7 @@ class LGraphCanvas {
           e.canvasY,
           this.visible_nodes
         );
-        if (!node22 && e.click_time < 300) {
+        if (!node22 && e.click_time < 300 && !this.graph.groups.some((x2) => x2.isPointInTitlebar(e.canvasX, e.canvasY))) {
           this.deselectAllNodes();
         }
         this.dirty_canvas = true;
@@ -64912,6 +64139,13 @@ class LGraphCanvas {
     e.stopPropagation();
     e.preventDefault();
     return false;
+  }
+  /**
+   * Called when the mouse moves off the canvas.  Clears all node hover states.
+   * @param e
+   */
+  processMouseOut(e) {
+    this.updateMouseOverNodes(null, e);
   }
   /**
    * Called when a mouse wheel event has to be processed
@@ -65178,7 +64412,7 @@ class LGraphCanvas {
         node22.configure(node_data);
         node22.pos[0] += this.graph_mouse[0] - posMin[0];
         node22.pos[1] += this.graph_mouse[1] - posMin[1];
-        this.graph.add(node22, { doProcessChange: false });
+        this.graph.add(node22, true);
         nodes.push(node22);
       }
     }
@@ -65371,8 +64605,16 @@ class LGraphCanvas {
     this.selected_nodes = {};
     this.current_node = null;
     this.highlighted_links = {};
+    this.deselectGroups();
     this.onSelectionChange?.(this.selected_nodes);
     this.setDirty(true);
+  }
+  deselectGroups() {
+    if (!this.selectedGroups) return;
+    for (const group of this.selectedGroups) {
+      delete group.selected;
+    }
+    this.selectedGroups = null;
   }
   /**
    * deletes all nodes in the current selection from the graph
@@ -65606,7 +64848,7 @@ class LGraphCanvas {
             null,
             link_color,
             connDir,
-            LiteGraph.CENTER
+            link.direction ?? LinkDirection.CENTER
           );
           ctx.beginPath();
           if (connType === LiteGraph.EVENT || connShape === LiteGraph.BOX_SHAPE) {
@@ -65999,12 +65241,6 @@ class LGraphCanvas {
         this.drawGroups(canvas, ctx);
       }
       this.onDrawBackground?.(ctx, this.visible_area);
-      if (this.onBackgroundRender) {
-        console.error(
-          "WARNING! onBackgroundRender deprecated, now is named onDrawBackground "
-        );
-        this.onBackgroundRender = null;
-      }
       if (this.render_canvas_border) {
         ctx.strokeStyle = "#235";
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
@@ -66097,8 +65333,7 @@ class LGraphCanvas {
       size2,
       color,
       bgcolor,
-      node22.is_selected,
-      node22.mouseOver
+      node22.is_selected
     );
     if (!low_quality) {
       node22.drawBadges(ctx);
@@ -66108,6 +65343,7 @@ class LGraphCanvas {
     ctx.textAlign = horizontal2 ? "center" : "left";
     ctx.font = this.inner_text_font;
     const render_text = !low_quality;
+    const highlightColour = LiteGraph.NODE_TEXT_HIGHLIGHT_COLOR ?? LiteGraph.NODE_SELECTED_TITLE_COLOR ?? LiteGraph.NODE_TEXT_COLOR;
     const out_slot = this.connecting_links ? this.connecting_links[0].output : null;
     const in_slot = this.connecting_links ? this.connecting_links[0].input : null;
     ctx.lineWidth = 1;
@@ -66118,10 +65354,10 @@ class LGraphCanvas {
         for (let i2 = 0; i2 < node22.inputs.length; i2++) {
           const slot = node22.inputs[i2];
           const slot_type = slot.type;
-          ctx.globalAlpha = editor_alpha;
-          if (out_slot && !LiteGraph.isValidConnection(slot.type, out_slot.type)) {
-            ctx.globalAlpha = 0.4 * editor_alpha;
-          }
+          const isValid2 = !this.connecting_links || out_slot && LiteGraph.isValidConnection(slot.type, out_slot.type);
+          const highlight = isValid2 && node22.mouseOver?.inputId === i2;
+          const label_color = highlight ? highlightColour : LiteGraph.NODE_TEXT_COLOR;
+          ctx.globalAlpha = isValid2 ? editor_alpha : 0.4 * editor_alpha;
           ctx.fillStyle = slot.link != null ? slot.color_on || this.default_connection_color_byType[slot_type] || this.default_connection_color.input_on : slot.color_off || this.default_connection_color_byTypeOff[slot_type] || this.default_connection_color_byType[slot_type] || this.default_connection_color.input_off;
           const pos2 = node22.getConnectionPos(true, i2, slot_pos);
           pos2[0] -= node22.pos[0];
@@ -66133,10 +65369,11 @@ class LGraphCanvas {
             horizontal: horizontal2,
             low_quality,
             render_text,
-            label_color: LiteGraph.NODE_TEXT_COLOR,
+            label_color,
             label_position: LabelPosition.Right,
             // Input slot is not stroked.
-            do_stroke: false
+            do_stroke: false,
+            highlight
           });
         }
       }
@@ -66146,9 +65383,10 @@ class LGraphCanvas {
         for (let i2 = 0; i2 < node22.outputs.length; i2++) {
           const slot = node22.outputs[i2];
           const slot_type = slot.type;
-          if (in_slot && !LiteGraph.isValidConnection(slot_type, in_slot.type)) {
-            ctx.globalAlpha = 0.4 * editor_alpha;
-          }
+          const isValid2 = !this.connecting_links || in_slot && LiteGraph.isValidConnection(slot_type, in_slot.type);
+          const highlight = isValid2 && node22.mouseOver?.outputId === i2;
+          const label_color = highlight ? highlightColour : LiteGraph.NODE_TEXT_COLOR;
+          ctx.globalAlpha = isValid2 ? editor_alpha : 0.4 * editor_alpha;
           const pos2 = node22.getConnectionPos(false, i2, slot_pos);
           pos2[0] -= node22.pos[0];
           pos2[1] -= node22.pos[1];
@@ -66160,9 +65398,10 @@ class LGraphCanvas {
             horizontal: horizontal2,
             low_quality,
             render_text,
-            label_color: LiteGraph.NODE_TEXT_COLOR,
+            label_color,
             label_position: LabelPosition.Left,
-            do_stroke: true
+            do_stroke: true,
+            highlight
           });
         }
       }
@@ -66300,21 +65539,23 @@ class LGraphCanvas {
     ctx.fillText(text, pos2[0], pos2[1] - 15 - h2 * 0.3);
   }
   /**
-   * draws the shape of the given node in the canvas
-   **/
-  drawNodeShape(node22, ctx, size2, fgcolor, bgcolor, selected2, mouse_over) {
+   * Draws the shape of the given node on the canvas
+   * @param node The node to draw
+   * @param ctx 2D canvas rendering context used to draw
+   * @param size Size of the background to draw, in graph units.  Differs from node size if collapsed, etc.
+   * @param fgcolor Foreground colour - used for text
+   * @param bgcolor Background colour of the node
+   * @param selected Whether to render the node as selected.  Likely to be removed in future, as current usage is simply the is_selected property of the node.
+   * @param mouse_over Deprecated
+   */
+  drawNodeShape(node22, ctx, size2, fgcolor, bgcolor, selected2) {
     ctx.strokeStyle = fgcolor;
     ctx.fillStyle = bgcolor;
     const title_height = LiteGraph.NODE_TITLE_HEIGHT;
     const low_quality = this.ds.scale < 0.5;
     const shape = node22._shape || node22.constructor.shape || LiteGraph.ROUND_SHAPE;
     const title_mode = node22.constructor.title_mode;
-    let render_title = true;
-    if (title_mode == LiteGraph.TRANSPARENT_TITLE || title_mode == LiteGraph.NO_TITLE) {
-      render_title = false;
-    } else if (title_mode == LiteGraph.AUTOHIDE_TITLE && mouse_over) {
-      render_title = true;
-    }
+    const render_title = title_mode == LiteGraph.TRANSPARENT_TITLE || title_mode == LiteGraph.NO_TITLE ? false : true;
     const area = LGraphCanvas.#tmp_area;
     area[0] = 0;
     area[1] = render_title ? -title_height : 0;
@@ -66354,8 +65595,7 @@ class LGraphCanvas {
     if (render_title || title_mode == LiteGraph.TRANSPARENT_TITLE) {
       if (node22.onDrawTitleBar) {
         node22.onDrawTitleBar(ctx, title_height, size2, this.ds.scale, fgcolor);
-      } else if (title_mode != LiteGraph.TRANSPARENT_TITLE && // @ts-expect-error ctor props
-      (node22.constructor.title_color || this.render_title_colored)) {
+      } else if (title_mode != LiteGraph.TRANSPARENT_TITLE && (node22.constructor.title_color || this.render_title_colored)) {
         const title_color = node22.constructor.title_color || fgcolor;
         if (node22.flags.collapsed) {
           ctx.shadowColor = LiteGraph.DEFAULT_SHADOW_COLOR;
@@ -66461,8 +65701,7 @@ class LGraphCanvas {
           if (selected2) {
             ctx.fillStyle = LiteGraph.NODE_SELECTED_TITLE_COLOR;
           } else {
-            ctx.fillStyle = // @ts-expect-error ctor props
-            node22.constructor.title_text_color || this.node_title_color;
+            ctx.fillStyle = node22.constructor.title_text_color || this.node_title_color;
           }
           if (node22.flags.collapsed) {
             ctx.textAlign = "left";
@@ -66978,8 +66217,7 @@ class LGraphCanvas {
       }
       ctx.fillStyle = "#FFF";
       ctx.fillText(
-        // @ts-expect-error type coercion
-        node22.order,
+        stringOrEmpty(node22.order),
         node22.pos[0] + LiteGraph.NODE_TITLE_HEIGHT * -0.5,
         node22.pos[1] - 6
       );
@@ -67139,9 +66377,9 @@ class LGraphCanvas {
               let v2 = typeof w2.value === "number" ? String(w2.value) : w2.value;
               if (w2.options.values) {
                 let values2 = w2.options.values;
-                if (values2.constructor === Function)
+                if (typeof values2 === "function")
                   values2 = values2();
-                if (values2 && values2.constructor !== Array)
+                if (values2 && !Array.isArray(values2))
                   v2 = values2[w2.value];
               }
               const labelWidth = ctx.measureText(w2.label || w2.name).width + margin * 2;
@@ -67277,12 +66515,12 @@ class LGraphCanvas {
             }
           } else if (event.type == LiteGraph.pointerevents_method + "down") {
             values = w.options.values;
-            if (values && values.constructor === Function) {
+            if (typeof values === "function") {
               values = w.options.values(w, node);
             }
             values_list = null;
             if (w.type != "number")
-              values_list = values.constructor === Array ? values : Object.keys(values);
+              values_list = Array.isArray(values) ? values : Object.keys(values);
             delta = x < 40 ? -1 : x > widget_width - 40 ? 1 : 0;
             if (w.type == "number") {
               w.value += delta * 0.1 * (w.options.step || 1);
@@ -67295,10 +66533,10 @@ class LGraphCanvas {
             } else if (delta) {
               let index2 = -1;
               this.last_mouseclick = 0;
-              index2 = values.constructor === Object ? values_list.indexOf(String(w.value)) + delta : values_list.indexOf(w.value) + delta;
+              index2 = typeof values === "object" ? values_list.indexOf(String(w.value)) + delta : values_list.indexOf(w.value) + delta;
               if (index2 >= values_list.length) index2 = values_list.length - 1;
               if (index2 < 0) index2 = 0;
-              w.value = values.constructor === Array ? values[index2] : index2;
+              w.value = Array.isArray(values) ? values[index2] : index2;
             } else {
               let inner_clicked = /* @__PURE__ */ __name(function(v2) {
                 if (values != values_list)
@@ -68266,7 +67504,7 @@ class LGraphCanvas {
     } else if ((type == "enum" || type == "combo") && info.values) {
       input_html = "<select autofocus type='text' class='value'>";
       for (const i2 in info.values) {
-        const v2 = info.values.constructor === Array ? info.values[i2] : i2;
+        const v2 = Array.isArray(info.values) ? info.values[i2] : i2;
         input_html += "<option value='" + v2 + "' " + (v2 == node22.properties[property] ? "selected" : "") + ">" + info.values[i2] + "</option>";
       }
       input_html += "</select>";
@@ -68280,12 +67518,12 @@ class LGraphCanvas {
       "<span class='name'>" + (info.label || property) + "</span>" + input_html + "<button>OK</button>",
       options3
     );
-    let input = false;
+    let input;
     if ((type == "enum" || type == "combo") && info.values) {
       input = dialog.querySelector("select");
       input.addEventListener("change", function(e) {
         dialog.modified();
-        setValue2(e.target.value);
+        setValue2(e.target?.value);
       });
     } else if (type == "boolean" || type == "toggle") {
       input = dialog.querySelector("input");
@@ -68326,7 +67564,7 @@ class LGraphCanvas {
     }
     __name(inner, "inner");
     function setValue2(value3) {
-      if (info?.values && info.values.constructor === Object && info.values[value3] != void 0)
+      if (info?.values && typeof info.values === "object" && info.values[value3] != void 0)
         value3 = info.values[value3];
       if (typeof node22.properties[property] == "number") {
         value3 = Number(value3);
@@ -68397,7 +67635,7 @@ class LGraphCanvas {
       dialog.parentNode?.removeChild(dialog);
     };
     let dialogCloseTimer = null;
-    let prevent_timeout = false;
+    let prevent_timeout = 0;
     dialog.addEventListener("mouseleave", function() {
       if (prevent_timeout)
         return;
@@ -68431,9 +67669,9 @@ class LGraphCanvas {
     root21.innerHTML = "<div class='dialog-header'><span class='dialog-title'></span></div><div class='dialog-content'></div><div style='display:none;' class='dialog-alt-content'></div><div class='dialog-footer'></div>";
     root21.header = root21.querySelector(".dialog-header");
     if (options3.width)
-      root21.style.width = options3.width + (options3.width.constructor === Number ? "px" : "");
+      root21.style.width = options3.width + (typeof options3.width === "number" ? "px" : "");
     if (options3.height)
-      root21.style.height = options3.height + (options3.height.constructor === Number ? "px" : "");
+      root21.style.height = options3.height + (typeof options3.height === "number" ? "px" : "");
     if (options3.closable) {
       const close3 = document.createElement("span");
       close3.innerHTML = "&#10005;";
@@ -68590,68 +67828,12 @@ class LGraphCanvas {
     document.querySelector("#node-panel")?.close();
     document.querySelector("#option-panel")?.close();
   }
-  showShowGraphOptionsPanel(refOpts, obEv) {
-    let graphcanvas;
-    if (this.constructor && this.constructor.name == "HTMLDivElement") {
-      if (!obEv || !obEv.event || !obEv.event.target || !obEv.event.target.lgraphcanvas) {
-        console.warn("Canvas not found");
-        return;
-      }
-      graphcanvas = obEv.event.target.lgraphcanvas;
-    } else {
-      graphcanvas = this;
-    }
-    graphcanvas.closePanels();
-    const ref_window2 = graphcanvas.getCanvasWindow();
-    panel = graphcanvas.createPanel("Options", {
-      closable: true,
-      window: ref_window2,
-      onOpen: /* @__PURE__ */ __name(function() {
-        graphcanvas.OPTIONPANEL_IS_OPEN = true;
-      }, "onOpen"),
-      onClose: /* @__PURE__ */ __name(function() {
-        graphcanvas.OPTIONPANEL_IS_OPEN = false;
-        graphcanvas.options_panel = null;
-      }, "onClose")
-    });
-    graphcanvas.options_panel = panel;
-    panel.id = "option-panel";
-    panel.classList.add("settings");
-    function inner_refresh() {
-      panel.content.innerHTML = "";
-      const fUpdate = /* @__PURE__ */ __name(function(name, value3, options3) {
-        switch (name) {
-          default:
-            if (options3?.key) {
-              name = options3.key;
-            }
-            if (options3.values) {
-              value3 = Object.values(options3.values).indexOf(value3);
-            }
-            graphcanvas[name] = value3;
-            break;
-        }
-      }, "fUpdate");
-      const aProps = LiteGraph.availableCanvasOptions;
-      aProps.sort();
-      for (const pI in aProps) {
-        const pX = aProps[pI];
-        panel.addWidget("boolean", pX, graphcanvas[pX], { key: pX, on: "True", off: "False" }, fUpdate);
-      }
-      panel.addWidget("combo", "Render mode", LiteGraph.LINK_RENDER_MODES[graphcanvas.links_render_mode], { key: "links_render_mode", values: LiteGraph.LINK_RENDER_MODES }, fUpdate);
-      panel.addSeparator();
-      panel.footer.innerHTML = "";
-    }
-    __name(inner_refresh, "inner_refresh");
-    inner_refresh();
-    graphcanvas.canvas.parentNode.appendChild(panel);
-  }
   showShowNodePanel(node22) {
     this.SELECTED_NODE = node22;
     this.closePanels();
     const ref_window2 = this.getCanvasWindow();
     const graphcanvas = this;
-    const panel22 = this.createPanel(node22.title || "", {
+    const panel2 = this.createPanel(node22.title || "", {
       closable: true,
       window: ref_window2,
       onOpen: /* @__PURE__ */ __name(function() {
@@ -68662,14 +67844,14 @@ class LGraphCanvas {
         graphcanvas.node_panel = null;
       }, "onClose")
     });
-    graphcanvas.node_panel = panel22;
-    panel22.id = "node-panel";
-    panel22.node = node22;
-    panel22.classList.add("settings");
+    graphcanvas.node_panel = panel2;
+    panel2.id = "node-panel";
+    panel2.node = node22;
+    panel2.classList.add("settings");
     function inner_refresh() {
-      panel22.content.innerHTML = "";
-      panel22.addHTML("<span class='node_type'>" + node22.type + "</span><span class='node_desc'>" + (node22.constructor.desc || "") + "</span><span class='separator'></span>");
-      panel22.addHTML("<h3>Properties</h3>");
+      panel2.content.innerHTML = "";
+      panel2.addHTML(`<span class='node_type'>${node22.type}</span><span class='node_desc'>${node22.constructor.desc || ""}</span><span class='separator'></span>`);
+      panel2.addHTML("<h3>Properties</h3>");
       const fUpdate = /* @__PURE__ */ __name(function(name, value3) {
         graphcanvas.graph.beforeChange(node22);
         switch (name) {
@@ -68700,44 +67882,41 @@ class LGraphCanvas {
         graphcanvas.graph.afterChange();
         graphcanvas.dirty_canvas = true;
       }, "fUpdate");
-      panel22.addWidget("string", "Title", node22.title, {}, fUpdate);
-      panel22.addWidget("combo", "Mode", LiteGraph.NODE_MODES[node22.mode], { values: LiteGraph.NODE_MODES }, fUpdate);
-      let nodeCol = "";
-      if (node22.color !== void 0) {
-        nodeCol = Object.keys(LGraphCanvas.node_colors).filter(function(nK) {
-          return LGraphCanvas.node_colors[nK].color == node22.color;
-        });
-      }
-      panel22.addWidget("combo", "Color", nodeCol, { values: Object.keys(LGraphCanvas.node_colors) }, fUpdate);
+      panel2.addWidget("string", "Title", node22.title, {}, fUpdate);
+      panel2.addWidget("combo", "Mode", LiteGraph.NODE_MODES[node22.mode], { values: LiteGraph.NODE_MODES }, fUpdate);
+      const nodeCol = node22.color !== void 0 ? Object.keys(LGraphCanvas.node_colors).filter(function(nK) {
+        return LGraphCanvas.node_colors[nK].color == node22.color;
+      }) : "";
+      panel2.addWidget("combo", "Color", nodeCol, { values: Object.keys(LGraphCanvas.node_colors) }, fUpdate);
       for (const pName in node22.properties) {
         const value3 = node22.properties[pName];
         const info = node22.getPropertyInfo(pName);
-        if (node22.onAddPropertyToPanel?.(pName, panel22))
+        if (node22.onAddPropertyToPanel?.(pName, panel2))
           continue;
-        panel22.addWidget(info.widget || info.type, pName, value3, info, fUpdate);
+        panel2.addWidget(info.widget || info.type, pName, value3, info, fUpdate);
       }
-      panel22.addSeparator();
-      node22.onShowCustomPanelInfo?.(panel22);
-      panel22.footer.innerHTML = "";
-      panel22.addButton("Delete", function() {
+      panel2.addSeparator();
+      node22.onShowCustomPanelInfo?.(panel2);
+      panel2.footer.innerHTML = "";
+      panel2.addButton("Delete", function() {
         if (node22.block_delete)
           return;
         node22.graph.remove(node22);
-        panel22.close();
+        panel2.close();
       }).classList.add("delete");
     }
     __name(inner_refresh, "inner_refresh");
-    panel22.inner_showCodePad = function(propname) {
-      panel22.classList.remove("settings");
-      panel22.classList.add("centered");
-      panel22.alt_content.innerHTML = "<textarea class='code'></textarea>";
-      const textarea = panel22.alt_content.querySelector("textarea");
+    panel2.inner_showCodePad = function(propname) {
+      panel2.classList.remove("settings");
+      panel2.classList.add("centered");
+      panel2.alt_content.innerHTML = "<textarea class='code'></textarea>";
+      const textarea = panel2.alt_content.querySelector("textarea");
       const fDoneWith = /* @__PURE__ */ __name(function() {
-        panel22.toggleAltContent(false);
-        panel22.toggleFooterVisibility(true);
+        panel2.toggleAltContent(false);
+        panel2.toggleFooterVisibility(true);
         textarea.parentNode.removeChild(textarea);
-        panel22.classList.add("settings");
-        panel22.classList.remove("centered");
+        panel2.classList.add("settings");
+        panel2.classList.remove("centered");
         inner_refresh();
       }, "fDoneWith");
       textarea.value = node22.properties[propname];
@@ -68747,37 +67926,37 @@ class LGraphCanvas {
           fDoneWith();
         }
       });
-      panel22.toggleAltContent(true);
-      panel22.toggleFooterVisibility(false);
+      panel2.toggleAltContent(true);
+      panel2.toggleFooterVisibility(false);
       textarea.style.height = "calc(100% - 40px)";
-      const assign2 = panel22.addButton("Assign", function() {
+      const assign2 = panel2.addButton("Assign", function() {
         node22.setProperty(propname, textarea.value);
         fDoneWith();
       });
-      panel22.alt_content.appendChild(assign2);
-      const button = panel22.addButton("Close", fDoneWith);
+      panel2.alt_content.appendChild(assign2);
+      const button = panel2.addButton("Close", fDoneWith);
       button.style.float = "right";
-      panel22.alt_content.appendChild(button);
+      panel2.alt_content.appendChild(button);
     };
     inner_refresh();
-    this.canvas.parentNode.appendChild(panel22);
+    this.canvas.parentNode.appendChild(panel2);
   }
   showSubgraphPropertiesDialog(node22) {
     console.log("showing subgraph properties dialog");
     const old_panel = this.canvas.parentNode.querySelector(".subgraph_dialog");
     old_panel?.close();
-    const panel22 = this.createPanel("Subgraph Inputs", { closable: true, width: 500 });
-    panel22.node = node22;
-    panel22.classList.add("subgraph_dialog");
+    const panel2 = this.createPanel("Subgraph Inputs", { closable: true, width: 500 });
+    panel2.node = node22;
+    panel2.classList.add("subgraph_dialog");
     function inner_refresh() {
-      panel22.clear();
+      panel2.clear();
       if (node22.inputs)
         for (let i2 = 0; i2 < node22.inputs.length; ++i2) {
           const input = node22.inputs[i2];
           if (input.not_subgraph_input)
             continue;
           const html2 = "<button>&#10005;</button> <span class='bullet_icon'></span><span class='name'></span><span class='type'></span>";
-          const elem2 = panel22.addHTML(html2, "subgraph_property");
+          const elem2 = panel2.addHTML(html2, "subgraph_property");
           elem2.dataset["name"] = input.name;
           elem2.dataset["slot"] = i2;
           elem2.querySelector(".name").innerText = input.name;
@@ -68790,7 +67969,7 @@ class LGraphCanvas {
     }
     __name(inner_refresh, "inner_refresh");
     const html = " + <span class='label'>Name</span><input class='name'/><span class='label'>Type</span><input class='type'></input><button>+</button>";
-    const elem = panel22.addHTML(html, "subgraph_property extra", true);
+    const elem = panel2.addHTML(html, "subgraph_property extra", true);
     elem.querySelector("button").addEventListener("click", function() {
       const elem2 = this.parentNode;
       const name = elem2.querySelector(".name").value;
@@ -68803,24 +67982,24 @@ class LGraphCanvas {
       inner_refresh();
     });
     inner_refresh();
-    this.canvas.parentNode.appendChild(panel22);
-    return panel22;
+    this.canvas.parentNode.appendChild(panel2);
+    return panel2;
   }
   showSubgraphPropertiesDialogRight(node22) {
     const old_panel = this.canvas.parentNode.querySelector(".subgraph_dialog");
     old_panel?.close();
-    const panel22 = this.createPanel("Subgraph Outputs", { closable: true, width: 500 });
-    panel22.node = node22;
-    panel22.classList.add("subgraph_dialog");
+    const panel2 = this.createPanel("Subgraph Outputs", { closable: true, width: 500 });
+    panel2.node = node22;
+    panel2.classList.add("subgraph_dialog");
     function inner_refresh() {
-      panel22.clear();
+      panel2.clear();
       if (node22.outputs)
         for (let i2 = 0; i2 < node22.outputs.length; ++i2) {
           const input = node22.outputs[i2];
           if (input.not_subgraph_output)
             continue;
           const html2 = "<button>&#10005;</button> <span class='bullet_icon'></span><span class='name'></span><span class='type'></span>";
-          const elem2 = panel22.addHTML(html2, "subgraph_property");
+          const elem2 = panel2.addHTML(html2, "subgraph_property");
           elem2.dataset["name"] = input.name;
           elem2.dataset["slot"] = i2;
           elem2.querySelector(".name").innerText = input.name;
@@ -68833,7 +68012,7 @@ class LGraphCanvas {
     }
     __name(inner_refresh, "inner_refresh");
     const html = " + <span class='label'>Name</span><input class='name'/><span class='label'>Type</span><input class='type'></input><button>+</button>";
-    const elem = panel22.addHTML(html, "subgraph_property extra", true);
+    const elem = panel2.addHTML(html, "subgraph_property extra", true);
     elem.querySelector(".name").addEventListener("keydown", function(e) {
       if (e.keyCode == 13) addOutput.apply(this);
     });
@@ -68853,18 +68032,16 @@ class LGraphCanvas {
     }
     __name(addOutput, "addOutput");
     inner_refresh();
-    this.canvas.parentNode.appendChild(panel22);
-    return panel22;
+    this.canvas.parentNode.appendChild(panel2);
+    return panel2;
   }
   checkPanels() {
     if (!this.canvas) return;
     const panels = this.canvas.parentNode.querySelectorAll(".litegraph.dialog");
     for (let i2 = 0; i2 < panels.length; ++i2) {
-      const panel22 = panels[i2];
-      if (!panel22.node)
-        continue;
-      if (!panel22.node.graph || panel22.graph != this.graph)
-        panel22.close();
+      const panel2 = panels[i2];
+      if (!panel2.node) continue;
+      if (!panel2.node.graph || panel2.graph != this.graph) panel2.close();
     }
   }
   getCanvasMenuOptions() {
@@ -69002,6 +68179,11 @@ class LGraphCanvas {
         has_submenu: true,
         callback: LGraphCanvas.onNodeAlign
       });
+      options3.push({
+        content: "Distribute Nodes",
+        has_submenu: true,
+        callback: LGraphCanvas.createDistributeMenu
+      });
     }
     options3.push(null, {
       content: "Remove",
@@ -69137,219 +68319,6 @@ class LGraphCanvas {
     }
     __name(inner_option_clicked, "inner_option_clicked");
   }
-}
-class LGraphGroup {
-  static {
-    __name(this, "LGraphGroup");
-  }
-  color;
-  title;
-  font;
-  font_size;
-  _bounding;
-  _pos;
-  _size;
-  _nodes;
-  graph;
-  flags;
-  constructor(title) {
-    this._ctor(title);
-  }
-  _ctor(title) {
-    this.title = title || "Group";
-    this.font_size = LiteGraph.DEFAULT_GROUP_FONT || 24;
-    this.color = LGraphCanvas.node_colors.pale_blue ? LGraphCanvas.node_colors.pale_blue.groupcolor : "#AAA";
-    this._bounding = new Float32Array([10, 10, 140, 80]);
-    this._pos = this._bounding.subarray(0, 2);
-    this._size = this._bounding.subarray(2, 4);
-    this._nodes = [];
-    this.graph = null;
-    this.flags = {};
-  }
-  /** Position of the group, as x,y co-ordinates in graph space */
-  get pos() {
-    return this._pos;
-  }
-  set pos(v2) {
-    if (!v2 || v2.length < 2) return;
-    this._pos[0] = v2[0];
-    this._pos[1] = v2[1];
-  }
-  /** Size of the group, as width,height in graph units */
-  get size() {
-    return this._size;
-  }
-  set size(v2) {
-    if (!v2 || v2.length < 2) return;
-    this._size[0] = Math.max(140, v2[0]);
-    this._size[1] = Math.max(80, v2[1]);
-  }
-  get nodes() {
-    return this._nodes;
-  }
-  get titleHeight() {
-    return this.font_size * 1.4;
-  }
-  get selected() {
-    return !!this.graph?.list_of_graphcanvas?.some((c) => c.selected_group === this);
-  }
-  get pinned() {
-    return !!this.flags.pinned;
-  }
-  pin() {
-    this.flags.pinned = true;
-  }
-  unpin() {
-    delete this.flags.pinned;
-  }
-  configure(o) {
-    this.title = o.title;
-    this._bounding.set(o.bounding);
-    this.color = o.color;
-    this.flags = o.flags || this.flags;
-    if (o.font_size) this.font_size = o.font_size;
-  }
-  serialize() {
-    const b = this._bounding;
-    return {
-      title: this.title,
-      bounding: [
-        Math.round(b[0]),
-        Math.round(b[1]),
-        Math.round(b[2]),
-        Math.round(b[3])
-      ],
-      color: this.color,
-      font_size: this.font_size,
-      flags: this.flags
-    };
-  }
-  /**
-   * Draws the group on the canvas
-   * @param {LGraphCanvas} graphCanvas
-   * @param {CanvasRenderingContext2D} ctx
-   */
-  draw(graphCanvas, ctx) {
-    const padding = 4;
-    ctx.fillStyle = this.color;
-    ctx.strokeStyle = this.color;
-    const [x2, y2] = this._pos;
-    const [width2, height] = this._size;
-    ctx.globalAlpha = 0.25 * graphCanvas.editor_alpha;
-    ctx.beginPath();
-    ctx.rect(x2 + 0.5, y2 + 0.5, width2, height);
-    ctx.fill();
-    ctx.globalAlpha = graphCanvas.editor_alpha;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x2 + width2, y2 + height);
-    ctx.lineTo(x2 + width2 - 10, y2 + height);
-    ctx.lineTo(x2 + width2, y2 + height - 10);
-    ctx.fill();
-    const font_size = this.font_size || LiteGraph.DEFAULT_GROUP_FONT_SIZE;
-    ctx.font = font_size + "px Arial";
-    ctx.textAlign = "left";
-    ctx.fillText(this.title + (this.pinned ? "📌" : ""), x2 + padding, y2 + font_size);
-    if (LiteGraph.highlight_selected_group && this.selected) {
-      graphCanvas.drawSelectionBounding(ctx, this._bounding, {
-        shape: LiteGraph.BOX_SHAPE,
-        title_height: this.titleHeight,
-        title_mode: LiteGraph.NORMAL_TITLE,
-        fgcolor: this.color,
-        padding
-      });
-    }
-  }
-  resize(width2, height) {
-    if (this.pinned) return;
-    this._size[0] = width2;
-    this._size[1] = height;
-  }
-  move(deltax, deltay, ignore_nodes = false) {
-    if (this.pinned) return;
-    this._pos[0] += deltax;
-    this._pos[1] += deltay;
-    if (ignore_nodes) return;
-    for (let i2 = 0; i2 < this._nodes.length; ++i2) {
-      const node22 = this._nodes[i2];
-      node22.pos[0] += deltax;
-      node22.pos[1] += deltay;
-    }
-  }
-  recomputeInsideNodes() {
-    this._nodes.length = 0;
-    const nodes = this.graph._nodes;
-    const node_bounding = new Float32Array(4);
-    for (let i2 = 0; i2 < nodes.length; ++i2) {
-      const node22 = nodes[i2];
-      node22.getBounding(node_bounding);
-      if (!overlapBounding(this._bounding, node_bounding))
-        continue;
-      this._nodes.push(node22);
-    }
-  }
-  /**
-   * Add nodes to the group and adjust the group's position and size accordingly
-   * @param {LGraphNode[]} nodes - The nodes to add to the group
-   * @param {number} [padding=10] - The padding around the group
-   * @returns {void}
-   */
-  addNodes(nodes, padding = 10) {
-    if (!this._nodes && nodes.length === 0) return;
-    const allNodes = [...this._nodes || [], ...nodes];
-    const bounds = allNodes.reduce((acc, node22) => {
-      const [x2, y2] = node22.pos;
-      const [width2, height] = node22.size;
-      const isReroute = node22.type === "Reroute";
-      const isCollapsed = node22.flags?.collapsed;
-      const top = y2 - (isReroute ? 0 : LiteGraph.NODE_TITLE_HEIGHT);
-      const bottom = isCollapsed ? top + LiteGraph.NODE_TITLE_HEIGHT : y2 + height;
-      const right = isCollapsed && node22._collapsed_width ? x2 + Math.round(node22._collapsed_width) : x2 + width2;
-      return {
-        left: Math.min(acc.left, x2),
-        top: Math.min(acc.top, top),
-        right: Math.max(acc.right, right),
-        bottom: Math.max(acc.bottom, bottom)
-      };
-    }, { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
-    this.pos = [
-      bounds.left - padding,
-      bounds.top - padding - this.titleHeight
-    ];
-    this.size = [
-      bounds.right - bounds.left + padding * 2,
-      bounds.bottom - bounds.top + padding * 2 + this.titleHeight
-    ];
-  }
-  getMenuOptions() {
-    return [
-      {
-        content: this.pinned ? "Unpin" : "Pin",
-        callback: /* @__PURE__ */ __name(() => {
-          if (this.pinned) this.unpin();
-          else this.pin();
-          this.setDirtyCanvas(false, true);
-        }, "callback")
-      },
-      null,
-      { content: "Title", callback: LGraphCanvas.onShowPropertyEditor },
-      {
-        content: "Color",
-        has_submenu: true,
-        callback: LGraphCanvas.onMenuNodeColors
-      },
-      {
-        content: "Font size",
-        property: "font_size",
-        type: "Number",
-        callback: LGraphCanvas.onShowPropertyEditor
-      },
-      null,
-      { content: "Remove", callback: LGraphCanvas.onMenuNodeRemove }
-    ];
-  }
-  isPointInside = LGraphNode.prototype.isPointInside;
-  setDirtyCanvas = LGraphNode.prototype.setDirtyCanvas;
 }
 class LGraph {
   static {
@@ -70396,41 +69365,35 @@ class ContextMenu {
   root;
   current_submenu;
   lock;
+  // TODO: Interface for values requires functionality change - currently accepts an array of strings, functions, objects, nulls, or undefined.
   constructor(values2, options3) {
-    options3 = options3 || {};
+    options3 ||= {};
     this.options = options3;
-    var that2 = this;
-    if (options3.parentMenu) {
-      if (!(options3.parentMenu instanceof ContextMenu)) {
-        console.error(
-          "parentMenu must be of class ContextMenu, ignoring it"
-        );
+    const parent = options3.parentMenu;
+    if (parent) {
+      if (!(parent instanceof ContextMenu)) {
+        console.error("parentMenu must be of class ContextMenu, ignoring it");
         options3.parentMenu = null;
       } else {
-        this.parentMenu = options3.parentMenu;
+        this.parentMenu = parent;
         this.parentMenu.lock = true;
         this.parentMenu.current_submenu = this;
       }
-      if (options3.parentMenu.options?.className === "dark") {
+      if (parent.options?.className === "dark") {
         options3.className = "dark";
       }
     }
-    var eventClass = null;
-    if (options3.event)
-      eventClass = options3.event.constructor.name;
+    const eventClass = options3.event ? options3.event.constructor.name : null;
     if (eventClass !== "MouseEvent" && eventClass !== "CustomEvent" && eventClass !== "PointerEvent") {
-      console.error(
-        "Event passed to ContextMenu is not of type MouseEvent or CustomEvent. Ignoring it. (" + eventClass + ")"
-      );
+      console.error(`Event passed to ContextMenu is not of type MouseEvent or CustomEvent. Ignoring it. (${eventClass})`);
       options3.event = null;
     }
-    var root21 = document.createElement("div");
-    root21.className = "litegraph litecontextmenu litemenubar-panel";
-    if (options3.className) {
-      root21.className += " " + options3.className;
-    }
-    root21.style.minWidth = 100;
-    root21.style.minHeight = 100;
+    const root21 = document.createElement("div");
+    let classes2 = "litegraph litecontextmenu litemenubar-panel";
+    if (options3.className) classes2 += " " + options3.className;
+    root21.className = classes2;
+    root21.style.minWidth = "100";
+    root21.style.minHeight = "100";
     root21.style.pointerEvents = "none";
     setTimeout(function() {
       root21.style.pointerEvents = "auto";
@@ -70447,9 +69410,7 @@ class ContextMenu {
     root21.addEventListener(
       "contextmenu",
       function(e) {
-        if (e.button != 2) {
-          return false;
-        }
+        if (e.button != 2) return false;
         e.preventDefault();
         return false;
       },
@@ -70458,9 +69419,9 @@ class ContextMenu {
     LiteGraph.pointerListenerAdd(
       root21,
       "down",
-      function(e) {
+      (e) => {
         if (e.button == 2) {
-          that2.close();
+          this.close();
           e.preventDefault();
           return true;
         }
@@ -70468,7 +69429,7 @@ class ContextMenu {
       true
     );
     function on_mouse_wheel(e) {
-      var pos2 = parseInt(root21.style.top);
+      const pos2 = parseInt(root21.style.top);
       root21.style.top = (pos2 + e.deltaY * options3.scroll_speed).toFixed() + "px";
       e.preventDefault();
       return true;
@@ -70478,80 +69439,68 @@ class ContextMenu {
       options3.scroll_speed = 0.1;
     }
     root21.addEventListener("wheel", on_mouse_wheel, true);
-    root21.addEventListener("mousewheel", on_mouse_wheel, true);
     this.root = root21;
     if (options3.title) {
-      var element = document.createElement("div");
+      const element = document.createElement("div");
       element.className = "litemenu-title";
       element.innerHTML = options3.title;
       root21.appendChild(element);
     }
-    for (var i2 = 0; i2 < values2.length; i2++) {
-      var name = values2.constructor == Array ? values2[i2] : i2;
-      if (name != null && name.constructor !== String) {
-        name = name.content === void 0 ? String(name) : name.content;
+    for (let i2 = 0; i2 < values2.length; i2++) {
+      const value3 = values2[i2];
+      let name = Array.isArray(values2) ? value3 : String(i2);
+      if (typeof name !== "string") {
+        name = name != null ? name.content === void 0 ? String(name) : name.content : name;
       }
-      var value3 = values2[i2];
       this.addItem(name, value3, options3);
     }
-    LiteGraph.pointerListenerAdd(root21, "enter", function(e) {
+    LiteGraph.pointerListenerAdd(root21, "enter", function() {
       if (root21.closing_timer) {
         clearTimeout(root21.closing_timer);
       }
     });
-    var root_document = document;
-    if (options3.event) {
-      root_document = options3.event.target.ownerDocument;
-    }
-    if (!root_document) {
-      root_document = document;
-    }
+    const ownerDocument = (options3.event?.target).ownerDocument;
+    const root_document = ownerDocument || document;
     if (root_document.fullscreenElement)
       root_document.fullscreenElement.appendChild(root21);
     else
       root_document.body.appendChild(root21);
-    var left = options3.left || 0;
-    var top = options3.top || 0;
+    let left = options3.left || 0;
+    let top = options3.top || 0;
     if (options3.event) {
       left = options3.event.clientX - 10;
       top = options3.event.clientY - 10;
-      if (options3.title) {
-        top -= 20;
-      }
-      if (options3.parentMenu) {
-        var rect = options3.parentMenu.root.getBoundingClientRect();
+      if (options3.title) top -= 20;
+      if (parent) {
+        const rect = parent.root.getBoundingClientRect();
         left = rect.left + rect.width;
       }
-      var body_rect = document.body.getBoundingClientRect();
-      var root_rect = root21.getBoundingClientRect();
+      const body_rect = document.body.getBoundingClientRect();
+      const root_rect = root21.getBoundingClientRect();
       if (body_rect.height == 0)
         console.error("document.body height is 0. That is dangerous, set html,body { height: 100%; }");
-      if (body_rect.width && left > body_rect.width - root_rect.width - 10) {
+      if (body_rect.width && left > body_rect.width - root_rect.width - 10)
         left = body_rect.width - root_rect.width - 10;
-      }
-      if (body_rect.height && top > body_rect.height - root_rect.height - 10) {
+      if (body_rect.height && top > body_rect.height - root_rect.height - 10)
         top = body_rect.height - root_rect.height - 10;
-      }
     }
     root21.style.left = left + "px";
     root21.style.top = top + "px";
-    if (options3.scale) {
-      root21.style.transform = "scale(" + options3.scale + ")";
-    }
+    if (options3.scale)
+      root21.style.transform = `scale(${options3.scale})`;
   }
   addItem(name, value3, options3) {
-    var that2 = this;
-    options3 = options3 || {};
-    var element = document.createElement("div");
+    options3 ||= {};
+    const element = document.createElement("div");
     element.className = "litemenu-entry submenu";
-    var disabled2 = false;
+    let disabled2 = false;
     if (value3 === null) {
       element.classList.add("separator");
     } else {
-      element.innerHTML = value3 && value3.title ? value3.title : name;
-      element.value = value3;
-      element.setAttribute("role", "menuitem");
-      if (value3) {
+      if (typeof value3 === "string") {
+        element.innerHTML = name;
+      } else {
+        element.innerHTML = value3?.title ?? name;
         if (value3.disabled) {
           disabled2 = true;
           element.classList.add("disabled");
@@ -70562,54 +69511,46 @@ class ContextMenu {
           element.setAttribute("aria-haspopup", "true");
           element.setAttribute("aria-expanded", "false");
         }
+        if (value3.className)
+          element.className += " " + value3.className;
       }
-      if (typeof value3 == "function") {
+      element.value = value3;
+      element.setAttribute("role", "menuitem");
+      if (typeof value3 === "function") {
         element.dataset["value"] = name;
         element.onclick_callback = value3;
       } else {
-        element.dataset["value"] = value3;
-      }
-      if (value3.className) {
-        element.className += " " + value3.className;
+        element.dataset["value"] = String(value3);
       }
     }
     this.root.appendChild(element);
-    if (!disabled2) {
-      element.addEventListener("click", inner_onclick);
-    }
-    if (!disabled2 && options3.autoopen) {
+    if (!disabled2) element.addEventListener("click", inner_onclick);
+    if (!disabled2 && options3.autoopen)
       LiteGraph.pointerListenerAdd(element, "enter", inner_over);
-    }
-    function setAriaExpanded() {
-      const entries = that2.root.querySelectorAll("div.litemenu-entry.has_submenu");
+    const setAriaExpanded = /* @__PURE__ */ __name(() => {
+      const entries = this.root.querySelectorAll("div.litemenu-entry.has_submenu");
       if (entries) {
         for (let i2 = 0; i2 < entries.length; i2++) {
           entries[i2].setAttribute("aria-expanded", "false");
         }
       }
       element.setAttribute("aria-expanded", "true");
-    }
-    __name(setAriaExpanded, "setAriaExpanded");
+    }, "setAriaExpanded");
     function inner_over(e) {
-      var value22 = this.value;
-      if (!value22 || !value22.has_submenu) {
-        return;
-      }
+      const value22 = this.value;
+      if (!value22 || !value22.has_submenu) return;
       inner_onclick.call(this, e);
       setAriaExpanded();
     }
     __name(inner_over, "inner_over");
+    const that2 = this;
     function inner_onclick(e) {
-      var value22 = this.value;
-      var close_parent = true;
-      if (that2.current_submenu) {
-        that2.current_submenu.close(e);
-      }
-      if (value22?.has_submenu || value22?.submenu) {
-        setAriaExpanded();
-      }
+      const value22 = this.value;
+      let close_parent = true;
+      that2.current_submenu?.close(e);
+      if (value22?.has_submenu || value22?.submenu) setAriaExpanded();
       if (options3.callback) {
-        var r = options3.callback.call(
+        const r = options3.callback.call(
           this,
           value22,
           options3,
@@ -70617,13 +69558,11 @@ class ContextMenu {
           that2,
           options3.node
         );
-        if (r === true) {
-          close_parent = false;
-        }
+        if (r === true) close_parent = false;
       }
-      if (value22) {
+      if (typeof value22 === "object") {
         if (value22.callback && !options3.ignore_item_callbacks && value22.disabled !== true) {
-          var r = value22.callback.call(
+          const r = value22.callback.call(
             this,
             value22,
             options3,
@@ -70631,14 +69570,11 @@ class ContextMenu {
             that2,
             options3.extra
           );
-          if (r === true) {
-            close_parent = false;
-          }
+          if (r === true) close_parent = false;
         }
         if (value22.submenu) {
-          if (!value22.submenu.options) {
+          if (!value22.submenu.options)
             throw "ContextMenu submenu needs options";
-          }
           new that2.constructor(value22.submenu.options, {
             callback: value22.submenu.callback,
             event: e,
@@ -70651,17 +69587,14 @@ class ContextMenu {
           close_parent = false;
         }
       }
-      if (close_parent && !that2.lock) {
+      if (close_parent && !that2.lock)
         that2.close();
-      }
     }
     __name(inner_onclick, "inner_onclick");
     return element;
   }
   close(e, ignore_parent_menu) {
-    if (this.root.parentNode) {
-      this.root.parentNode.removeChild(this.root);
-    }
+    this.root.parentNode?.removeChild(this.root);
     if (this.parentMenu && !ignore_parent_menu) {
       this.parentMenu.lock = false;
       this.parentMenu.current_submenu = null;
@@ -70671,45 +69604,31 @@ class ContextMenu {
         ContextMenu.trigger(this.parentMenu.root, LiteGraph.pointerevents_method + "leave", e);
       }
     }
-    if (this.current_submenu) {
-      this.current_submenu.close(e, true);
-    }
-    if (this.root.closing_timer) {
+    this.current_submenu?.close(e, true);
+    if (this.root.closing_timer)
       clearTimeout(this.root.closing_timer);
-    }
   }
   //this code is used to trigger events easily (used in the context menu mouseleave
   static trigger(element, event_name, params, origin2) {
-    var evt = document.createEvent("CustomEvent");
+    const evt = document.createEvent("CustomEvent");
     evt.initCustomEvent(event_name, true, true, params);
     evt.srcElement = origin2;
-    if (element.dispatchEvent) {
-      element.dispatchEvent(evt);
-    } else if (element.__events) {
-      element.__events.dispatchEvent(evt);
-    }
+    if (element.dispatchEvent) element.dispatchEvent(evt);
+    else if (element.__events) element.__events.dispatchEvent(evt);
     return evt;
   }
   //returns the top most menu
   getTopMenu() {
-    if (this.options.parentMenu) {
-      return this.options.parentMenu.getTopMenu();
-    }
-    return this;
+    return this.options.parentMenu ? this.options.parentMenu.getTopMenu() : this;
   }
   getFirstEvent() {
-    if (this.options.parentMenu) {
-      return this.options.parentMenu.getFirstEvent();
-    }
-    return this.options.event;
+    return this.options.parentMenu ? this.options.parentMenu.getFirstEvent() : this.options.event;
   }
   static isCursorOverElement(event2, element) {
-    var left = event2.clientX;
-    var top = event2.clientY;
-    var rect = element.getBoundingClientRect();
-    if (!rect) {
-      return false;
-    }
+    const left = event2.clientX;
+    const top = event2.clientY;
+    const rect = element.getBoundingClientRect();
+    if (!rect) return false;
     if (top > rect.top && top < rect.top + rect.height && left > rect.left && left < rect.left + rect.width) {
       return true;
     }
@@ -70720,6 +69639,13 @@ class CurveEditor {
   static {
     __name(this, "CurveEditor");
   }
+  points;
+  selected;
+  nearest;
+  size;
+  must_update;
+  margin;
+  _nearest;
   constructor(points) {
     this.points = points;
     this.selected = -1;
@@ -70731,26 +69657,26 @@ class CurveEditor {
   static sampleCurve(f, points) {
     if (!points)
       return;
-    for (var i2 = 0; i2 < points.length - 1; ++i2) {
-      var p2 = points[i2];
-      var pn = points[i2 + 1];
+    for (let i2 = 0; i2 < points.length - 1; ++i2) {
+      const p2 = points[i2];
+      const pn = points[i2 + 1];
       if (pn[0] < f)
         continue;
-      var r = pn[0] - p2[0];
+      const r = pn[0] - p2[0];
       if (Math.abs(r) < 1e-5)
         return p2[1];
-      var local_f = (f - p2[0]) / r;
+      const local_f = (f - p2[0]) / r;
       return p2[1] * (1 - local_f) + pn[1] * local_f;
     }
     return 0;
   }
-  draw(ctx, size2, graphcanvas, background_color, line_color, inactive) {
-    var points = this.points;
+  draw(ctx, size2, graphcanvas, background_color, line_color, inactive = false) {
+    const points = this.points;
     if (!points)
       return;
     this.size = size2;
-    var w2 = size2[0] - this.margin * 2;
-    var h2 = size2[1] - this.margin * 2;
+    const w2 = size2[0] - this.margin * 2;
+    const h2 = size2[1] - this.margin * 2;
     line_color = line_color || "#666";
     ctx.save();
     ctx.translate(this.margin, this.margin);
@@ -70766,15 +69692,15 @@ class CurveEditor {
     if (inactive)
       ctx.globalAlpha = 0.5;
     ctx.beginPath();
-    for (var i2 = 0; i2 < points.length; ++i2) {
-      var p2 = points[i2];
+    for (let i2 = 0; i2 < points.length; ++i2) {
+      const p2 = points[i2];
       ctx.lineTo(p2[0] * w2, (1 - p2[1]) * h2);
     }
     ctx.stroke();
     ctx.globalAlpha = 1;
     if (!inactive)
-      for (var i2 = 0; i2 < points.length; ++i2) {
-        var p2 = points[i2];
+      for (let i2 = 0; i2 < points.length; ++i2) {
+        const p2 = points[i2];
         ctx.fillStyle = this.selected == i2 ? "#FFF" : this.nearest == i2 ? "#DDD" : "#AAA";
         ctx.beginPath();
         ctx.arc(p2[0] * w2, (1 - p2[1]) * h2, 2, 0, Math.PI * 2);
@@ -70784,20 +69710,20 @@ class CurveEditor {
   }
   //localpos is mouse in curve editor space
   onMouseDown(localpos, graphcanvas) {
-    var points = this.points;
+    const points = this.points;
     if (!points)
       return;
     if (localpos[1] < 0)
       return;
-    var w2 = this.size[0] - this.margin * 2;
-    var h2 = this.size[1] - this.margin * 2;
-    var x2 = localpos[0] - this.margin;
-    var y2 = localpos[1] - this.margin;
-    var pos2 = [x2, y2];
-    var max_dist = 30 / graphcanvas.ds.scale;
+    const w2 = this.size[0] - this.margin * 2;
+    const h2 = this.size[1] - this.margin * 2;
+    const x2 = localpos[0] - this.margin;
+    const y2 = localpos[1] - this.margin;
+    const pos2 = [x2, y2];
+    const max_dist = 30 / graphcanvas.ds.scale;
     this.selected = this.getCloserPoint(pos2, max_dist);
     if (this.selected == -1) {
-      var point = [x2 / w2, 1 - y2 / h2];
+      const point = [x2 / w2, 1 - y2 / h2];
       points.push(point);
       points.sort(function(a, b) {
         return a[0] - b[0];
@@ -70809,20 +69735,20 @@ class CurveEditor {
       return true;
   }
   onMouseMove(localpos, graphcanvas) {
-    var points = this.points;
+    const points = this.points;
     if (!points)
       return;
-    var s = this.selected;
+    const s = this.selected;
     if (s < 0)
       return;
-    var x2 = (localpos[0] - this.margin) / (this.size[0] - this.margin * 2);
-    var y2 = (localpos[1] - this.margin) / (this.size[1] - this.margin * 2);
-    var curvepos = [localpos[0] - this.margin, localpos[1] - this.margin];
-    var max_dist = 30 / graphcanvas.ds.scale;
+    const x2 = (localpos[0] - this.margin) / (this.size[0] - this.margin * 2);
+    const y2 = (localpos[1] - this.margin) / (this.size[1] - this.margin * 2);
+    const curvepos = [localpos[0] - this.margin, localpos[1] - this.margin];
+    const max_dist = 30 / graphcanvas.ds.scale;
     this._nearest = this.getCloserPoint(curvepos, max_dist);
-    var point = points[s];
+    const point = points[s];
     if (point) {
-      var is_edge_point = s == 0 || s == points.length - 1;
+      const is_edge_point = s == 0 || s == points.length - 1;
       if (!is_edge_point && (localpos[0] < -10 || localpos[0] > this.size[0] + 10 || localpos[1] < -10 || localpos[1] > this.size[1] + 10)) {
         points.splice(s, 1);
         this.selected = -1;
@@ -70840,28 +69766,27 @@ class CurveEditor {
       this.must_update = true;
     }
   }
-  onMouseUp(localpos, graphcanvas) {
+  // Former params: localpos, graphcanvas
+  onMouseUp() {
     this.selected = -1;
     return false;
   }
   getCloserPoint(pos2, max_dist) {
-    var points = this.points;
+    const points = this.points;
     if (!points)
       return -1;
     max_dist = max_dist || 30;
-    var w2 = this.size[0] - this.margin * 2;
-    var h2 = this.size[1] - this.margin * 2;
-    var num = points.length;
-    var p2 = [0, 0];
-    var min_dist = 1e6;
-    var closest = -1;
-    for (var i2 = 0; i2 < num; ++i2) {
-      var p3 = points[i2];
+    const w2 = this.size[0] - this.margin * 2;
+    const h2 = this.size[1] - this.margin * 2;
+    const num = points.length;
+    const p2 = [0, 0];
+    let min_dist = 1e6;
+    let closest = -1;
+    for (let i2 = 0; i2 < num; ++i2) {
+      const p3 = points[i2];
       p2[0] = p3[0] * w2;
       p2[1] = (1 - p3[1]) * h2;
-      if (p2[0] < pos2[0])
-        ;
-      var dist2 = vec2.distance(pos2, p2);
+      const dist2 = distance(pos2, p2);
       if (dist2 > min_dist || dist2 > max_dist)
         continue;
       closest = i2;
@@ -70870,15 +69795,844 @@ class CurveEditor {
     return closest;
   }
 }
+class LiteGraphGlobal {
+  static {
+    __name(this, "LiteGraphGlobal");
+  }
+  // Enums
+  SlotShape = SlotShape;
+  SlotDirection = SlotDirection;
+  SlotType = SlotType;
+  LabelPosition = LabelPosition;
+  VERSION = 0.4;
+  CANVAS_GRID_SIZE = 10;
+  NODE_TITLE_HEIGHT = 30;
+  NODE_TITLE_TEXT_Y = 20;
+  NODE_SLOT_HEIGHT = 20;
+  NODE_WIDGET_HEIGHT = 20;
+  NODE_WIDTH = 140;
+  NODE_MIN_WIDTH = 50;
+  NODE_COLLAPSED_RADIUS = 10;
+  NODE_COLLAPSED_WIDTH = 80;
+  NODE_TITLE_COLOR = "#999";
+  NODE_SELECTED_TITLE_COLOR = "#FFF";
+  NODE_TEXT_SIZE = 14;
+  NODE_TEXT_COLOR = "#AAA";
+  NODE_TEXT_HIGHLIGHT_COLOR = "#EEE";
+  NODE_SUBTEXT_SIZE = 12;
+  NODE_DEFAULT_COLOR = "#333";
+  NODE_DEFAULT_BGCOLOR = "#353535";
+  NODE_DEFAULT_BOXCOLOR = "#666";
+  NODE_DEFAULT_SHAPE = "box";
+  NODE_BOX_OUTLINE_COLOR = "#FFF";
+  DEFAULT_SHADOW_COLOR = "rgba(0,0,0,0.5)";
+  DEFAULT_GROUP_FONT = 24;
+  DEFAULT_GROUP_FONT_SIZE;
+  WIDGET_BGCOLOR = "#222";
+  WIDGET_OUTLINE_COLOR = "#666";
+  WIDGET_TEXT_COLOR = "#DDD";
+  WIDGET_SECONDARY_TEXT_COLOR = "#999";
+  LINK_COLOR = "#9A9";
+  // TODO: This is a workaround until LGraphCanvas.link_type_colors is no longer static.
+  static DEFAULT_EVENT_LINK_COLOR = "#A86";
+  EVENT_LINK_COLOR = "#A86";
+  CONNECTING_LINK_COLOR = "#AFA";
+  MAX_NUMBER_OF_NODES = 1e4;
+  //avoid infinite loops
+  DEFAULT_POSITION = [100, 100];
+  //default node position
+  VALID_SHAPES = ["default", "box", "round", "card"];
+  //,"circle"
+  //shapes are used for nodes but also for slots
+  BOX_SHAPE = RenderShape.BOX;
+  ROUND_SHAPE = RenderShape.ROUND;
+  CIRCLE_SHAPE = RenderShape.CIRCLE;
+  CARD_SHAPE = RenderShape.CARD;
+  ARROW_SHAPE = RenderShape.ARROW;
+  GRID_SHAPE = RenderShape.GRID;
+  // intended for slot arrays
+  //enums
+  INPUT = NodeSlotType.INPUT;
+  OUTPUT = NodeSlotType.OUTPUT;
+  // TODO: -1 can lead to ambiguity in JS; these should be updated to a more explicit constant or Symbol.
+  EVENT = -1;
+  //for outputs
+  ACTION = -1;
+  //for inputs
+  NODE_MODES = ["Always", "On Event", "Never", "On Trigger"];
+  // helper, will add "On Request" and more in the future
+  NODE_MODES_COLORS = ["#666", "#422", "#333", "#224", "#626"];
+  // use with node_box_coloured_by_mode
+  ALWAYS = LGraphEventMode.ALWAYS;
+  ON_EVENT = LGraphEventMode.ON_EVENT;
+  NEVER = LGraphEventMode.NEVER;
+  ON_TRIGGER = LGraphEventMode.ON_TRIGGER;
+  UP = LinkDirection.UP;
+  DOWN = LinkDirection.DOWN;
+  LEFT = LinkDirection.LEFT;
+  RIGHT = LinkDirection.RIGHT;
+  CENTER = LinkDirection.CENTER;
+  LINK_RENDER_MODES = ["Straight", "Linear", "Spline"];
+  // helper
+  HIDDEN_LINK = LinkRenderType.HIDDEN_LINK;
+  STRAIGHT_LINK = LinkRenderType.STRAIGHT_LINK;
+  LINEAR_LINK = LinkRenderType.LINEAR_LINK;
+  SPLINE_LINK = LinkRenderType.SPLINE_LINK;
+  NORMAL_TITLE = TitleMode.NORMAL_TITLE;
+  NO_TITLE = TitleMode.NO_TITLE;
+  TRANSPARENT_TITLE = TitleMode.TRANSPARENT_TITLE;
+  AUTOHIDE_TITLE = TitleMode.AUTOHIDE_TITLE;
+  VERTICAL_LAYOUT = "vertical";
+  // arrange nodes vertically
+  proxy = null;
+  //used to redirect calls
+  node_images_path = "";
+  debug = false;
+  catch_exceptions = true;
+  throw_errors = true;
+  allow_scripts = false;
+  //if set to true some nodes like Formula would be allowed to evaluate code that comes from unsafe sources (like node configuration), which could lead to exploits
+  registered_node_types = {};
+  //nodetypes by string
+  node_types_by_file_extension = {};
+  //used for dropping files in the canvas
+  Nodes = {};
+  //node types by classname
+  Globals = {};
+  //used to store vars between graphs
+  searchbox_extras = {};
+  //used to add extra features to the search box
+  auto_sort_node_types = false;
+  // [true!] If set to true, will automatically sort node types / categories in the context menus
+  node_box_coloured_when_on = false;
+  // [true!] this make the nodes box (top left circle) coloured when triggered (execute/action), visual feedback
+  node_box_coloured_by_mode = false;
+  // [true!] nodebox based on node mode, visual feedback
+  dialog_close_on_mouse_leave = false;
+  // [false on mobile] better true if not touch device, TODO add an helper/listener to close if false
+  dialog_close_on_mouse_leave_delay = 500;
+  shift_click_do_break_link_from = false;
+  // [false!] prefer false if results too easy to break links - implement with ALT or TODO custom keys
+  click_do_break_link_to = false;
+  // [false!]prefer false, way too easy to break links
+  ctrl_alt_click_do_break_link = true;
+  // [true!] who accidentally ctrl-alt-clicks on an in/output? nobody! that's who!
+  search_hide_on_mouse_leave = true;
+  // [false on mobile] better true if not touch device, TODO add an helper/listener to close if false
+  search_filter_enabled = false;
+  // [true!] enable filtering slots type in the search widget, !requires auto_load_slot_types or manual set registered_slot_[in/out]_types and slot_types_[in/out]
+  search_show_all_on_open = true;
+  // [true!] opens the results list when opening the search widget
+  auto_load_slot_types = false;
+  // [if want false, use true, run, get vars values to be statically set, than disable] nodes types and nodeclass association with node types need to be calculated, if dont want this, calculate once and set registered_slot_[in/out]_types and slot_types_[in/out]
+  // set these values if not using auto_load_slot_types
+  registered_slot_in_types = {};
+  // slot types for nodeclass
+  registered_slot_out_types = {};
+  // slot types for nodeclass
+  slot_types_in = [];
+  // slot types IN
+  slot_types_out = [];
+  // slot types OUT
+  slot_types_default_in = {};
+  // specify for each IN slot type a(/many) default node(s), use single string, array, or object (with node, title, parameters, ..) like for search
+  slot_types_default_out = {};
+  // specify for each OUT slot type a(/many) default node(s), use single string, array, or object (with node, title, parameters, ..) like for search
+  alt_drag_do_clone_nodes = false;
+  // [true!] very handy, ALT click to clone and drag the new node
+  do_add_triggers_slots = false;
+  // [true!] will create and connect event slots when using action/events connections, !WILL CHANGE node mode when using onTrigger (enable mode colors), onExecuted does not need this
+  allow_multi_output_for_events = true;
+  // [false!] being events, it is strongly reccomended to use them sequentially, one by one
+  middle_click_slot_add_default_node = false;
+  //[true!] allows to create and connect a ndoe clicking with the third button (wheel)
+  release_link_on_empty_shows_menu = false;
+  //[true!] dragging a link to empty space will open a menu, add from list, search or defaults
+  pointerevents_method = "pointer";
+  // "mouse"|"pointer" use mouse for retrocompatibility issues? (none found @ now)
+  // TODO implement pointercancel, gotpointercapture, lostpointercapture, (pointerover, pointerout if necessary)
+  ctrl_shift_v_paste_connect_unselected_outputs = true;
+  //[true!] allows ctrl + shift + v to paste nodes with the outputs of the unselected nodes connected with the inputs of the newly pasted nodes
+  // if true, all newly created nodes/links will use string UUIDs for their id fields instead of integers.
+  // use this if you must have node IDs that are unique across all graphs and subgraphs.
+  use_uuids = false;
+  // Whether to highlight the bounding box of selected groups
+  highlight_selected_group = true;
+  // TODO: Remove legacy accessors
+  LGraph = LGraph;
+  LLink = LLink;
+  LGraphNode = LGraphNode;
+  LGraphGroup = LGraphGroup;
+  DragAndScale = DragAndScale;
+  LGraphCanvas = LGraphCanvas;
+  ContextMenu = ContextMenu;
+  CurveEditor = CurveEditor;
+  static {
+    LGraphCanvas.link_type_colors = {
+      "-1": LiteGraphGlobal.DEFAULT_EVENT_LINK_COLOR,
+      number: "#AAA",
+      node: "#DCA"
+    };
+  }
+  constructor() {
+    if (typeof performance != "undefined") {
+      this.getTime = performance.now.bind(performance);
+    } else if (typeof Date != "undefined" && Date.now) {
+      this.getTime = Date.now.bind(Date);
+    } else if (typeof process != "undefined") {
+      this.getTime = function() {
+        const t = process.hrtime();
+        return t[0] * 1e-3 + t[1] * 1e-6;
+      };
+    } else {
+      this.getTime = function() {
+        return (/* @__PURE__ */ new Date()).getTime();
+      };
+    }
+  }
+  /**
+   * Register a node class so it can be listed when the user wants to create a new one
+   * @param {String} type name of the node and path
+   * @param {Class} base_class class containing the structure of a node
+   */
+  registerNodeType(type, base_class) {
+    if (!base_class.prototype)
+      throw "Cannot register a simple object, it must be a class with a prototype";
+    base_class.type = type;
+    if (this.debug) console.log("Node registered: " + type);
+    const classname = base_class.name;
+    const pos2 = type.lastIndexOf("/");
+    base_class.category = type.substring(0, pos2);
+    base_class.title ||= classname;
+    for (const i2 in LGraphNode.prototype) {
+      base_class.prototype[i2] ||= LGraphNode.prototype[i2];
+    }
+    const prev2 = this.registered_node_types[type];
+    if (prev2) {
+      console.log("replacing node type: " + type);
+    }
+    if (!Object.prototype.hasOwnProperty.call(base_class.prototype, "shape")) {
+      Object.defineProperty(base_class.prototype, "shape", {
+        set(v2) {
+          switch (v2) {
+            case "default":
+              delete this._shape;
+              break;
+            case "box":
+              this._shape = RenderShape.BOX;
+              break;
+            case "round":
+              this._shape = RenderShape.ROUND;
+              break;
+            case "circle":
+              this._shape = RenderShape.CIRCLE;
+              break;
+            case "card":
+              this._shape = RenderShape.CARD;
+              break;
+            default:
+              this._shape = v2;
+          }
+        },
+        get() {
+          return this._shape;
+        },
+        enumerable: true,
+        configurable: true
+      });
+      if (base_class.supported_extensions) {
+        for (const i2 in base_class.supported_extensions) {
+          const ext = base_class.supported_extensions[i2];
+          if (ext && typeof ext === "string") {
+            this.node_types_by_file_extension[ext.toLowerCase()] = base_class;
+          }
+        }
+      }
+    }
+    this.registered_node_types[type] = base_class;
+    if (base_class.constructor.name) this.Nodes[classname] = base_class;
+    this.onNodeTypeRegistered?.(type, base_class);
+    if (prev2) this.onNodeTypeReplaced?.(type, base_class, prev2);
+    if (base_class.prototype.onPropertyChange)
+      console.warn(`LiteGraph node class ${type} has onPropertyChange method, it must be called onPropertyChanged with d at the end`);
+    if (this.auto_load_slot_types) new base_class(base_class.title || "tmpnode");
+  }
+  /**
+   * removes a node type from the system
+   * @param {String|Object} type name of the node or the node constructor itself
+   */
+  unregisterNodeType(type) {
+    const base_class = typeof type === "string" ? this.registered_node_types[type] : type;
+    if (!base_class) throw "node type not found: " + type;
+    delete this.registered_node_types[base_class.type];
+    const name = base_class.constructor.name;
+    if (name) delete this.Nodes[name];
+  }
+  /**
+   * Save a slot type and his node
+   * @param {String|Object} type name of the node or the node constructor itself
+   * @param {String} slot_type name of the slot type (variable type), eg. string, number, array, boolean, ..
+   */
+  registerNodeAndSlotType(type, slot_type, out) {
+    out ||= false;
+    const base_class = typeof type === "string" && this.registered_node_types[type] !== "anonymous" ? this.registered_node_types[type] : type;
+    const class_type = base_class.constructor.type;
+    let allTypes = [];
+    if (typeof slot_type === "string") {
+      allTypes = slot_type.split(",");
+    } else if (slot_type == this.EVENT || slot_type == this.ACTION) {
+      allTypes = ["_event_"];
+    } else {
+      allTypes = ["*"];
+    }
+    for (let i2 = 0; i2 < allTypes.length; ++i2) {
+      let slotType = allTypes[i2];
+      if (slotType === "") slotType = "*";
+      const registerTo = out ? "registered_slot_out_types" : "registered_slot_in_types";
+      if (this[registerTo][slotType] === void 0)
+        this[registerTo][slotType] = { nodes: [] };
+      if (!this[registerTo][slotType].nodes.includes(class_type))
+        this[registerTo][slotType].nodes.push(class_type);
+      const types = out ? this.slot_types_out : this.slot_types_in;
+      if (!types.includes(slotType.toLowerCase())) {
+        types.push(slotType.toLowerCase());
+        types.sort();
+      }
+    }
+  }
+  /**
+   * Create a new nodetype by passing a function, it wraps it with a proper class and generates inputs according to the parameters of the function.
+   * Useful to wrap simple methods that do not require properties, and that only process some input to generate an output.
+   * @param {String} name node name with namespace (p.e.: 'math/sum')
+   * @param {Function} func
+   * @param {Array} param_types [optional] an array containing the type of every parameter, otherwise parameters will accept any type
+   * @param {String} return_type [optional] string with the return type, otherwise it will be generic
+   * @param {Object} properties [optional] properties to be configurable
+   */
+  wrapFunctionAsNode(name, func, param_types, return_type, properties) {
+    const params = Array(func.length);
+    let code2 = "";
+    const names = this.getParameterNames(func);
+    for (let i2 = 0; i2 < names.length; ++i2) {
+      code2 += `this.addInput('${names[i2]}',${param_types && param_types[i2] ? `'${param_types[i2]}'` : "0"});
+`;
+    }
+    code2 += `this.addOutput('out',${return_type ? `'${return_type}'` : 0});
+`;
+    if (properties) code2 += `this.properties = ${JSON.stringify(properties)};
+`;
+    const classobj = Function(code2);
+    classobj.title = name.split("/").pop();
+    classobj.desc = "Generated from " + func.name;
+    classobj.prototype.onExecute = /* @__PURE__ */ __name(function onExecute() {
+      for (let i2 = 0; i2 < params.length; ++i2) {
+        params[i2] = this.getInputData(i2);
+      }
+      const r = func.apply(this, params);
+      this.setOutputData(0, r);
+    }, "onExecute");
+    this.registerNodeType(name, classobj);
+  }
+  /**
+   * Removes all previously registered node's types
+   */
+  clearRegisteredTypes() {
+    this.registered_node_types = {};
+    this.node_types_by_file_extension = {};
+    this.Nodes = {};
+    this.searchbox_extras = {};
+  }
+  /**
+   * Adds this method to all nodetypes, existing and to be created
+   * (You can add it to LGraphNode.prototype but then existing node types wont have it)
+   * @param {Function} func
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  addNodeMethod(name, func) {
+    LGraphNode.prototype[name] = func;
+    for (const i2 in this.registered_node_types) {
+      const type = this.registered_node_types[i2];
+      if (type.prototype[name]) type.prototype["_" + name] = type.prototype[name];
+      type.prototype[name] = func;
+    }
+  }
+  /**
+   * Create a node of a given type with a name. The node is not attached to any graph yet.
+   * @param {String} type full name of the node class. p.e. "math/sin"
+   * @param {String} name a name to distinguish from other nodes
+   * @param {Object} options to set options
+   */
+  createNode(type, title, options3) {
+    const base_class = this.registered_node_types[type];
+    if (!base_class) {
+      if (this.debug) console.log(`GraphNode type "${type}" not registered.`);
+      return null;
+    }
+    title = title || base_class.title || type;
+    let node22 = null;
+    if (this.catch_exceptions) {
+      try {
+        node22 = new base_class(title);
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    } else {
+      node22 = new base_class(title);
+    }
+    node22.type = type;
+    if (!node22.title && title) node22.title = title;
+    node22.properties ||= {};
+    node22.properties_info ||= [];
+    node22.flags ||= {};
+    node22.size ||= node22.computeSize();
+    node22.pos ||= this.DEFAULT_POSITION.concat();
+    node22.mode ||= this.ALWAYS;
+    if (options3) {
+      for (const i2 in options3) {
+        node22[i2] = options3[i2];
+      }
+    }
+    node22.onNodeCreated?.();
+    return node22;
+  }
+  /**
+   * Returns a registered node type with a given name
+   * @param {String} type full name of the node class. p.e. "math/sin"
+   * @return {Class} the node class
+   */
+  getNodeType(type) {
+    return this.registered_node_types[type];
+  }
+  /**
+   * Returns a list of node types matching one category
+   * @param {String} category category name
+   * @return {Array} array with all the node classes
+   */
+  getNodeTypesInCategory(category, filter4) {
+    const r = [];
+    for (const i2 in this.registered_node_types) {
+      const type = this.registered_node_types[i2];
+      if (type.filter != filter4) continue;
+      if (category == "") {
+        if (type.category == null) r.push(type);
+      } else if (type.category == category) {
+        r.push(type);
+      }
+    }
+    if (this.auto_sort_node_types) {
+      r.sort(function(a, b) {
+        return a.title.localeCompare(b.title);
+      });
+    }
+    return r;
+  }
+  /**
+   * Returns a list with all the node type categories
+   * @param {String} filter only nodes with ctor.filter equal can be shown
+   * @return {Array} array with all the names of the categories
+   */
+  getNodeTypesCategories(filter4) {
+    const categories = { "": 1 };
+    for (const i2 in this.registered_node_types) {
+      const type = this.registered_node_types[i2];
+      if (type.category && !type.skip_list) {
+        if (type.filter != filter4)
+          continue;
+        categories[type.category] = 1;
+      }
+    }
+    const result = [];
+    for (const i2 in categories) {
+      result.push(i2);
+    }
+    return this.auto_sort_node_types ? result.sort() : result;
+  }
+  //debug purposes: reloads all the js scripts that matches a wildcard
+  reloadNodes(folder_wildcard) {
+    const tmp = document.getElementsByTagName("script");
+    const script_files = [];
+    for (let i2 = 0; i2 < tmp.length; i2++) {
+      script_files.push(tmp[i2]);
+    }
+    const docHeadObj = document.getElementsByTagName("head")[0];
+    folder_wildcard = document.location.href + folder_wildcard;
+    for (let i2 = 0; i2 < script_files.length; i2++) {
+      const src = script_files[i2].src;
+      if (!src || src.substr(0, folder_wildcard.length) != folder_wildcard)
+        continue;
+      try {
+        if (this.debug) console.log("Reloading: " + src);
+        const dynamicScript = document.createElement("script");
+        dynamicScript.type = "text/javascript";
+        dynamicScript.src = src;
+        docHeadObj.appendChild(dynamicScript);
+        docHeadObj.removeChild(script_files[i2]);
+      } catch (err) {
+        if (this.throw_errors) throw err;
+        if (this.debug) console.log("Error while reloading " + src);
+      }
+    }
+    if (this.debug) console.log("Nodes reloaded");
+  }
+  //separated just to improve if it doesn't work
+  cloneObject(obj, target) {
+    if (obj == null) return null;
+    const r = JSON.parse(JSON.stringify(obj));
+    if (!target) return r;
+    for (const i2 in r) {
+      target[i2] = r[i2];
+    }
+    return target;
+  }
+  /*
+   * https://gist.github.com/jed/982883?permalink_comment_id=852670#gistcomment-852670
+   */
+  uuidv4() {
+    return ("10000000-1000-4000-8000" + -1e11).replace(/[018]/g, (a) => (a ^ Math.random() * 16 >> a / 4).toString(16));
+  }
+  /**
+   * Returns if the types of two slots are compatible (taking into account wildcards, etc)
+   * @param {String} type_a output
+   * @param {String} type_b input
+   * @return {Boolean} true if they can be connected
+   */
+  isValidConnection(type_a, type_b) {
+    if (type_a == "" || type_a === "*") type_a = 0;
+    if (type_b == "" || type_b === "*") type_b = 0;
+    if (!type_a || !type_b || type_a == type_b || type_a == this.EVENT && type_b == this.ACTION)
+      return true;
+    type_a = String(type_a);
+    type_b = String(type_b);
+    type_a = type_a.toLowerCase();
+    type_b = type_b.toLowerCase();
+    if (type_a.indexOf(",") == -1 && type_b.indexOf(",") == -1)
+      return type_a == type_b;
+    const supported_types_a = type_a.split(",");
+    const supported_types_b = type_b.split(",");
+    for (let i2 = 0; i2 < supported_types_a.length; ++i2) {
+      for (let j = 0; j < supported_types_b.length; ++j) {
+        if (this.isValidConnection(supported_types_a[i2], supported_types_b[j]))
+          return true;
+      }
+    }
+    return false;
+  }
+  /**
+   * Register a string in the search box so when the user types it it will recommend this node
+   * @param {String} node_type the node recommended
+   * @param {String} description text to show next to it
+   * @param {Object} data it could contain info of how the node should be configured
+   * @return {Boolean} true if they can be connected
+   */
+  registerSearchboxExtra(node_type, description, data21) {
+    this.searchbox_extras[description.toLowerCase()] = {
+      type: node_type,
+      desc: description,
+      data: data21
+    };
+  }
+  /**
+   * Wrapper to load files (from url using fetch or from file using FileReader)
+   * @param {String|File|Blob} url the url of the file (or the file itself)
+   * @param {String} type an string to know how to fetch it: "text","arraybuffer","json","blob"
+   * @param {Function} on_complete callback(data)
+   * @param {Function} on_error in case of an error
+   * @return {FileReader|Promise} returns the object used to
+   */
+  fetchFile(url, type, on_complete, on_error) {
+    if (!url) return null;
+    type = type || "text";
+    if (typeof url === "string") {
+      if (url.substr(0, 4) == "http" && this.proxy)
+        url = this.proxy + url.substr(url.indexOf(":") + 3);
+      return fetch(url).then(function(response) {
+        if (!response.ok)
+          throw new Error("File not found");
+        if (type == "arraybuffer")
+          return response.arrayBuffer();
+        else if (type == "text" || type == "string")
+          return response.text();
+        else if (type == "json")
+          return response.json();
+        else if (type == "blob")
+          return response.blob();
+      }).then(function(data21) {
+        on_complete?.(data21);
+      }).catch(function(error) {
+        console.error("error fetching file:", url);
+        on_error?.(error);
+      });
+    } else if (url instanceof File || url instanceof Blob) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        let v2 = e.target.result;
+        if (type == "json")
+          v2 = JSON.parse(v2);
+        on_complete?.(v2);
+      };
+      if (type == "arraybuffer")
+        return reader.readAsArrayBuffer(url);
+      else if (type == "text" || type == "json")
+        return reader.readAsText(url);
+      else if (type == "blob")
+        return reader.readAsBinaryString(url);
+    }
+    return null;
+  }
+  //used to create nodes from wrapping functions
+  getParameterNames(func) {
+    return (func + "").replace(/[/][/].*$/gm, "").replace(/\s+/g, "").replace(/[/][*][^/*]*[*][/]/g, "").split("){", 1)[0].replace(/^[^(]*[(]/, "").replace(/=[^,]+/g, "").split(",").filter(Boolean);
+  }
+  /* helper for interaction: pointer, touch, mouse Listeners
+  used by LGraphCanvas DragAndScale ContextMenu*/
+  pointerListenerAdd(oDOM, sEvIn, fCall, capture = false) {
+    if (!oDOM || !oDOM.addEventListener || !sEvIn || typeof fCall !== "function") return;
+    let sMethod = LiteGraph.pointerevents_method;
+    let sEvent = sEvIn;
+    if (sMethod == "pointer" && !window.PointerEvent) {
+      console.warn("sMethod=='pointer' && !window.PointerEvent");
+      console.log("Converting pointer[" + sEvent + "] : down move up cancel enter TO touchstart touchmove touchend, etc ..");
+      switch (sEvent) {
+        case "down": {
+          sMethod = "touch";
+          sEvent = "start";
+          break;
+        }
+        case "move": {
+          sMethod = "touch";
+          break;
+        }
+        case "up": {
+          sMethod = "touch";
+          sEvent = "end";
+          break;
+        }
+        case "cancel": {
+          sMethod = "touch";
+          break;
+        }
+        case "enter": {
+          console.log("debug: Should I send a move event?");
+          break;
+        }
+        default: {
+          console.warn("PointerEvent not available in this browser ? The event " + sEvent + " would not be called");
+        }
+      }
+    }
+    switch (sEvent) {
+      case "down":
+      case "up":
+      case "move":
+      case "over":
+      case "out":
+      case "enter": {
+        oDOM.addEventListener(sMethod + sEvent, fCall, capture);
+      }
+      case "leave":
+      case "cancel":
+      case "gotpointercapture":
+      case "lostpointercapture": {
+        if (sMethod != "mouse") {
+          return oDOM.addEventListener(sMethod + sEvent, fCall, capture);
+        }
+      }
+      default:
+        return oDOM.addEventListener(sEvent, fCall, capture);
+    }
+  }
+  pointerListenerRemove(oDOM, sEvent, fCall, capture = false) {
+    if (!oDOM || !oDOM.removeEventListener || !sEvent || typeof fCall !== "function") return;
+    switch (sEvent) {
+      case "down":
+      case "up":
+      case "move":
+      case "over":
+      case "out":
+      case "enter": {
+        if (LiteGraph.pointerevents_method == "pointer" || LiteGraph.pointerevents_method == "mouse") {
+          oDOM.removeEventListener(LiteGraph.pointerevents_method + sEvent, fCall, capture);
+        }
+      }
+      case "leave":
+      case "cancel":
+      case "gotpointercapture":
+      case "lostpointercapture": {
+        if (LiteGraph.pointerevents_method == "pointer") {
+          return oDOM.removeEventListener(LiteGraph.pointerevents_method + sEvent, fCall, capture);
+        }
+      }
+      default:
+        return oDOM.removeEventListener(sEvent, fCall, capture);
+    }
+  }
+  getTime;
+  compareObjects(a, b) {
+    for (const i2 in a) {
+      if (a[i2] != b[i2]) return false;
+    }
+    return true;
+  }
+  distance = distance;
+  colorToString(c) {
+    return "rgba(" + Math.round(c[0] * 255).toFixed() + "," + Math.round(c[1] * 255).toFixed() + "," + Math.round(c[2] * 255).toFixed() + "," + (c.length == 4 ? c[3].toFixed(2) : "1.0") + ")";
+  }
+  isInsideRectangle = isInsideRectangle;
+  //[minx,miny,maxx,maxy]
+  growBounding(bounding, x2, y2) {
+    if (x2 < bounding[0]) {
+      bounding[0] = x2;
+    } else if (x2 > bounding[2]) {
+      bounding[2] = x2;
+    }
+    if (y2 < bounding[1]) {
+      bounding[1] = y2;
+    } else if (y2 > bounding[3]) {
+      bounding[3] = y2;
+    }
+  }
+  overlapBounding = overlapBounding;
+  //point inside bounding box
+  isInsideBounding(p2, bb) {
+    if (p2[0] < bb[0][0] || p2[1] < bb[0][1] || p2[0] > bb[1][0] || p2[1] > bb[1][1]) {
+      return false;
+    }
+    return true;
+  }
+  //Convert a hex value to its decimal value - the inputted hex must be in the
+  //	format of a hex triplet - the kind we use for HTML colours. The function
+  //	will return an array with three values.
+  hex2num(hex) {
+    if (hex.charAt(0) == "#") {
+      hex = hex.slice(1);
+    }
+    hex = hex.toUpperCase();
+    const hex_alphabets = "0123456789ABCDEF";
+    const value3 = new Array(3);
+    let k = 0;
+    let int1, int2;
+    for (let i2 = 0; i2 < 6; i2 += 2) {
+      int1 = hex_alphabets.indexOf(hex.charAt(i2));
+      int2 = hex_alphabets.indexOf(hex.charAt(i2 + 1));
+      value3[k] = int1 * 16 + int2;
+      k++;
+    }
+    return value3;
+  }
+  //Give a array with three values as the argument and the function will return
+  //	the corresponding hex triplet.
+  num2hex(triplet) {
+    const hex_alphabets = "0123456789ABCDEF";
+    let hex = "#";
+    let int1, int2;
+    for (let i2 = 0; i2 < 3; i2++) {
+      int1 = triplet[i2] / 16;
+      int2 = triplet[i2] % 16;
+      hex += hex_alphabets.charAt(int1) + hex_alphabets.charAt(int2);
+    }
+    return hex;
+  }
+  closeAllContextMenus(ref_window2) {
+    ref_window2 = ref_window2 || window;
+    const elements = ref_window2.document.querySelectorAll(".litecontextmenu");
+    if (!elements.length) return;
+    const result = [];
+    for (let i2 = 0; i2 < elements.length; i2++) {
+      result.push(elements[i2]);
+    }
+    for (let i2 = 0; i2 < result.length; i2++) {
+      if (result[i2].close) {
+        result[i2].close();
+      } else if (result[i2].parentNode) {
+        result[i2].parentNode.removeChild(result[i2]);
+      }
+    }
+  }
+  extendClass(target, origin2) {
+    for (const i2 in origin2) {
+      if (target.hasOwnProperty(i2)) continue;
+      target[i2] = origin2[i2];
+    }
+    if (origin2.prototype) {
+      for (const i2 in origin2.prototype) {
+        if (!origin2.prototype.hasOwnProperty(i2)) continue;
+        if (target.prototype.hasOwnProperty(i2)) continue;
+        if (origin2.prototype.__lookupGetter__(i2)) {
+          target.prototype.__defineGetter__(
+            i2,
+            origin2.prototype.__lookupGetter__(i2)
+          );
+        } else {
+          target.prototype[i2] = origin2.prototype[i2];
+        }
+        if (origin2.prototype.__lookupSetter__(i2)) {
+          target.prototype.__defineSetter__(
+            i2,
+            origin2.prototype.__lookupSetter__(i2)
+          );
+        }
+      }
+    }
+  }
+}
+function loadPolyfills() {
+  if (typeof window != "undefined" && window.CanvasRenderingContext2D && !window.CanvasRenderingContext2D.prototype.roundRect) {
+    window.CanvasRenderingContext2D.prototype.roundRect = function(x2, y2, w2, h2, radius, radius_low) {
+      var top_left_radius = 0;
+      var top_right_radius = 0;
+      var bottom_left_radius = 0;
+      var bottom_right_radius = 0;
+      if (radius === 0) {
+        this.rect(x2, y2, w2, h2);
+        return;
+      }
+      if (radius_low === void 0)
+        radius_low = radius;
+      if (radius != null && radius.constructor === Array) {
+        if (radius.length == 1)
+          top_left_radius = top_right_radius = bottom_left_radius = bottom_right_radius = radius[0];
+        else if (radius.length == 2) {
+          top_left_radius = bottom_right_radius = radius[0];
+          top_right_radius = bottom_left_radius = radius[1];
+        } else if (radius.length == 4) {
+          top_left_radius = radius[0];
+          top_right_radius = radius[1];
+          bottom_left_radius = radius[2];
+          bottom_right_radius = radius[3];
+        } else
+          return;
+      } else {
+        top_left_radius = radius || 0;
+        top_right_radius = radius || 0;
+        bottom_left_radius = radius_low || 0;
+        bottom_right_radius = radius_low || 0;
+      }
+      this.moveTo(x2 + top_left_radius, y2);
+      this.lineTo(x2 + w2 - top_right_radius, y2);
+      this.quadraticCurveTo(x2 + w2, y2, x2 + w2, y2 + top_right_radius);
+      this.lineTo(x2 + w2, y2 + h2 - bottom_right_radius);
+      this.quadraticCurveTo(
+        x2 + w2,
+        y2 + h2,
+        x2 + w2 - bottom_right_radius,
+        y2 + h2
+      );
+      this.lineTo(x2 + bottom_right_radius, y2 + h2);
+      this.quadraticCurveTo(x2, y2 + h2, x2, y2 + h2 - bottom_left_radius);
+      this.lineTo(x2, y2 + bottom_left_radius);
+      this.quadraticCurveTo(x2, y2, x2 + top_left_radius, y2);
+    };
+  }
+  if (typeof window != "undefined" && !window["requestAnimationFrame"]) {
+    window.requestAnimationFrame = // @ts-expect-error Legacy code
+    window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function(callback) {
+      window.setTimeout(callback, 1e3 / 60);
+    };
+  }
+}
+__name(loadPolyfills, "loadPolyfills");
 const LiteGraph = new LiteGraphGlobal();
-LiteGraph.LGraph = LGraph;
-LiteGraph.LLink = LLink;
-LiteGraph.LGraphNode = LGraphNode;
-LiteGraph.LGraphGroup = LGraphGroup;
-LiteGraph.DragAndScale = DragAndScale;
-LiteGraph.LGraphCanvas = LGraphCanvas;
-LiteGraph.ContextMenu = ContextMenu;
-LiteGraph.CurveEditor = CurveEditor;
 function clamp(v2, a, b) {
   return a > v2 ? a : b < v2 ? b : v2;
 }
@@ -72862,11 +72616,9 @@ function rgbToHsl({ r, g, b }) {
   g /= 255;
   b /= 255;
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h2, s;
+  let h2 = 0, s = 0;
   const l = (max + min) / 2;
-  if (max === min) {
-    h2 = s = 0;
-  } else {
+  if (max !== min) {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
@@ -73435,9 +73187,150 @@ class ComfyAppMenu {
 window.comfyAPI = window.comfyAPI || {};
 window.comfyAPI.index = window.comfyAPI.index || {};
 window.comfyAPI.index.ComfyAppMenu = ComfyAppMenu;
+const useExecutionStore = /* @__PURE__ */ defineStore("execution", () => {
+  const activePromptId = ref(null);
+  const queuedPrompts = ref({});
+  const executingNodeId = ref(null);
+  const executingNode = computed(() => {
+    if (!executingNodeId.value) return null;
+    const workflow = activePrompt.value?.workflow;
+    if (!workflow) return null;
+    const canvasState = workflow.changeTracker?.activeState ?? null;
+    if (!canvasState) return null;
+    return canvasState.nodes.find(
+      (n) => String(n.id) === executingNodeId.value
+    ) ?? null;
+  });
+  const _executingNodeProgress = ref(null);
+  const executingNodeProgress = computed(
+    () => _executingNodeProgress.value ? Math.round(
+      _executingNodeProgress.value.value / _executingNodeProgress.value.max * 100
+    ) : null
+  );
+  const activePrompt = computed(
+    () => queuedPrompts.value[activePromptId.value ?? ""]
+  );
+  const totalNodesToExecute = computed(() => {
+    if (!activePrompt.value) return 0;
+    return Object.values(activePrompt.value.nodes).length;
+  });
+  const isIdle = computed(() => !activePromptId.value);
+  const nodesExecuted = computed(() => {
+    if (!activePrompt.value) return 0;
+    return Object.values(activePrompt.value.nodes).filter(Boolean).length;
+  });
+  const executionProgress = computed(() => {
+    if (!activePrompt.value) return 0;
+    const total = totalNodesToExecute.value;
+    const done = nodesExecuted.value;
+    return Math.round(done / total * 100);
+  });
+  function bindExecutionEvents() {
+    api.addEventListener(
+      "execution_start",
+      handleExecutionStart
+    );
+    api.addEventListener(
+      "execution_cached",
+      handleExecutionCached
+    );
+    api.addEventListener("executed", handleExecuted);
+    api.addEventListener("executing", handleExecuting);
+    api.addEventListener("progress", handleProgress);
+  }
+  __name(bindExecutionEvents, "bindExecutionEvents");
+  function unbindExecutionEvents() {
+    api.removeEventListener(
+      "execution_start",
+      handleExecutionStart
+    );
+    api.removeEventListener(
+      "execution_cached",
+      handleExecutionCached
+    );
+    api.removeEventListener("executed", handleExecuted);
+    api.removeEventListener("executing", handleExecuting);
+    api.removeEventListener("progress", handleProgress);
+  }
+  __name(unbindExecutionEvents, "unbindExecutionEvents");
+  function handleExecutionStart(e) {
+    activePromptId.value = e.detail.prompt_id;
+    queuedPrompts.value[activePromptId.value] ??= { nodes: {} };
+  }
+  __name(handleExecutionStart, "handleExecutionStart");
+  function handleExecutionCached(e) {
+    if (!activePrompt.value) return;
+    for (const n of e.detail.nodes) {
+      activePrompt.value.nodes[n] = true;
+    }
+  }
+  __name(handleExecutionCached, "handleExecutionCached");
+  function handleExecuted(e) {
+    if (!activePrompt.value) return;
+    activePrompt.value.nodes[e.detail.node] = true;
+  }
+  __name(handleExecuted, "handleExecuted");
+  function handleExecuting(e) {
+    _executingNodeProgress.value = null;
+    if (!activePrompt.value) return;
+    if (executingNodeId.value && activePrompt.value) {
+      activePrompt.value.nodes[executingNodeId.value] = true;
+    }
+    executingNodeId.value = e.detail ? String(e.detail) : null;
+    if (!executingNodeId.value) {
+      if (activePromptId.value) {
+        delete queuedPrompts.value[activePromptId.value];
+      }
+      activePromptId.value = null;
+    }
+  }
+  __name(handleExecuting, "handleExecuting");
+  function handleProgress(e) {
+    _executingNodeProgress.value = e.detail;
+  }
+  __name(handleProgress, "handleProgress");
+  function storePrompt({
+    nodes,
+    id: id3,
+    workflow
+  }) {
+    queuedPrompts.value[id3] ??= { nodes: {} };
+    const queuedPrompt = queuedPrompts.value[id3];
+    queuedPrompt.nodes = {
+      ...nodes.reduce((p2, n) => {
+        p2[n] = false;
+        return p2;
+      }, {}),
+      ...queuedPrompt.nodes
+    };
+    queuedPrompt.workflow = workflow;
+    console.debug(
+      `queued task ${id3} with ${Object.values(queuedPrompt.nodes).length} nodes`
+    );
+  }
+  __name(storePrompt, "storePrompt");
+  return {
+    isIdle,
+    activePromptId,
+    queuedPrompts,
+    executingNodeId,
+    activePrompt,
+    totalNodesToExecute,
+    nodesExecuted,
+    executionProgress,
+    executingNode,
+    executingNodeProgress,
+    bindExecutionEvents,
+    unbindExecutionEvents,
+    storePrompt
+  };
+});
 class ChangeTracker {
   static {
     __name(this, "ChangeTracker");
+  }
+  constructor(workflow) {
+    this.workflow = workflow;
   }
   static MAX_HISTORY = 50;
   #app;
@@ -73445,15 +73338,11 @@ class ChangeTracker {
   redoQueue = [];
   activeState = null;
   isOurLoad = false;
-  workflow;
   changeCount = 0;
   ds;
   nodeOutputs;
   get app() {
     return this.#app ?? this.workflow.manager.app;
-  }
-  constructor(workflow) {
-    this.workflow = workflow;
   }
   #setApp(app2) {
     this.#app = app2;
@@ -73534,8 +73423,8 @@ class ChangeTracker {
     const changeTracker = /* @__PURE__ */ __name(() => app2.workflowManager.activeWorkflow?.changeTracker ?? globalTracker, "changeTracker");
     globalTracker.#setApp(app2);
     const loadGraphData = app2.loadGraphData;
-    app2.loadGraphData = async function() {
-      const v2 = await loadGraphData.apply(this, arguments);
+    app2.loadGraphData = async function(...args) {
+      const v2 = await loadGraphData.apply(this, args);
       const ct = changeTracker();
       if (ct.isOurLoad) {
         ct.isOurLoad = false;
@@ -73551,9 +73440,9 @@ class ChangeTracker {
         if (e.repeat) return;
         const activeEl = document.activeElement;
         requestAnimationFrame(async () => {
-          let bindInputEl;
+          let bindInputEl = null;
           if (!app2.ui.autoQueueEnabled || app2.ui.autoQueueMode === "instant") {
-            if (activeEl?.tagName === "INPUT" || activeEl?.["type"] === "textarea") {
+            if (activeEl?.tagName === "INPUT" || activeEl && "type" in activeEl && activeEl.type === "textarea") {
               return;
             }
             bindInputEl = activeEl;
@@ -73584,13 +73473,13 @@ class ChangeTracker {
     });
     const processMouseUp = LGraphCanvas.prototype.processMouseUp;
     LGraphCanvas.prototype.processMouseUp = function(e) {
-      const v2 = processMouseUp.apply(this, arguments);
+      const v2 = processMouseUp.apply(this, [e]);
       changeTracker().checkState();
       return v2;
     };
     const processMouseDown = LGraphCanvas.prototype.processMouseDown;
     LGraphCanvas.prototype.processMouseDown = function(e) {
-      const v2 = processMouseDown.apply(this, arguments);
+      const v2 = processMouseDown.apply(this, [e]);
       changeTracker().checkState();
       return v2;
     };
@@ -73604,13 +73493,13 @@ class ChangeTracker {
     };
     const close3 = LiteGraph.ContextMenu.prototype.close;
     LiteGraph.ContextMenu.prototype.close = function(e) {
-      const v2 = close3.apply(this, arguments);
+      const v2 = close3.apply(this, [e]);
       changeTracker().checkState();
       return v2;
     };
     const onNodeAdded = LiteGraph.LGraph.prototype.onNodeAdded;
-    LiteGraph.LGraph.prototype.onNodeAdded = function() {
-      const v2 = onNodeAdded?.apply(this, arguments);
+    LiteGraph.LGraph.prototype.onNodeAdded = function(node3) {
+      const v2 = onNodeAdded?.apply(this, [node3]);
       if (!app2?.configuringGraph) {
         const ct = changeTracker();
         if (!ct.isOurLoad) {
@@ -73620,16 +73509,20 @@ class ChangeTracker {
       return v2;
     };
     document.addEventListener("litegraph:canvas", (e) => {
-      if (e.detail.subType === "before-change") {
+      const detail = e.detail;
+      if (detail.subType === "before-change") {
         changeTracker().beforeChange();
-      } else if (e.detail.subType === "after-change") {
+      } else if (detail.subType === "after-change") {
         changeTracker().afterChange();
       }
     });
-    api.addEventListener("executed", ({ detail }) => {
-      const prompt2 = app2.workflowManager.executionStore.queuedPrompts[detail.prompt_id];
-      if (!prompt2?.workflow) return;
-      const nodeOutputs = prompt2.workflow.changeTracker.nodeOutputs ??= {};
+    api.addEventListener("executed", (e) => {
+      const detail = e.detail;
+      const workflow = useExecutionStore().queuedPrompts[detail.prompt_id]?.workflow;
+      const changeTracker2 = workflow?.changeTracker;
+      if (!changeTracker2) return;
+      changeTracker2.nodeOutputs ??= {};
+      const nodeOutputs = changeTracker2.nodeOutputs;
       const output = nodeOutputs[detail.node];
       if (detail.merge && output) {
         for (const k in detail.output ?? {}) {
@@ -73646,18 +73539,21 @@ class ChangeTracker {
     });
   }
   static bindInput(app2, activeEl) {
-    if (activeEl && activeEl.tagName !== "CANVAS" && activeEl.tagName !== "BODY") {
-      for (const evt of ["change", "input", "blur"]) {
-        if (`on${evt}` in activeEl) {
-          const listener = /* @__PURE__ */ __name(() => {
-            app2.workflowManager.activeWorkflow.changeTracker.checkState();
-            activeEl.removeEventListener(evt, listener);
-          }, "listener");
-          activeEl.addEventListener(evt, listener);
-          return true;
-        }
+    if (!activeEl || activeEl.tagName === "CANVAS" || activeEl.tagName === "BODY") {
+      return false;
+    }
+    for (const evt of ["change", "input", "blur"]) {
+      const htmlElement = activeEl;
+      if (`on${evt}` in htmlElement) {
+        const listener = /* @__PURE__ */ __name(() => {
+          app2.workflowManager.activeWorkflow?.changeTracker?.checkState();
+          htmlElement.removeEventListener(evt, listener);
+        }, "listener");
+        htmlElement.addEventListener(evt, listener);
+        return true;
       }
     }
+    return false;
   }
   static graphEqual(a, b, path = "") {
     if (a === b) return true;
@@ -74054,8 +73950,8 @@ class ComfyWorkflow {
       if (!path) return;
     }
     path = appendJsonExt(path);
-    const p2 = await this.manager.app.graphToPrompt();
-    const json = JSON.stringify(p2.workflow, null, 2);
+    const workflow = this.manager.app.serializeGraph();
+    const json = JSON.stringify(workflow, null, 2);
     let resp = await api.storeUserData("workflows/" + path, json, {
       stringify: false,
       throwOnError: false,
@@ -74088,8 +73984,8 @@ class ComfyWorkflow {
       setStorageValue("Comfy.PreviousWorkflow", this.path ?? "");
     } else if (path !== this.path) {
       await this.manager.loadWorkflows();
-      const workflow = this.manager.workflowLookup[path];
-      await workflow.load();
+      const workflow2 = this.manager.workflowLookup[path];
+      await workflow2.load();
     } else {
       this.unsaved = false;
       this.manager.dispatchEvent(new CustomEvent("save", { detail: this }));
@@ -75698,12 +75594,11 @@ class ComfyInputsSpec {
   optional;
   hidden;
   constructor(obj) {
-    this.required = ComfyInputsSpec.transformInputSpecRecord(obj.required) ?? {};
-    this.optional = ComfyInputsSpec.transformInputSpecRecord(obj.optional) ?? {};
+    this.required = ComfyInputsSpec.transformInputSpecRecord(obj.required ?? {});
+    this.optional = ComfyInputsSpec.transformInputSpecRecord(obj.optional ?? {});
     this.hidden = obj.hidden;
   }
   static transformInputSpecRecord(record) {
-    if (!record) return record;
     const result = {};
     for (const [key, value3] of Object.entries(record)) {
       result[key] = ComfyInputsSpec.transformSingleInputSpec(key, value3);
@@ -75818,6 +75713,14 @@ class ComfyNodeDefImpl {
     const nodeFrequency = nodeFrequencyStore.getNodeFrequencyByName(this.name);
     return [scores[0], -nodeFrequency, ...scores.slice(1)];
   }
+  get isCoreNode() {
+    return this.nodeSource.type === NodeSourceType.Core;
+  }
+  get nodeLifeCycleBadgeText() {
+    if (this.deprecated) return "[DEPR]";
+    if (this.experimental) return "[BETA]";
+    return "";
+  }
 }
 const SYSTEM_NODE_DEFS = {
   PrimitiveNode: {
@@ -75828,6 +75731,7 @@ const SYSTEM_NODE_DEFS = {
     output: ["*"],
     output_name: ["connect to widget input"],
     output_is_list: [false],
+    output_node: false,
     python_module: "nodes",
     description: "Primitive values like numbers, strings, and booleans."
   },
@@ -75839,6 +75743,7 @@ const SYSTEM_NODE_DEFS = {
     output: ["*"],
     output_name: [""],
     output_is_list: [false],
+    output_node: false,
     python_module: "nodes",
     description: "Reroute the connection to another node."
   },
@@ -75850,6 +75755,7 @@ const SYSTEM_NODE_DEFS = {
     output: [],
     output_name: [],
     output_is_list: [],
+    output_node: false,
     python_module: "nodes",
     description: "Node that add notes to your project"
   }
@@ -75871,70 +75777,85 @@ function createDummyFolderNodeDef(folderPath) {
     input: {},
     output: [],
     output_name: [],
-    output_is_list: []
+    output_is_list: [],
+    output_node: false
   });
 }
 __name(createDummyFolderNodeDef, "createDummyFolderNodeDef");
-const useNodeDefStore = /* @__PURE__ */ defineStore("nodeDef", {
-  state: /* @__PURE__ */ __name(() => ({
-    nodeDefsByName: {},
-    nodeDefsByDisplayName: {},
-    widgets: {},
-    showDeprecated: false,
-    showExperimental: false
-  }), "state"),
-  getters: {
-    nodeDefs(state) {
-      return Object.values(state.nodeDefsByName);
-    },
-    // Node defs that are not deprecated
-    visibleNodeDefs(state) {
-      return this.nodeDefs.filter(
-        (nodeDef) => (state.showDeprecated || !nodeDef.deprecated) && (state.showExperimental || !nodeDef.experimental)
-      );
-    },
-    nodeSearchService() {
-      return new NodeSearchService(this.visibleNodeDefs);
-    },
-    nodeTree() {
-      return buildNodeDefTree(this.visibleNodeDefs);
-    }
-  },
-  actions: {
-    updateNodeDefs(nodeDefs) {
-      const newNodeDefsByName = {};
-      const nodeDefsByDisplayName = {};
-      for (const nodeDef of nodeDefs) {
+const useNodeDefStore = /* @__PURE__ */ defineStore("nodeDef", () => {
+  const nodeDefsByName = ref({});
+  const nodeDefsByDisplayName = ref({});
+  const widgets = ref({});
+  const showDeprecated = ref(false);
+  const showExperimental = ref(false);
+  const nodeDefs = computed(() => Object.values(nodeDefsByName.value));
+  const visibleNodeDefs = computed(
+    () => nodeDefs.value.filter(
+      (nodeDef) => (showDeprecated.value || !nodeDef.deprecated) && (showExperimental.value || !nodeDef.experimental)
+    )
+  );
+  const nodeSearchService = computed(
+    () => new NodeSearchService(visibleNodeDefs.value)
+  );
+  const nodeTree = computed(() => buildNodeDefTree(visibleNodeDefs.value));
+  function updateNodeDefs(nodeDefs2) {
+    const newNodeDefsByName = {};
+    const newNodeDefsByDisplayName = {};
+    for (const nodeDef of nodeDefs2) {
+      try {
         const nodeDefImpl = new ComfyNodeDefImpl(nodeDef);
         newNodeDefsByName[nodeDef.name] = nodeDefImpl;
-        nodeDefsByDisplayName[nodeDef.display_name] = nodeDefImpl;
+        newNodeDefsByDisplayName[nodeDef.display_name] = nodeDefImpl;
+      } catch (e) {
+        console.error("Error adding nodeDef:", e);
       }
-      this.nodeDefsByName = newNodeDefsByName;
-      this.nodeDefsByDisplayName = nodeDefsByDisplayName;
-    },
-    addNodeDef(nodeDef) {
-      const nodeDefImpl = new ComfyNodeDefImpl(nodeDef);
-      this.nodeDefsByName[nodeDef.name] = nodeDefImpl;
-      this.nodeDefsByDisplayName[nodeDef.display_name] = nodeDefImpl;
-    },
-    updateWidgets(widgets) {
-      this.widgets = widgets;
-    },
-    getWidgetType(type, inputName) {
-      if (type === "COMBO") {
-        return "COMBO";
-      } else if (`${type}:${inputName}` in this.widgets) {
-        return `${type}:${inputName}`;
-      } else if (type in this.widgets) {
-        return type;
-      } else {
-        return null;
-      }
-    },
-    inputIsWidget(spec) {
-      return this.getWidgetType(spec.type, spec.name) !== null;
+    }
+    nodeDefsByName.value = newNodeDefsByName;
+    nodeDefsByDisplayName.value = newNodeDefsByDisplayName;
+  }
+  __name(updateNodeDefs, "updateNodeDefs");
+  function addNodeDef(nodeDef) {
+    const nodeDefImpl = new ComfyNodeDefImpl(nodeDef);
+    nodeDefsByName.value[nodeDef.name] = nodeDefImpl;
+    nodeDefsByDisplayName.value[nodeDef.display_name] = nodeDefImpl;
+  }
+  __name(addNodeDef, "addNodeDef");
+  function getWidgetType(type, inputName) {
+    if (type === "COMBO") {
+      return "COMBO";
+    } else if (`${type}:${inputName}` in widgets.value) {
+      return `${type}:${inputName}`;
+    } else if (type in widgets.value) {
+      return type;
+    } else {
+      return null;
     }
   }
+  __name(getWidgetType, "getWidgetType");
+  function inputIsWidget(spec) {
+    return getWidgetType(spec.type, spec.name) !== null;
+  }
+  __name(inputIsWidget, "inputIsWidget");
+  function fromLGraphNode(node3) {
+    return nodeDefsByName.value[node3.constructor?.nodeData?.name] ?? null;
+  }
+  __name(fromLGraphNode, "fromLGraphNode");
+  return {
+    nodeDefsByName,
+    nodeDefsByDisplayName,
+    widgets,
+    showDeprecated,
+    showExperimental,
+    nodeDefs,
+    visibleNodeDefs,
+    nodeSearchService,
+    nodeTree,
+    updateNodeDefs,
+    addNodeDef,
+    getWidgetType,
+    inputIsWidget,
+    fromLGraphNode
+  };
 });
 const useNodeFrequencyStore = /* @__PURE__ */ defineStore("nodeFrequency", () => {
   const topNodeDefLimit = ref(64);
@@ -76113,160 +76034,49 @@ class ModelFolder {
   }
 }
 const folderBlacklist = ["configs", "custom_nodes"];
-const useModelStore = /* @__PURE__ */ defineStore("modelStore", {
-  state: /* @__PURE__ */ __name(() => ({
-    modelStoreMap: {},
-    isLoading: {},
-    modelFolders: []
-  }), "state"),
-  actions: {
-    async getModelsInFolderCached(folder) {
-      if (folder in this.modelStoreMap) {
-        return this.modelStoreMap[folder];
+const useModelStore = /* @__PURE__ */ defineStore("modelStore", () => {
+  const modelStoreMap = ref({});
+  const isLoading = ref({});
+  const modelFolders = ref([]);
+  async function getModelsInFolderCached(folder) {
+    if (folder in modelStoreMap.value) {
+      return modelStoreMap.value[folder];
+    }
+    if (isLoading.value[folder]) {
+      return isLoading.value[folder];
+    }
+    const promise = api.getModels(folder).then((models) => {
+      if (!models) {
+        return null;
       }
-      if (this.isLoading[folder]) {
-        return this.isLoading[folder];
-      }
-      const promise = api.getModels(folder).then((models) => {
-        if (!models) {
-          return null;
-        }
-        const store = new ModelFolder(folder, models);
-        this.modelStoreMap[folder] = store;
-        this.isLoading[folder] = null;
-        return store;
-      });
-      this.isLoading[folder] = promise;
-      return promise;
-    },
-    clearCache() {
-      this.modelStoreMap = {};
-    },
-    async getModelFolders() {
-      this.modelFolders = (await api.getModelFolders()).filter(
-        (folder) => !folderBlacklist.includes(folder)
-      );
-    }
+      const store = new ModelFolder(folder, models);
+      modelStoreMap.value[folder] = store;
+      isLoading.value[folder] = null;
+      return store;
+    });
+    isLoading.value[folder] = promise;
+    return promise;
   }
-});
-const useExecutionStore = /* @__PURE__ */ defineStore("execution", () => {
-  const activePromptId = ref(null);
-  const queuedPrompts = ref({});
-  const executingNodeId = ref(null);
-  const executingNode = computed(() => {
-    if (!executingNodeId.value) return null;
-    const workflow = activePrompt.value?.workflow;
-    if (!workflow) return null;
-    const canvasState = workflow.changeTracker?.activeState;
-    if (!canvasState) return null;
-    return canvasState.nodes.find((n) => String(n.id) === executingNodeId.value) ?? null;
-  });
-  const _executingNodeProgress = ref(null);
-  const executingNodeProgress = computed(
-    () => _executingNodeProgress.value ? Math.round(
-      _executingNodeProgress.value.value / _executingNodeProgress.value.max * 100
-    ) : null
-  );
-  const activePrompt = computed(() => queuedPrompts.value[activePromptId.value]);
-  const totalNodesToExecute = computed(() => {
-    if (!activePrompt.value) return 0;
-    return Object.values(activePrompt.value.nodes).length;
-  });
-  const isIdle = computed(() => !activePromptId.value);
-  const nodesExecuted = computed(() => {
-    if (!activePrompt.value) return 0;
-    return Object.values(activePrompt.value.nodes).filter(Boolean).length;
-  });
-  const executionProgress = computed(() => {
-    if (!activePrompt.value) return 0;
-    const total = totalNodesToExecute.value;
-    const done = nodesExecuted.value;
-    return Math.round(done / total * 100);
-  });
-  function bindExecutionEvents() {
-    api.addEventListener("execution_start", handleExecutionStart);
-    api.addEventListener("execution_cached", handleExecutionCached);
-    api.addEventListener("executed", handleExecuted);
-    api.addEventListener("executing", handleExecuting);
-    api.addEventListener("progress", handleProgress);
+  __name(getModelsInFolderCached, "getModelsInFolderCached");
+  function clearCache() {
+    Object.keys(modelStoreMap.value).forEach((key) => {
+      delete modelStoreMap.value[key];
+    });
   }
-  __name(bindExecutionEvents, "bindExecutionEvents");
-  function unbindExecutionEvents() {
-    api.removeEventListener("execution_start", handleExecutionStart);
-    api.removeEventListener("execution_cached", handleExecutionCached);
-    api.removeEventListener("executed", handleExecuted);
-    api.removeEventListener("executing", handleExecuting);
-    api.removeEventListener("progress", handleProgress);
-  }
-  __name(unbindExecutionEvents, "unbindExecutionEvents");
-  function handleExecutionStart(e) {
-    activePromptId.value = e.detail.prompt_id;
-    queuedPrompts.value[activePromptId.value] ??= { nodes: {} };
-  }
-  __name(handleExecutionStart, "handleExecutionStart");
-  function handleExecutionCached(e) {
-    if (!activePrompt.value) return;
-    for (const n of e.detail.nodes) {
-      activePrompt.value.nodes[n] = true;
-    }
-  }
-  __name(handleExecutionCached, "handleExecutionCached");
-  function handleExecuted(e) {
-    if (!activePrompt.value) return;
-    activePrompt.value.nodes[e.detail.node] = true;
-  }
-  __name(handleExecuted, "handleExecuted");
-  function handleExecuting(e) {
-    _executingNodeProgress.value = null;
-    if (!activePrompt.value) return;
-    if (executingNodeId.value) {
-      activePrompt.value.nodes[executingNodeId.value] = true;
-    }
-    executingNodeId.value = e.detail ? String(e.detail) : null;
-    if (!executingNodeId.value) {
-      delete queuedPrompts.value[activePromptId.value];
-      activePromptId.value = null;
-    }
-  }
-  __name(handleExecuting, "handleExecuting");
-  function handleProgress(e) {
-    _executingNodeProgress.value = e.detail;
-  }
-  __name(handleProgress, "handleProgress");
-  function storePrompt({
-    nodes,
-    id: id3,
-    workflow
-  }) {
-    queuedPrompts.value[id3] ??= { nodes: {} };
-    const queuedPrompt = queuedPrompts.value[id3];
-    queuedPrompt.nodes = {
-      ...nodes.reduce((p2, n) => {
-        p2[n] = false;
-        return p2;
-      }, {}),
-      ...queuedPrompt.nodes
-    };
-    queuedPrompt.workflow = workflow;
-    console.debug(
-      `queued task ${id3} with ${Object.values(queuedPrompt.nodes).length} nodes`
+  __name(clearCache, "clearCache");
+  async function getModelFolders() {
+    modelFolders.value = (await api.getModelFolders()).filter(
+      (folder) => !folderBlacklist.includes(folder)
     );
   }
-  __name(storePrompt, "storePrompt");
+  __name(getModelFolders, "getModelFolders");
   return {
-    isIdle,
-    activePromptId,
-    queuedPrompts,
-    executingNodeId,
-    activePrompt,
-    totalNodesToExecute,
-    nodesExecuted,
-    executionProgress,
-    executingNode,
-    executingNodeProgress,
-    bindExecutionEvents,
-    unbindExecutionEvents,
-    storePrompt
+    modelStoreMap,
+    isLoading,
+    modelFolders,
+    getModelsInFolderCached,
+    clearCache,
+    getModelFolders
   };
 });
 const CORE_KEYBINDINGS = [
@@ -76429,6 +76239,13 @@ const CORE_KEYBINDINGS = [
     },
     commandId: "Comfy.Canvas.ToggleSelectedNodes.Mute",
     targetSelector: "#graph-canvas"
+  },
+  {
+    combo: {
+      key: "`",
+      ctrl: true
+    },
+    commandId: "Workspace.ToggleBottomPanelTab.integrated-terminal"
   }
 ];
 class KeybindingImpl {
@@ -76792,6 +76609,127 @@ const useMenuItemStore = /* @__PURE__ */ defineStore("menuItem", () => {
     loadExtensionMenuCommands
   };
 });
+const _hoisted_1$x = { class: "p-terminal rounded-none h-full w-full" };
+const _hoisted_2$m = { class: "px-4 whitespace-pre-wrap" };
+const _sfc_main$q = /* @__PURE__ */ defineComponent({
+  __name: "IntegratedTerminal",
+  setup(__props) {
+    const log = ref("");
+    const scrollPanelRef = ref(null);
+    const scrolledToBottom = ref(false);
+    let intervalId = 0;
+    onMounted(async () => {
+      const element = scrollPanelRef.value?.$el;
+      const scrollContainer = element?.querySelector(".p-scrollpanel-content");
+      if (scrollContainer) {
+        scrollContainer.addEventListener("scroll", () => {
+          scrolledToBottom.value = scrollContainer.scrollTop + scrollContainer.clientHeight === scrollContainer.scrollHeight;
+        });
+      }
+      const scrollToBottom = /* @__PURE__ */ __name(() => {
+        if (scrollContainer) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+      }, "scrollToBottom");
+      watch(log, () => {
+        if (scrolledToBottom.value) {
+          scrollToBottom();
+        }
+      });
+      const fetchLogs = /* @__PURE__ */ __name(async () => {
+        log.value = await api.getLogs();
+      }, "fetchLogs");
+      await fetchLogs();
+      scrollToBottom();
+      intervalId = window.setInterval(fetchLogs, 500);
+    });
+    onBeforeUnmount(() => {
+      window.clearInterval(intervalId);
+    });
+    return (_ctx, _cache) => {
+      return openBlock(), createElementBlock("div", _hoisted_1$x, [
+        createVNode(unref(script$w), {
+          class: "h-full w-full",
+          ref_key: "scrollPanelRef",
+          ref: scrollPanelRef
+        }, {
+          default: withCtx(() => [
+            createBaseVNode("pre", _hoisted_2$m, toDisplayString$1(log.value), 1)
+          ]),
+          _: 1
+        }, 512)
+      ]);
+    };
+  }
+});
+const useIntegratedTerminalTab = /* @__PURE__ */ __name(() => {
+  const { t } = useI18n();
+  return {
+    id: "integrated-terminal",
+    title: t("terminal"),
+    component: markRaw(_sfc_main$q),
+    type: "vue"
+  };
+}, "useIntegratedTerminalTab");
+const useBottomPanelStore = /* @__PURE__ */ defineStore("bottomPanel", () => {
+  const bottomPanelVisible = ref(false);
+  const toggleBottomPanel = /* @__PURE__ */ __name(() => {
+    if (bottomPanelTabs.value.length === 0) {
+      return;
+    }
+    bottomPanelVisible.value = !bottomPanelVisible.value;
+  }, "toggleBottomPanel");
+  const bottomPanelTabs = ref([]);
+  const activeBottomPanelTabId = ref(null);
+  const activeBottomPanelTab = computed(() => {
+    return bottomPanelTabs.value.find(
+      (tab) => tab.id === activeBottomPanelTabId.value
+    ) ?? null;
+  });
+  const setActiveTab = /* @__PURE__ */ __name((tabId) => {
+    activeBottomPanelTabId.value = tabId;
+  }, "setActiveTab");
+  const toggleBottomPanelTab = /* @__PURE__ */ __name((tabId) => {
+    if (activeBottomPanelTabId.value === tabId && bottomPanelVisible.value) {
+      bottomPanelVisible.value = false;
+    } else {
+      activeBottomPanelTabId.value = tabId;
+      bottomPanelVisible.value = true;
+    }
+  }, "toggleBottomPanelTab");
+  const registerBottomPanelTab = /* @__PURE__ */ __name((tab) => {
+    bottomPanelTabs.value = [...bottomPanelTabs.value, tab];
+    if (bottomPanelTabs.value.length === 1) {
+      activeBottomPanelTabId.value = tab.id;
+    }
+    useCommandStore().registerCommand({
+      id: `Workspace.ToggleBottomPanelTab.${tab.id}`,
+      icon: "pi pi-list",
+      label: tab.title,
+      function: /* @__PURE__ */ __name(() => toggleBottomPanelTab(tab.id), "function")
+    });
+  }, "registerBottomPanelTab");
+  const registerCoreBottomPanelTabs = /* @__PURE__ */ __name(() => {
+    registerBottomPanelTab(useIntegratedTerminalTab());
+  }, "registerCoreBottomPanelTabs");
+  const registerExtensionBottomPanelTabs = /* @__PURE__ */ __name((extension) => {
+    if (extension.bottomPanelTabs) {
+      extension.bottomPanelTabs.forEach(registerBottomPanelTab);
+    }
+  }, "registerExtensionBottomPanelTabs");
+  return {
+    bottomPanelVisible,
+    toggleBottomPanel,
+    bottomPanelTabs,
+    activeBottomPanelTab,
+    activeBottomPanelTabId,
+    setActiveTab,
+    toggleBottomPanelTab,
+    registerBottomPanelTab,
+    registerCoreBottomPanelTabs,
+    registerExtensionBottomPanelTabs
+  };
+});
 const useExtensionStore = /* @__PURE__ */ defineStore("extension", () => {
   const extensionByName = ref({});
   const extensions = computed(() => Object.values(extensionByName.value));
@@ -76819,6 +76757,8 @@ const useExtensionStore = /* @__PURE__ */ defineStore("extension", () => {
     useKeybindingStore().loadExtensionKeybindings(extension);
     useCommandStore().loadExtensionCommands(extension);
     useMenuItemStore().loadExtensionMenuCommands(extension);
+    useSettingStore().loadExtensionSettings(extension);
+    useBottomPanelStore().registerExtensionBottomPanelTabs(extension);
     app$1.extensions.push(extension);
   }
   __name(registerExtension, "registerExtension");
@@ -76918,6 +76858,9 @@ class ComfyApp {
   canvasContainer;
   menu;
   bypassBgColor;
+  // Set by Comfy.Clipspace extension
+  openClipspace = /* @__PURE__ */ __name(() => {
+  }, "openClipspace");
   /**
    * @deprecated Use useExecutionStore().executingNodeId instead
    */
@@ -77905,7 +77848,7 @@ class ComfyApp {
   #addDrawNodeHandler() {
     const origDrawNodeShape = LGraphCanvas.prototype.drawNodeShape;
     const self2 = this;
-    LGraphCanvas.prototype.drawNodeShape = function(node3, ctx, size2, fgcolor, bgcolor, selected2, mouse_over) {
+    LGraphCanvas.prototype.drawNodeShape = function(node3, ctx, size2, fgcolor, bgcolor, selected2) {
       const res = origDrawNodeShape.apply(this, arguments);
       const nodeErrors = self2.lastNodeErrors?.[node3.id];
       let color = null;
@@ -77922,10 +77865,7 @@ class ComfyApp {
         lineWidth = 2;
       }
       if (color) {
-        const shape = (
-          // @ts-expect-error
-          node3._shape || node3.constructor.shape || LiteGraph.ROUND_SHAPE
-        );
+        const shape = node3._shape || node3.constructor.shape || LiteGraph.ROUND_SHAPE;
         ctx.lineWidth = lineWidth;
         ctx.globalAlpha = 0.8;
         ctx.beginPath();
@@ -78115,7 +78055,7 @@ class ComfyApp {
       async (e) => {
         if (e.detail.subType === "connectingWidgetLink") {
           const { convertToInput } = await __vitePreload(async () => {
-            const { convertToInput: convertToInput2 } = await import("./widgetInputs-DNVvusS1.js");
+            const { convertToInput: convertToInput2 } = await import("./widgetInputs-DdecKYqd.js");
             return { convertToInput: convertToInput2 };
           }, true ? [] : void 0, import.meta.url);
           const { node: node3, link, widget } = e.detail;
@@ -78157,7 +78097,7 @@ class ComfyApp {
     useExtensionStore().loadDisabledExtensionNames();
     const extensions = await api.getExtensions();
     this.logging.addEntry("Comfy.App", "debug", { Extensions: extensions });
-    await __vitePreload(() => import("./index-D36_Nnai.js"), true ? __vite__mapDeps([5,6,7]) : void 0, import.meta.url);
+    await __vitePreload(() => import("./index-BReiUkk9.js"), true ? __vite__mapDeps([5,6,7]) : void 0, import.meta.url);
     await Promise.all(
       extensions.filter((extension) => !extension.includes("extensions/core")).map(async (ext) => {
         try {
@@ -78200,7 +78140,7 @@ class ComfyApp {
     if (!user || !users[user]) {
       if (this.vueAppReady) useWorkspaceStore().spinner = false;
       const { UserSelectionScreen } = await __vitePreload(async () => {
-        const { UserSelectionScreen: UserSelectionScreen2 } = await import("./userSelection-DVDwxLD5.js");
+        const { UserSelectionScreen: UserSelectionScreen2 } = await import("./userSelection-DITGVoWz.js");
         return { UserSelectionScreen: UserSelectionScreen2 };
       }, true ? __vite__mapDeps([8,9]) : void 0, import.meta.url);
       this.ui.menuContainer.style.display = "none";
@@ -78309,8 +78249,7 @@ class ComfyApp {
       await this.loadGraphData();
     }
     setInterval(() => {
-      const sortNodes = useSettingStore().get("Comfy.Workflow.SortNodeIdOnSave");
-      const workflow = JSON.stringify(this.graph.serialize({ sortNodes }));
+      const workflow = JSON.stringify(this.serializeGraph());
       localStorage.setItem("workflow", workflow);
       if (api.clientId) {
         sessionStorage.setItem(`workflow:${api.clientId}`, workflow);
@@ -78359,7 +78298,7 @@ class ComfyApp {
     const nodeDefArray = Object.values(allNodeDefs);
     this.#invokeExtensions("beforeRegisterVueAppNodeDefs", nodeDefArray, this);
     nodeDefStore.updateNodeDefs(nodeDefArray);
-    nodeDefStore.updateWidgets(this.widgets);
+    nodeDefStore.widgets = this.widgets;
   }
   /**
    * Registers nodes with the graph
@@ -78526,12 +78465,9 @@ class ComfyApp {
     }
     localStorage.setItem("litegrapheditor_clipboard", old);
   }
-  #showMissingNodesError(missingNodeTypes, hasAddedNodes = true) {
+  #showMissingNodesError(missingNodeTypes) {
     if (useSettingStore().get("Comfy.Workflow.ShowMissingNodesWarning")) {
-      showLoadWorkflowWarning({
-        missingNodeTypes,
-        hasAddedNodes
-      });
+      showLoadWorkflowWarning({ missingNodeTypes });
     }
     this.logging.addEntry("Comfy.App", "warn", {
       MissingNodes: missingNodeTypes
@@ -78722,7 +78658,17 @@ class ComfyApp {
     });
   }
   /**
-   * Converts the current graph workflow for sending to the API
+   * Serializes a graph using preferred user settings.
+   * @param graph The litegraph to serialize.
+   * @returns A serialized graph (aka workflow) with preferred user settings.
+   */
+  serializeGraph(graph = this.graph) {
+    const sortNodes = useSettingStore().get("Comfy.Workflow.SortNodeIdOnSave");
+    return graph.serialize({ sortNodes });
+  }
+  /**
+   * Converts the current graph workflow for sending to the API.
+   * Note: Node widgets are updated before serialization to prepare queueing.
    * @returns The workflow and node links
    */
   async graphToPrompt(graph = this.graph, clean = true) {
@@ -78741,8 +78687,7 @@ class ComfyApp {
         }
       }
     }
-    const sortNodes = useSettingStore().get("Comfy.Workflow.SortNodeIdOnSave");
-    const workflow = graph.serialize({ sortNodes });
+    const workflow = this.serializeGraph(graph);
     const output = {};
     for (const outerNode of graph.computeExecutionOrder(false)) {
       const skipNode = outerNode.mode === 2 || outerNode.mode === 4;
@@ -79024,8 +78969,7 @@ class ComfyApp {
     if (missingNodeTypes.length) {
       this.#showMissingNodesError(
         // @ts-expect-error
-        missingNodeTypes.map((t) => t.class_type),
-        false
+        missingNodeTypes.map((t) => t.class_type)
       );
       return;
     }
@@ -79280,7 +79224,7 @@ const useWorkflowStore = /* @__PURE__ */ defineStore("workflow", () => {
   );
   const bookmarkedWorkflowsTree = computed(
     () => buildTree(bookmarkedWorkflows.value, (workflow) => [
-      workflow.path
+      workflow.path ?? "temporary_workflow"
     ])
   );
   const openWorkflowsTree = computed(
@@ -79431,7 +79375,7 @@ const useCommandStore = /* @__PURE__ */ defineStore("command", () => {
         app$1.workflowManager.setWorkflow(null);
         app$1.clean();
         app$1.graph.clear();
-        app$1.workflowManager.activeWorkflow.track();
+        app$1.workflowManager.activeWorkflow?.track();
       }, "function")
     },
     {
@@ -79457,7 +79401,7 @@ const useCommandStore = /* @__PURE__ */ defineStore("command", () => {
       label: "Save Workflow",
       menubarLabel: "Save",
       function: /* @__PURE__ */ __name(() => {
-        app$1.workflowManager.activeWorkflow.save();
+        app$1.workflowManager.activeWorkflow?.save();
       }, "function")
     },
     {
@@ -79466,7 +79410,7 @@ const useCommandStore = /* @__PURE__ */ defineStore("command", () => {
       label: "Save Workflow As",
       menubarLabel: "Save As",
       function: /* @__PURE__ */ __name(() => {
-        app$1.workflowManager.activeWorkflow.save(true);
+        app$1.workflowManager.activeWorkflow?.save(true);
       }, "function")
     },
     {
@@ -79528,7 +79472,7 @@ const useCommandStore = /* @__PURE__ */ defineStore("command", () => {
       icon: "pi pi-clipboard",
       label: "Clipspace",
       function: /* @__PURE__ */ __name(() => {
-        app$1["openClipspace"]?.();
+        app$1.openClipspace();
       }, "function")
     },
     {
@@ -79579,10 +79523,10 @@ const useCommandStore = /* @__PURE__ */ defineStore("command", () => {
       label: "Zoom In",
       function: /* @__PURE__ */ __name(() => {
         const ds = app$1.canvas.ds;
-        ds.changeScale(ds.scale * 1.1, [
-          ds.element.width / 2,
-          ds.element.height / 2
-        ]);
+        ds.changeScale(
+          ds.scale * 1.1,
+          ds.element ? [ds.element.width / 2, ds.element.height / 2] : void 0
+        );
         app$1.canvas.setDirty(true, true);
       }, "function")
     },
@@ -79592,10 +79536,10 @@ const useCommandStore = /* @__PURE__ */ defineStore("command", () => {
       label: "Zoom Out",
       function: /* @__PURE__ */ __name(() => {
         const ds = app$1.canvas.ds;
-        ds.changeScale(ds.scale / 1.1, [
-          ds.element.width / 2,
-          ds.element.height / 2
-        ]);
+        ds.changeScale(
+          ds.scale / 1.1,
+          ds.element ? [ds.element.width / 2, ds.element.height / 2] : void 0
+        );
         app$1.canvas.setDirty(true, true);
       }, "function")
     },
@@ -79754,6 +79698,15 @@ const useCommandStore = /* @__PURE__ */ defineStore("command", () => {
           }
         };
       })()
+    },
+    {
+      id: "Workspace.ToggleBottomPanel",
+      icon: "pi pi-list",
+      label: "Toggle Bottom Panel",
+      versionAdded: "1.3.22",
+      function: /* @__PURE__ */ __name(() => {
+        useBottomPanelStore().toggleBottomPanel();
+      }, "function")
     }
   ];
   commandDefinitions.forEach(registerCommand);
@@ -80383,11 +80336,11 @@ var script$1$a = {
     }, "ariaSelected")
   },
   components: {
-    Checkbox: script$G,
-    ChevronDownIcon: script$F,
+    Checkbox: script$F,
+    ChevronDownIcon: script$E,
     ChevronRightIcon: script$m,
     CheckIcon: script$R,
-    MinusIcon: script$H,
+    MinusIcon: script$G,
     SpinnerIcon: script$M
   },
   directives: {
@@ -81878,7 +81831,7 @@ var script$g = {
   },
   components: {
     ContextMenuSub: script$1$9,
-    Portal: script$D
+    Portal: script$C
   }
 };
 function render$f(_ctx, _cache, $props, $setup, $data, $options) {
@@ -84092,7 +84045,7 @@ const _sfc_main$m = /* @__PURE__ */ defineComponent({
           }),
           renderSlot(_ctx.$slots, "header")
         ]),
-        createVNode(unref(script$x), { class: "comfy-vue-side-bar-body flex-grow h-0" }, {
+        createVNode(unref(script$w), { class: "comfy-vue-side-bar-body flex-grow h-0" }, {
           default: withCtx(() => [
             renderSlot(_ctx.$slots, "body")
           ]),
@@ -84302,73 +84255,59 @@ class ModelNodeProvider {
     this.key = key;
   }
 }
-const useModelToNodeStore = /* @__PURE__ */ defineStore("modelToNode", {
-  state: /* @__PURE__ */ __name(() => ({
-    modelToNodeMap: {},
-    nodeDefStore: useNodeDefStore(),
-    haveDefaultsLoaded: false
-  }), "state"),
-  actions: {
-    /**
-     * Get the node provider for the given model type name.
-     * @param modelType The name of the model type to get the node provider for.
-     * @returns The node provider for the given model type name.
-     */
-    getNodeProvider(modelType) {
-      this.registerDefaults();
-      return this.modelToNodeMap[modelType]?.[0];
-    },
-    /**
-     * Get the list of all valid node providers for the given model type name.
-     * @param modelType The name of the model type to get the node providers for.
-     * @returns The list of all valid node providers for the given model type name.
-     */
-    getAllNodeProviders(modelType) {
-      this.registerDefaults();
-      return this.modelToNodeMap[modelType] ?? [];
-    },
-    /**
-     * Register a node provider for the given model type name.
-     * @param modelType The name of the model type to register the node provider for.
-     * @param nodeProvider The node provider to register.
-     */
-    registerNodeProvider(modelType, nodeProvider) {
-      this.registerDefaults();
-      this.modelToNodeMap[modelType] ??= [];
-      this.modelToNodeMap[modelType].push(nodeProvider);
-    },
-    /**
-     * Register a node provider for the given simple names.
-     * @param modelType The name of the model type to register the node provider for.
-     * @param nodeClass The node class name to register.
-     * @param key The key to use for the node input.
-     */
-    quickRegister(modelType, nodeClass, key) {
-      this.registerNodeProvider(
-        modelType,
-        new ModelNodeProvider(this.nodeDefStore.nodeDefsByName[nodeClass], key)
-      );
-    },
-    registerDefaults() {
-      if (this.haveDefaultsLoaded) {
-        return;
-      }
-      if (Object.keys(this.nodeDefStore.nodeDefsByName).length === 0) {
-        return;
-      }
-      this.haveDefaultsLoaded = true;
-      this.quickRegister("checkpoints", "CheckpointLoaderSimple", "ckpt_name");
-      this.quickRegister(
-        "checkpoints",
-        "ImageOnlyCheckpointLoader",
-        "ckpt_name"
-      );
-      this.quickRegister("loras", "LoraLoader", "lora_name");
-      this.quickRegister("loras", "LoraLoaderModelOnly", "lora_name");
-      this.quickRegister("vae", "VAELoader", "vae_name");
-      this.quickRegister("controlnet", "ControlNetLoader", "control_net_name");
-    }
+const useModelToNodeStore = /* @__PURE__ */ defineStore("modelToNode", () => {
+  const modelToNodeMap = ref({});
+  const nodeDefStore = useNodeDefStore();
+  const haveDefaultsLoaded = ref(false);
+  function getNodeProvider(modelType) {
+    registerDefaults();
+    return modelToNodeMap.value[modelType]?.[0];
   }
+  __name(getNodeProvider, "getNodeProvider");
+  function getAllNodeProviders(modelType) {
+    registerDefaults();
+    return modelToNodeMap.value[modelType] ?? [];
+  }
+  __name(getAllNodeProviders, "getAllNodeProviders");
+  function registerNodeProvider(modelType, nodeProvider) {
+    registerDefaults();
+    if (!modelToNodeMap.value[modelType]) {
+      modelToNodeMap.value[modelType] = [];
+    }
+    modelToNodeMap.value[modelType].push(nodeProvider);
+  }
+  __name(registerNodeProvider, "registerNodeProvider");
+  function quickRegister(modelType, nodeClass, key) {
+    registerNodeProvider(
+      modelType,
+      new ModelNodeProvider(nodeDefStore.nodeDefsByName[nodeClass], key)
+    );
+  }
+  __name(quickRegister, "quickRegister");
+  function registerDefaults() {
+    if (haveDefaultsLoaded.value) {
+      return;
+    }
+    if (Object.keys(nodeDefStore.nodeDefsByName).length === 0) {
+      return;
+    }
+    haveDefaultsLoaded.value = true;
+    quickRegister("checkpoints", "CheckpointLoaderSimple", "ckpt_name");
+    quickRegister("checkpoints", "ImageOnlyCheckpointLoader", "ckpt_name");
+    quickRegister("loras", "LoraLoader", "lora_name");
+    quickRegister("loras", "LoraLoaderModelOnly", "lora_name");
+    quickRegister("vae", "VAELoader", "vae_name");
+    quickRegister("controlnet", "ControlNetLoader", "control_net_name");
+  }
+  __name(registerDefaults, "registerDefaults");
+  return {
+    modelToNodeMap,
+    getNodeProvider,
+    getAllNodeProviders,
+    registerNodeProvider,
+    quickRegister,
+    registerDefaults
+  };
 });
 function useTreeExpansion(expandedKeys2) {
   const toggleNode = /* @__PURE__ */ __name((node3) => {
@@ -85078,7 +85017,7 @@ var script$e = {
     ripple: Ripple
   },
   components: {
-    Portal: script$D
+    Portal: script$C
   }
 };
 var _hoisted_1$m = ["aria-modal"];
@@ -86127,7 +86066,7 @@ const useNodeBookmarkStore = /* @__PURE__ */ defineStore("nodeBookmark", () => {
         return;
       }
       const category = bookmark.split("/").slice(0, -1).join("/");
-      const displayName = bookmark.split("/").pop();
+      const displayName = bookmark.split("/").pop() ?? "";
       const nodeDef = nodeDefStore.nodeDefsByDisplayName[displayName];
       if (!nodeDef) return;
       addBookmark(`${category === "" ? "" : category + "/"}${nodeDef.name}`);
@@ -86154,7 +86093,7 @@ const useNodeBookmarkStore = /* @__PURE__ */ defineStore("nodeBookmark", () => {
     const bookmarkNodes = bookmarks2.map((bookmark) => {
       if (bookmark.endsWith("/")) return createDummyFolderNodeDef(bookmark);
       const parts2 = bookmark.split("/");
-      const name = parts2.pop();
+      const name = parts2.pop() ?? "";
       const category = parts2.join("/");
       const srcNodeDef = nodeDefStore.nodeDefsByName[name];
       if (!srcNodeDef) {
@@ -86189,6 +86128,9 @@ const useNodeBookmarkStore = /* @__PURE__ */ defineStore("nodeBookmark", () => {
   const renameBookmarkFolder = /* @__PURE__ */ __name((folderNode, newName) => {
     if (!folderNode.isDummyFolder) {
       throw new Error("Cannot rename non-folder node");
+    }
+    if (newName.includes("/")) {
+      throw new Error('Folder name cannot contain "/"');
     }
     const newNodePath = folderNode.category.split("/").slice(0, -1).concat(newName).join("/") + "/";
     if (newNodePath === folderNode.nodePath) {
@@ -86340,12 +86282,12 @@ const _sfc_main$h = /* @__PURE__ */ defineComponent({
       }, [
         createVNode(TreeExplorerTreeNode, { node: _ctx.node }, {
           "before-label": withCtx(() => [
-            nodeDef.value.experimental ? (openBlock(), createBlock(unref(script$s), {
+            nodeDef.value.experimental ? (openBlock(), createBlock(unref(script$r), {
               key: 0,
               value: _ctx.$t("experimental"),
               severity: "primary"
             }, null, 8, ["value"])) : createCommentVNode("", true),
-            nodeDef.value.deprecated ? (openBlock(), createBlock(unref(script$s), {
+            nodeDef.value.deprecated ? (openBlock(), createBlock(unref(script$r), {
               key: 1,
               value: _ctx.$t("deprecated"),
               severity: "danger"
@@ -86997,10 +86939,10 @@ var script$b = {
   },
   components: {
     Button: script$I,
-    Portal: script$D,
+    Portal: script$C,
     WindowMinimizeIcon: script$c,
     WindowMaximizeIcon: script$d,
-    TimesIcon: script$E
+    TimesIcon: script$D
   }
 };
 function _typeof$4(o) {
@@ -87584,7 +87526,7 @@ var classes$4 = {
       "p-disabled": props.disabled
     }];
   }, "preview"),
-  panel: /* @__PURE__ */ __name(function panel2(_ref3) {
+  panel: /* @__PURE__ */ __name(function panel(_ref3) {
     var props = _ref3.props;
     return ["p-colorpicker-panel", {
       "p-colorpicker-panel-inline": props.inline,
@@ -88150,7 +88092,7 @@ var script$8 = {
     }, "onOverlayClick")
   },
   components: {
-    Portal: script$D
+    Portal: script$C
   }
 };
 var _hoisted_1$f = ["id", "tabindex", "disabled"];
@@ -88374,7 +88316,7 @@ const _sfc_main$f = /* @__PURE__ */ defineComponent({
                 _: 1
               }, 8, ["modelValue"])
             ]),
-            createVNode(unref(script$y)),
+            createVNode(unref(script$x)),
             createBaseVNode("div", _hoisted_4$5, [
               createBaseVNode("label", _hoisted_5$3, toDisplayString$1(_ctx.$t("color")), 1),
               createBaseVNode("div", _hoisted_6$2, [
@@ -88495,7 +88437,7 @@ const _sfc_main$e = /* @__PURE__ */ defineComponent({
               if (node22.leaf) {
                 return "pi pi-circle-fill";
               }
-              const customization = nodeBookmarkStore.bookmarksCustomization[node22.data.nodePath];
+              const customization = nodeBookmarkStore.bookmarksCustomization[node22.data?.nodePath];
               return customization?.icon ? "pi " + customization.icon : "pi pi-bookmark-fill";
             }, "getIcon"),
             children: sortedChildren,
@@ -88635,7 +88577,7 @@ const _sfc_main$d = /* @__PURE__ */ defineComponent({
             optionLabel: "name",
             onChange: updateSelectedFilterValue
           }, null, 8, ["modelValue", "options"]),
-          createVNode(unref(script$C), {
+          createVNode(unref(script$B), {
             class: "filter-value-select",
             modelValue: selectedFilterValue.value,
             "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => selectedFilterValue.value = $event),
@@ -88799,7 +88741,7 @@ const _sfc_main$c = /* @__PURE__ */ defineComponent({
               ref: nodeBookmarkTreeExplorerRef,
               "filtered-node-defs": filteredNodeDefs.value
             }, null, 8, ["filtered-node-defs"]),
-            withDirectives(createVNode(unref(script$y), {
+            withDirectives(createVNode(unref(script$x), {
               type: "dashed",
               class: "m-2"
             }, null, 512), [
@@ -89119,7 +89061,7 @@ var script$7 = {
   },
   components: {
     Button: script$I,
-    Portal: script$D
+    Portal: script$C
   },
   directives: {
     focustrap: FocusTrap
@@ -89519,7 +89461,7 @@ const _sfc_main$8 = /* @__PURE__ */ defineComponent({
         ]),
         createBaseVNode("div", _hoisted_7, [
           createBaseVNode("div", _hoisted_8, [
-            _ctx.isFlatTask && _ctx.task.isHistory ? (openBlock(), createBlock(unref(script$s), {
+            _ctx.isFlatTask && _ctx.task.isHistory ? (openBlock(), createBlock(unref(script$r), {
               key: 0,
               class: "node-name-tag"
             }, {
@@ -89534,7 +89476,7 @@ const _sfc_main$8 = /* @__PURE__ */ defineComponent({
               ]),
               _: 1
             })) : createCommentVNode("", true),
-            createVNode(unref(script$s), {
+            createVNode(unref(script$r), {
               severity: taskTagSeverity(_ctx.task.displayStatus)
             }, {
               default: withCtx(() => [
@@ -90547,7 +90489,7 @@ var script$2 = {
     ChevronLeftIcon: script$n,
     ChevronRightIcon: script$m,
     ChevronUpIcon: script$6,
-    ChevronDownIcon: script$F
+    ChevronDownIcon: script$E
   },
   directives: {
     ripple: Ripple
@@ -90841,7 +90783,7 @@ var script$1$1 = {
   components: {
     GalleriaItem: script$3,
     GalleriaThumbnails: script$2,
-    TimesIcon: script$E
+    TimesIcon: script$D
   },
   directives: {
     ripple: Ripple
@@ -91050,7 +90992,7 @@ var script$5 = {
   },
   components: {
     GalleriaContent: script$1$1,
-    Portal: script$D
+    Portal: script$C
   },
   directives: {
     focustrap: FocusTrap
@@ -91559,7 +91501,7 @@ const _sfc_main$4 = /* @__PURE__ */ defineComponent({
         class: normalizeClass(["flex items-center", props.class])
       }, [
         _ctx.position === "left" ? (openBlock(), createElementBlock("span", _hoisted_1$3, toDisplayString$1(_ctx.text), 1)) : createCommentVNode("", true),
-        createVNode(unref(script$y), {
+        createVNode(unref(script$x), {
           align: _ctx.align,
           type: _ctx.type,
           layout: _ctx.layout,
@@ -91861,38 +91803,43 @@ const useSidebarTabStore = /* @__PURE__ */ defineStore("sidebarTab", () => {
     registerCoreSidebarTabs
   };
 });
-const useWorkspaceStore = /* @__PURE__ */ defineStore("workspace", {
-  state: /* @__PURE__ */ __name(() => ({
-    spinner: false,
-    shiftDown: false
-  }), "state"),
-  getters: {
-    toast() {
-      return useToastStore();
-    },
-    queueSettings() {
-      return useQueueSettingsStore();
-    },
-    command() {
-      return {
-        execute: useCommandStore().execute
-      };
-    },
-    sidebarTab() {
-      return useSidebarTabStore();
-    }
-  },
-  actions: {
-    registerSidebarTab(tab) {
-      this.sidebarTab.registerSidebarTab(tab);
-    },
-    unregisterSidebarTab(id3) {
-      this.sidebarTab.unregisterSidebarTab(id3);
-    },
-    getSidebarTabs() {
-      return this.sidebarTab.sidebarTabs;
-    }
+const useWorkspaceStore = /* @__PURE__ */ defineStore("workspace", () => {
+  const spinner = ref(false);
+  const shiftDown = ref(false);
+  const toast = computed(() => useToastStore());
+  const queueSettings = computed(() => useQueueSettingsStore());
+  const command = computed(() => ({
+    execute: useCommandStore().execute
+  }));
+  const sidebarTab = computed(() => useSidebarTabStore());
+  const setting = computed(() => ({
+    get: useSettingStore().get,
+    set: useSettingStore().set
+  }));
+  function registerSidebarTab(tab) {
+    sidebarTab.value.registerSidebarTab(tab);
   }
+  __name(registerSidebarTab, "registerSidebarTab");
+  function unregisterSidebarTab(id3) {
+    sidebarTab.value.unregisterSidebarTab(id3);
+  }
+  __name(unregisterSidebarTab, "unregisterSidebarTab");
+  function getSidebarTabs() {
+    return sidebarTab.value.sidebarTabs;
+  }
+  __name(getSidebarTabs, "getSidebarTabs");
+  return {
+    spinner,
+    shiftDown,
+    toast,
+    queueSettings,
+    command,
+    sidebarTab,
+    setting,
+    registerSidebarTab,
+    unregisterSidebarTab,
+    getSidebarTabs
+  };
 });
 var theme$1 = /* @__PURE__ */ __name(function theme34(_ref) {
   var dt2 = _ref.dt;
@@ -94950,7 +94897,7 @@ const router = createRouter({
       children: [
         {
           path: "",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./GraphView-DmeOoKWv.js"), true ? __vite__mapDeps([10,2,11]) : void 0, import.meta.url), "component")
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./GraphView-C4blCugc.js"), true ? __vite__mapDeps([10,2,11]) : void 0, import.meta.url), "component")
         }
       ]
     }
@@ -100744,7 +100691,7 @@ app.use(router).use(PrimeVue, {
   }
 }).use(ConfirmationService).use(ToastService).use(pinia).use(i18n).mount("#vue-app");
 export {
-  vShow as $,
+  script$n as $,
   createBaseVNode as A,
   BaseStyle as B,
   normalizeClass as C,
@@ -100753,169 +100700,172 @@ export {
   useCommandStore as F,
   useDialogStore as G,
   SettingDialogContent as H,
-  useWorkspaceStore as I,
-  onBeforeUnmount as J,
-  useKeybindingStore as K,
+  onBeforeUnmount as I,
+  resolveDynamicComponent as J,
+  useWorkspaceStore as K,
   LGraphGroup as L,
-  Fragment as M,
-  renderList as N,
-  resolveDynamicComponent as O,
+  useKeybindingStore as M,
+  Fragment as N,
+  renderList as O,
   pushScopeId as P,
   popScopeId as Q,
   script$U as R,
   SettingDialogHeader as S,
   Teleport as T,
   getWidth as U,
-  getHeight as V,
-  getOuterWidth as W,
-  getOuterHeight as X,
-  getVNodeProp as Y,
-  isArray$3 as Z,
+  findSingle as V,
+  getOuterHeight as W,
+  getOffset as X,
+  getOuterWidth as Y,
+  getHeight as Z,
   _export_sfc as _,
   useTitleEditorStore as a,
-  useExecutionStore as a$,
-  isNotEmpty as a0,
-  UniqueComponentId as a1,
-  ZIndex as a2,
-  resolveFieldData as a3,
-  focus as a4,
-  OverlayEventBus as a5,
-  isEmpty as a6,
-  addStyle as a7,
-  relativePosition as a8,
-  absolutePosition as a9,
-  script$b as aA,
-  SearchFilterChip as aB,
-  watchEffect as aC,
-  toRaw as aD,
-  LinkReleaseTriggerAction as aE,
-  useEventListener as aF,
-  nextTick as aG,
-  markRaw as aH,
-  useModelToNodeStore as aI,
-  usePragmaticDroppable as aJ,
-  ComfyNodeDefImpl as aK,
-  ComfyModelDef as aL,
-  LGraph as aM,
-  LLink as aN,
-  DragAndScale as aO,
-  LGraphCanvas as aP,
-  ContextMenu as aQ,
-  LGraphBadge as aR,
-  script$R as aS,
-  script$q as aT,
-  script$E as aU,
-  normalizeProps as aV,
-  ToastEventBus as aW,
-  setAttribute as aX,
-  TransitionGroup as aY,
-  useToast as aZ,
-  useToastStore as a_,
-  ConnectedOverlayScrollHandler as aa,
-  isTouchDevice as ab,
-  equals as ac,
-  findLastIndex as ad,
-  findSingle as ae,
-  script$N as af,
-  script$L as ag,
-  script$D as ah,
-  script$F as ai,
-  script$M as aj,
-  script$p as ak,
-  Ripple as al,
-  toDisplayString$1 as am,
-  Transition as an,
-  createSlots as ao,
-  createTextVNode as ap,
-  useNodeFrequencyStore as aq,
-  useNodeBookmarkStore as ar,
-  highlightQuery as as,
-  script$s as at,
-  formatNumberWithSuffix as au,
-  NodeSourceType as av,
-  useI18n as aw,
-  useNodeDefStore as ax,
-  NodePreview as ay,
-  NodeSearchFilter as az,
+  DragAndScale as a$,
+  script$m as a0,
+  Ripple as a1,
+  getAttribute as a2,
+  focus as a3,
+  equals as a4,
+  useBottomPanelStore as a5,
+  toDisplayString$1 as a6,
+  script$A as a7,
+  getVNodeProp as a8,
+  isArray$3 as a9,
+  script$r as aA,
+  formatNumberWithSuffix as aB,
+  NodeSourceType as aC,
+  useI18n as aD,
+  useNodeDefStore as aE,
+  NodePreview as aF,
+  NodeSearchFilter as aG,
+  script$b as aH,
+  SearchFilterChip as aI,
+  watchEffect as aJ,
+  toRaw as aK,
+  LinkReleaseTriggerAction as aL,
+  useEventListener as aM,
+  nextTick as aN,
+  getColorPalette as aO,
+  BadgePosition as aP,
+  LGraphBadge as aQ,
+  _ as aR,
+  defaultColorPalette as aS,
+  NodeBadgeMode as aT,
+  markRaw as aU,
+  useModelToNodeStore as aV,
+  usePragmaticDroppable as aW,
+  ComfyNodeDefImpl as aX,
+  ComfyModelDef as aY,
+  LGraph as aZ,
+  LLink as a_,
+  useSidebarTabStore as aa,
+  vShow as ab,
+  isNotEmpty as ac,
+  UniqueComponentId as ad,
+  ZIndex as ae,
+  resolveFieldData as af,
+  OverlayEventBus as ag,
+  isEmpty as ah,
+  addStyle as ai,
+  relativePosition as aj,
+  absolutePosition as ak,
+  ConnectedOverlayScrollHandler as al,
+  isTouchDevice as am,
+  findLastIndex as an,
+  script$N as ao,
+  script$L as ap,
+  script$C as aq,
+  script$E as ar,
+  script$M as as,
+  script$o as at,
+  Transition as au,
+  createSlots as av,
+  createTextVNode as aw,
+  useNodeFrequencyStore as ax,
+  useNodeBookmarkStore as ay,
+  highlightQuery as az,
   useCanvasStore as b,
-  clearSelection as b$,
-  useWorkflowStore as b0,
-  useTitle as b1,
-  withModifiers as b2,
-  script$9 as b3,
-  resolve as b4,
-  script$h as b5,
-  script$w as b6,
-  isPrintableCharacter as b7,
-  guardReactiveProps as b8,
-  useMenuItemStore as b9,
-  applyTextReplacements as bA,
-  NodeBadgeMode as bB,
-  getColorPalette as bC,
-  BadgePosition as bD,
-  _ as bE,
-  defaultColorPalette as bF,
-  addValueControlWidgets as bG,
-  FilterMatchMode as bH,
-  SearchBox as bI,
-  KeybindingImpl as bJ,
-  useExtensionStore as bK,
-  script$t as bL,
-  script$T as bM,
-  script$C as bN,
-  script$G as bO,
-  getFirstFocusableElement as bP,
-  invokeElementMethod as bQ,
-  getAttribute as bR,
-  getNextElementSibling as bS,
-  getPreviousElementSibling as bT,
-  script$m as bU,
-  _default as bV,
-  FilterOperator as bW,
-  FocusTrap as bX,
-  withKeys as bY,
-  getIndex as bZ,
-  isClickable as b_,
-  script$H as ba,
-  nestedPosition as bb,
-  useQueueSettingsStore as bc,
-  storeToRefs as bd,
-  isRef as be,
-  script$u as bf,
-  useQueuePendingTaskCountStore as bg,
-  useLocalStorage as bh,
-  useDraggable as bi,
-  watchDebounced as bj,
-  inject as bk,
-  useElementBounding as bl,
-  script$y as bm,
-  lodashExports as bn,
-  useEventBus as bo,
-  provide as bp,
-  api as bq,
-  i18n as br,
-  useWorkflowBookmarkStore as bs,
-  useSidebarTabStore as bt,
-  ComfyDialog as bu,
-  $el as bv,
-  ComfyApp as bw,
-  DraggableList as bx,
-  KeyComboImpl as by,
-  ComfyWidgets as bz,
+  FocusTrap as b$,
+  LGraphCanvas as b0,
+  ContextMenu as b1,
+  script$R as b2,
+  script$p as b3,
+  script$D as b4,
+  normalizeProps as b5,
+  ToastEventBus as b6,
+  setAttribute as b7,
+  TransitionGroup as b8,
+  useToast as b9,
+  useEventBus as bA,
+  provide as bB,
+  api as bC,
+  i18n as bD,
+  useWorkflowBookmarkStore as bE,
+  ComfyDialog as bF,
+  $el as bG,
+  ComfyApp as bH,
+  DraggableList as bI,
+  KeyComboImpl as bJ,
+  ComfyWidgets as bK,
+  applyTextReplacements as bL,
+  addValueControlWidgets as bM,
+  FilterMatchMode as bN,
+  SearchBox as bO,
+  KeybindingImpl as bP,
+  useExtensionStore as bQ,
+  script$s as bR,
+  script$T as bS,
+  script$B as bT,
+  script$F as bU,
+  getFirstFocusableElement as bV,
+  invokeElementMethod as bW,
+  getNextElementSibling as bX,
+  getPreviousElementSibling as bY,
+  _default as bZ,
+  FilterOperator as b_,
+  useToastStore as ba,
+  useExecutionStore as bb,
+  useWorkflowStore as bc,
+  useTitle as bd,
+  withModifiers as be,
+  script$9 as bf,
+  resolve as bg,
+  script$h as bh,
+  script$v as bi,
+  isPrintableCharacter as bj,
+  guardReactiveProps as bk,
+  useMenuItemStore as bl,
+  script$G as bm,
+  nestedPosition as bn,
+  useQueueSettingsStore as bo,
+  storeToRefs as bp,
+  isRef as bq,
+  script$t as br,
+  useQueuePendingTaskCountStore as bs,
+  useLocalStorage as bt,
+  useDraggable as bu,
+  watchDebounced as bv,
+  inject as bw,
+  useElementBounding as bx,
+  script$x as by,
+  lodashExports as bz,
   app$1 as c,
-  localeComparator as c0,
-  sort as c1,
-  FilterService as c2,
-  findIndexInList as c3,
-  find as c4,
-  exportCSV as c5,
-  getOffset as c6,
-  getHiddenElementOuterWidth as c7,
-  getHiddenElementOuterHeight as c8,
-  reorderArray as c9,
-  getWindowScrollTop as ca,
-  removeClass as cb,
-  addClass as cc,
+  withKeys as c0,
+  getIndex as c1,
+  isClickable as c2,
+  clearSelection as c3,
+  localeComparator as c4,
+  sort as c5,
+  FilterService as c6,
+  findIndexInList as c7,
+  find as c8,
+  exportCSV as c9,
+  getHiddenElementOuterWidth as ca,
+  getHiddenElementOuterHeight as cb,
+  reorderArray as cc,
+  getWindowScrollTop as cd,
+  removeClass as ce,
+  addClass as cf,
   defineComponent as d,
   LGraphNode as e,
   onUnmounted as f,
@@ -100940,4 +100890,4 @@ export {
   withCtx as y,
   unref as z
 };
-//# sourceMappingURL=index-CgU1oKZt.js.map
+//# sourceMappingURL=index-BHayQCxv.js.map
