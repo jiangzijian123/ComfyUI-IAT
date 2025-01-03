@@ -1,6 +1,6 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
-import { ca as ComfyDialog, cb as $el, cc as ComfyApp, h as app, a3 as LiteGraph, bd as LGraphCanvas, cd as useExtensionService, ce as processDynamicPrompt, cf as isElectron, c0 as electronAPI, bR as useDialogService, cg as t, ch as DraggableList, bt as useToastStore, ah as LGraphNode, ci as applyTextReplacements, cj as ComfyWidgets, ck as addValueControlWidgets, a6 as useNodeDefStore, cl as serialise, cm as deserialiseAndCreate, b8 as api, a as useSettingStore, ag as LGraphGroup, ad as nextTick } from "./index-BbhVsmQe.js";
+import { ca as ComfyDialog, cb as $el, cc as ComfyApp, h as app, a3 as LiteGraph, bd as LGraphCanvas, cd as useExtensionService, ce as processDynamicPrompt, cf as isElectron, c0 as electronAPI, bR as useDialogService, cg as t, ch as DraggableList, bt as useToastStore, ah as LGraphNode, ci as applyTextReplacements, cj as ComfyWidgets, ck as addValueControlWidgets, a6 as useNodeDefStore, cl as serialise, cm as deserialiseAndCreate, b8 as api, a as useSettingStore, ag as LGraphGroup, ad as nextTick } from "./index-C4Fk50Nx.js";
 class ClipspaceDialog extends ComfyDialog {
   static {
     __name(this, "ClipspaceDialog");
@@ -52403,11 +52403,11 @@ app.registerExtension({
         if (!this.properties) {
           this.properties = { text: "" };
         }
-        ComfyWidgets.MARKDOWN(
+        ComfyWidgets.STRING(
           // Should we extends LGraphNode?  Yesss
           this,
           "",
-          ["", { default: this.properties.text }],
+          ["", { default: this.properties.text, multiline: true }],
           app
         );
         this.serialize_widgets = true;
@@ -52423,6 +52423,31 @@ app.registerExtension({
       })
     );
     NoteNode.category = "utils";
+    class MarkdownNoteNode extends LGraphNode {
+      static {
+        __name(this, "MarkdownNoteNode");
+      }
+      static title = "Markdown Note";
+      color = LGraphCanvas.node_colors.yellow.color;
+      bgcolor = LGraphCanvas.node_colors.yellow.bgcolor;
+      groupcolor = LGraphCanvas.node_colors.yellow.groupcolor;
+      constructor(title) {
+        super(title);
+        if (!this.properties) {
+          this.properties = { text: "" };
+        }
+        ComfyWidgets.MARKDOWN(
+          this,
+          "",
+          ["", { default: this.properties.text }],
+          app
+        );
+        this.serialize_widgets = true;
+        this.isVirtualNode = true;
+      }
+    }
+    LiteGraph.registerNodeType("MarkdownNote", MarkdownNoteNode);
+    MarkdownNoteNode.category = "utils";
   }
 });
 app.registerExtension({
@@ -53186,4 +53211,4 @@ app.registerExtension({
     });
   }
 });
-//# sourceMappingURL=index-CCg06AEp.js.map
+//# sourceMappingURL=index-5Sv744Dr.js.map
