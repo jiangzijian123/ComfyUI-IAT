@@ -1,6 +1,6 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
-import { ca as ComfyDialog, cb as $el, cc as ComfyApp, h as app, a3 as LiteGraph, bd as LGraphCanvas, cd as useExtensionService, ce as processDynamicPrompt, cf as isElectron, c0 as electronAPI, bR as useDialogService, cg as t, ch as DraggableList, bt as useToastStore, ah as LGraphNode, ci as applyTextReplacements, cj as ComfyWidgets, ck as addValueControlWidgets, a6 as useNodeDefStore, cl as serialise, cm as deserialiseAndCreate, b8 as api, a as useSettingStore, ag as LGraphGroup, ad as nextTick } from "./index-DjNHn37O.js";
+import { ci as ComfyDialog, cj as $el, ck as ComfyApp, h as app, a5 as LiteGraph, bl as LGraphCanvas, cl as useExtensionService, cm as processDynamicPrompt, bT as isElectron, bV as electronAPI, bW as useDialogService, cn as t, co as DraggableList, bA as useToastStore, aj as LGraphNode, cp as applyTextReplacements, cq as ComfyWidgets, cr as addValueControlWidgets, a8 as useNodeDefStore, cs as serialise, ct as deserialiseAndCreate, bh as api, a as useSettingStore, ai as LGraphGroup, af as nextTick, bO as lodashExports, bg as setStorageValue, bb as getStorageValue } from "./index-QvfM__ze.js";
 class ClipspaceDialog extends ComfyDialog {
   static {
     __name(this, "ClipspaceDialog");
@@ -441,10 +441,24 @@ app.registerExtension({
       {
         id: "Comfy-Desktop.SendStatistics",
         category: ["Comfy-Desktop", "General", "Send Statistics"],
-        name: "Send anonymous crash reports",
+        name: "Send anonymous usage metrics",
         type: "boolean",
         defaultValue: true,
         onChange: onChangeRestartApp
+      },
+      {
+        id: "Comfy-Desktop.WindowStyle",
+        category: ["Comfy-Desktop", "General", "Window Style"],
+        name: "Window Style",
+        tooltip: "Choose custom option to hide the system title bar",
+        type: "combo",
+        experimental: true,
+        defaultValue: "default",
+        options: ["default", "custom"],
+        onChange: /* @__PURE__ */ __name((newValue, oldValue) => {
+          electronAPI$1.Config.setWindowStyle(newValue);
+          onChangeRestartApp(newValue, oldValue);
+        }, "onChange")
       }
     ],
     commands: [
@@ -2968,10 +2982,10 @@ function manageGroupNodes(type) {
   new ManageGroupDialog(app).show(type);
 }
 __name(manageGroupNodes, "manageGroupNodes");
-const id$2 = "Comfy.GroupNode";
+const id$1 = "Comfy.GroupNode";
 let globalDefs;
 const ext = {
-  name: id$2,
+  name: id$1,
   commands: [
     {
       id: "Comfy.GroupNode.ConvertSelectedNodesToGroupNode",
@@ -3232,39 +3246,6 @@ app.registerExtension({
       }
       return options;
     };
-  }
-});
-const id$1 = "Comfy.InvertMenuScrolling";
-app.registerExtension({
-  name: id$1,
-  init() {
-    const ctxMenu = LiteGraph.ContextMenu;
-    const replace = /* @__PURE__ */ __name(() => {
-      LiteGraph.ContextMenu = function(values, options) {
-        options = options || {};
-        if (options.scroll_speed) {
-          options.scroll_speed *= -1;
-        } else {
-          options.scroll_speed = -0.1;
-        }
-        return ctxMenu.call(this, values, options);
-      };
-      LiteGraph.ContextMenu.prototype = ctxMenu.prototype;
-    }, "replace");
-    app.ui.settings.addSetting({
-      id: id$1,
-      category: ["LiteGraph", "Menu", "InvertMenuScrolling"],
-      name: "Invert Context Menu Scrolling",
-      type: "boolean",
-      defaultValue: false,
-      onChange(value) {
-        if (value) {
-          replace();
-        } else {
-          LiteGraph.ContextMenu = ctxMenu;
-        }
-      }
-    });
   }
 });
 /**
@@ -36361,6 +36342,229 @@ function interceptControlUp(event) {
   }
 }
 __name(interceptControlUp, "interceptControlUp");
+class ViewHelper extends Object3D {
+  static {
+    __name(this, "ViewHelper");
+  }
+  constructor(camera, domElement) {
+    super();
+    this.isViewHelper = true;
+    this.animating = false;
+    this.center = new Vector3();
+    const color1 = new Color("#ff4466");
+    const color2 = new Color("#88ff44");
+    const color3 = new Color("#4488ff");
+    const color4 = new Color("#000000");
+    const options = {};
+    const interactiveObjects = [];
+    const raycaster = new Raycaster();
+    const mouse = new Vector2();
+    const dummy = new Object3D();
+    const orthoCamera = new OrthographicCamera(-2, 2, 2, -2, 0, 4);
+    orthoCamera.position.set(0, 0, 2);
+    const geometry = new CylinderGeometry(0.04, 0.04, 0.8, 5).rotateZ(-Math.PI / 2).translate(0.4, 0, 0);
+    const xAxis = new Mesh(geometry, getAxisMaterial(color1));
+    const yAxis = new Mesh(geometry, getAxisMaterial(color2));
+    const zAxis = new Mesh(geometry, getAxisMaterial(color3));
+    yAxis.rotation.z = Math.PI / 2;
+    zAxis.rotation.y = -Math.PI / 2;
+    this.add(xAxis);
+    this.add(zAxis);
+    this.add(yAxis);
+    const spriteMaterial1 = getSpriteMaterial(color1);
+    const spriteMaterial2 = getSpriteMaterial(color2);
+    const spriteMaterial3 = getSpriteMaterial(color3);
+    const spriteMaterial4 = getSpriteMaterial(color4);
+    const posXAxisHelper = new Sprite(spriteMaterial1);
+    const posYAxisHelper = new Sprite(spriteMaterial2);
+    const posZAxisHelper = new Sprite(spriteMaterial3);
+    const negXAxisHelper = new Sprite(spriteMaterial4);
+    const negYAxisHelper = new Sprite(spriteMaterial4);
+    const negZAxisHelper = new Sprite(spriteMaterial4);
+    posXAxisHelper.position.x = 1;
+    posYAxisHelper.position.y = 1;
+    posZAxisHelper.position.z = 1;
+    negXAxisHelper.position.x = -1;
+    negYAxisHelper.position.y = -1;
+    negZAxisHelper.position.z = -1;
+    negXAxisHelper.material.opacity = 0.2;
+    negYAxisHelper.material.opacity = 0.2;
+    negZAxisHelper.material.opacity = 0.2;
+    posXAxisHelper.userData.type = "posX";
+    posYAxisHelper.userData.type = "posY";
+    posZAxisHelper.userData.type = "posZ";
+    negXAxisHelper.userData.type = "negX";
+    negYAxisHelper.userData.type = "negY";
+    negZAxisHelper.userData.type = "negZ";
+    this.add(posXAxisHelper);
+    this.add(posYAxisHelper);
+    this.add(posZAxisHelper);
+    this.add(negXAxisHelper);
+    this.add(negYAxisHelper);
+    this.add(negZAxisHelper);
+    interactiveObjects.push(posXAxisHelper);
+    interactiveObjects.push(posYAxisHelper);
+    interactiveObjects.push(posZAxisHelper);
+    interactiveObjects.push(negXAxisHelper);
+    interactiveObjects.push(negYAxisHelper);
+    interactiveObjects.push(negZAxisHelper);
+    const point = new Vector3();
+    const dim = 128;
+    const turnRate = 2 * Math.PI;
+    this.render = function(renderer) {
+      this.quaternion.copy(camera.quaternion).invert();
+      this.updateMatrixWorld();
+      point.set(0, 0, 1);
+      point.applyQuaternion(camera.quaternion);
+      const x = domElement.offsetWidth - dim;
+      renderer.clearDepth();
+      renderer.getViewport(viewport);
+      renderer.setViewport(x, 0, dim, dim);
+      renderer.render(this, orthoCamera);
+      renderer.setViewport(viewport.x, viewport.y, viewport.z, viewport.w);
+    };
+    const targetPosition = new Vector3();
+    const targetQuaternion = new Quaternion();
+    const q1 = new Quaternion();
+    const q2 = new Quaternion();
+    const viewport = new Vector4();
+    let radius = 0;
+    this.handleClick = function(event) {
+      if (this.animating === true) return false;
+      const rect = domElement.getBoundingClientRect();
+      const offsetX = rect.left + (domElement.offsetWidth - dim);
+      const offsetY = rect.top + (domElement.offsetHeight - dim);
+      mouse.x = (event.clientX - offsetX) / (rect.right - offsetX) * 2 - 1;
+      mouse.y = -((event.clientY - offsetY) / (rect.bottom - offsetY)) * 2 + 1;
+      raycaster.setFromCamera(mouse, orthoCamera);
+      const intersects2 = raycaster.intersectObjects(interactiveObjects);
+      if (intersects2.length > 0) {
+        const intersection = intersects2[0];
+        const object = intersection.object;
+        prepareAnimationData(object, this.center);
+        this.animating = true;
+        return true;
+      } else {
+        return false;
+      }
+    };
+    this.setLabels = function(labelX, labelY, labelZ) {
+      options.labelX = labelX;
+      options.labelY = labelY;
+      options.labelZ = labelZ;
+      updateLabels();
+    };
+    this.setLabelStyle = function(font, color, radius2) {
+      options.font = font;
+      options.color = color;
+      options.radius = radius2;
+      updateLabels();
+    };
+    this.update = function(delta) {
+      const step = delta * turnRate;
+      q1.rotateTowards(q2, step);
+      camera.position.set(0, 0, 1).applyQuaternion(q1).multiplyScalar(radius).add(this.center);
+      camera.quaternion.rotateTowards(targetQuaternion, step);
+      if (q1.angleTo(q2) === 0) {
+        this.animating = false;
+      }
+    };
+    this.dispose = function() {
+      geometry.dispose();
+      xAxis.material.dispose();
+      yAxis.material.dispose();
+      zAxis.material.dispose();
+      posXAxisHelper.material.map.dispose();
+      posYAxisHelper.material.map.dispose();
+      posZAxisHelper.material.map.dispose();
+      negXAxisHelper.material.map.dispose();
+      negYAxisHelper.material.map.dispose();
+      negZAxisHelper.material.map.dispose();
+      posXAxisHelper.material.dispose();
+      posYAxisHelper.material.dispose();
+      posZAxisHelper.material.dispose();
+      negXAxisHelper.material.dispose();
+      negYAxisHelper.material.dispose();
+      negZAxisHelper.material.dispose();
+    };
+    function prepareAnimationData(object, focusPoint) {
+      switch (object.userData.type) {
+        case "posX":
+          targetPosition.set(1, 0, 0);
+          targetQuaternion.setFromEuler(new Euler(0, Math.PI * 0.5, 0));
+          break;
+        case "posY":
+          targetPosition.set(0, 1, 0);
+          targetQuaternion.setFromEuler(new Euler(-Math.PI * 0.5, 0, 0));
+          break;
+        case "posZ":
+          targetPosition.set(0, 0, 1);
+          targetQuaternion.setFromEuler(new Euler());
+          break;
+        case "negX":
+          targetPosition.set(-1, 0, 0);
+          targetQuaternion.setFromEuler(new Euler(0, -Math.PI * 0.5, 0));
+          break;
+        case "negY":
+          targetPosition.set(0, -1, 0);
+          targetQuaternion.setFromEuler(new Euler(Math.PI * 0.5, 0, 0));
+          break;
+        case "negZ":
+          targetPosition.set(0, 0, -1);
+          targetQuaternion.setFromEuler(new Euler(0, Math.PI, 0));
+          break;
+        default:
+          console.error("ViewHelper: Invalid axis.");
+      }
+      radius = camera.position.distanceTo(focusPoint);
+      targetPosition.multiplyScalar(radius).add(focusPoint);
+      dummy.position.copy(focusPoint);
+      dummy.lookAt(camera.position);
+      q1.copy(dummy.quaternion);
+      dummy.lookAt(targetPosition);
+      q2.copy(dummy.quaternion);
+    }
+    __name(prepareAnimationData, "prepareAnimationData");
+    function getAxisMaterial(color) {
+      return new MeshBasicMaterial({ color, toneMapped: false });
+    }
+    __name(getAxisMaterial, "getAxisMaterial");
+    function getSpriteMaterial(color, text) {
+      const { font = "24px Arial", color: labelColor = "#000000", radius: radius2 = 14 } = options;
+      const canvas = document.createElement("canvas");
+      canvas.width = 64;
+      canvas.height = 64;
+      const context = canvas.getContext("2d");
+      context.beginPath();
+      context.arc(32, 32, radius2, 0, 2 * Math.PI);
+      context.closePath();
+      context.fillStyle = color.getStyle();
+      context.fill();
+      if (text) {
+        context.font = font;
+        context.textAlign = "center";
+        context.fillStyle = labelColor;
+        context.fillText(text, 32, 41);
+      }
+      const texture = new CanvasTexture(canvas);
+      texture.colorSpace = SRGBColorSpace;
+      return new SpriteMaterial({ map: texture, toneMapped: false });
+    }
+    __name(getSpriteMaterial, "getSpriteMaterial");
+    function updateLabels() {
+      posXAxisHelper.material.map.dispose();
+      posYAxisHelper.material.map.dispose();
+      posZAxisHelper.material.map.dispose();
+      posXAxisHelper.material.dispose();
+      posYAxisHelper.material.dispose();
+      posZAxisHelper.material.dispose();
+      posXAxisHelper.material = getSpriteMaterial(color1, options.labelX);
+      posYAxisHelper.material = getSpriteMaterial(color2, options.labelY);
+      posZAxisHelper.material = getSpriteMaterial(color3, options.labelZ);
+    }
+    __name(updateLabels, "updateLabels");
+  }
+}
 /*!
 fflate - fast JavaScript compression/decompression
 <https://101arrowz.github.io/fflate>
@@ -45833,7 +46037,6 @@ class Load3d {
   stlLoader;
   currentModel = null;
   originalModel = null;
-  node;
   animationFrameId = null;
   gridHelper;
   lights = [];
@@ -45846,6 +46049,10 @@ class Load3d {
   materialMode = "original";
   currentUpDirection = "original";
   originalRotation = null;
+  viewHelper;
+  viewHelperContainer;
+  cameraSwitcherContainer;
+  gridSwitcherContainer;
   constructor(container) {
     this.scene = new Scene();
     this.perspectiveCamera = new PerspectiveCamera(75, 1, 0.1, 1e3);
@@ -45866,6 +46073,7 @@ class Load3d {
     this.renderer = new WebGLRenderer({ alpha: true, antialias: true });
     this.renderer.setSize(300, 300);
     this.renderer.setClearColor(2631720);
+    this.renderer.autoClear = false;
     const rendererDomElement = this.renderer.domElement;
     container.appendChild(rendererDomElement);
     this.controls = new OrbitControls(
@@ -45901,9 +46109,112 @@ class Load3d {
       side: DoubleSide
     });
     this.standardMaterial = this.createSTLMaterial();
-    this.animate();
+    this.createViewHelper(container);
+    this.createGridSwitcher(container);
+    this.createCameraSwitcher(container);
     this.handleResize();
     this.startAnimation();
+  }
+  createViewHelper(container) {
+    this.viewHelperContainer = document.createElement("div");
+    this.viewHelperContainer.style.position = "absolute";
+    this.viewHelperContainer.style.bottom = "0";
+    this.viewHelperContainer.style.left = "0";
+    this.viewHelperContainer.style.width = "128px";
+    this.viewHelperContainer.style.height = "128px";
+    this.viewHelperContainer.addEventListener("pointerup", (event) => {
+      event.stopPropagation();
+      this.viewHelper.handleClick(event);
+    });
+    this.viewHelperContainer.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+    });
+    container.appendChild(this.viewHelperContainer);
+    this.viewHelper = new ViewHelper(
+      this.activeCamera,
+      this.viewHelperContainer
+    );
+    this.viewHelper.center = this.controls.target;
+  }
+  createGridSwitcher(container) {
+    this.gridSwitcherContainer = document.createElement("div");
+    this.gridSwitcherContainer.style.position = "absolute";
+    this.gridSwitcherContainer.style.top = "28px";
+    this.gridSwitcherContainer.style.left = "3px";
+    this.gridSwitcherContainer.style.width = "20px";
+    this.gridSwitcherContainer.style.height = "20px";
+    this.gridSwitcherContainer.style.cursor = "pointer";
+    this.gridSwitcherContainer.style.alignItems = "center";
+    this.gridSwitcherContainer.style.justifyContent = "center";
+    this.gridSwitcherContainer.style.transition = "background-color 0.2s";
+    const gridIcon = document.createElement("div");
+    gridIcon.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+      <path d="M3 3h18v18H3z"/>
+      <path d="M3 9h18"/>
+      <path d="M3 15h18"/>
+      <path d="M9 3v18"/>
+      <path d="M15 3v18"/>
+    </svg>
+  `;
+    const updateButtonState = /* @__PURE__ */ __name(() => {
+      if (this.gridHelper.visible) {
+        this.gridSwitcherContainer.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
+      } else {
+        this.gridSwitcherContainer.style.backgroundColor = "transparent";
+      }
+    }, "updateButtonState");
+    updateButtonState();
+    this.gridSwitcherContainer.addEventListener("mouseenter", () => {
+      if (!this.gridHelper.visible) {
+        this.gridSwitcherContainer.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+      }
+    });
+    this.gridSwitcherContainer.addEventListener("mouseleave", () => {
+      if (!this.gridHelper.visible) {
+        this.gridSwitcherContainer.style.backgroundColor = "transparent";
+      }
+    });
+    this.gridSwitcherContainer.title = "Toggle Grid";
+    this.gridSwitcherContainer.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.toggleGrid(!this.gridHelper.visible);
+      updateButtonState();
+    });
+    this.gridSwitcherContainer.appendChild(gridIcon);
+    container.appendChild(this.gridSwitcherContainer);
+  }
+  createCameraSwitcher(container) {
+    this.cameraSwitcherContainer = document.createElement("div");
+    this.cameraSwitcherContainer.style.position = "absolute";
+    this.cameraSwitcherContainer.style.top = "3px";
+    this.cameraSwitcherContainer.style.left = "3px";
+    this.cameraSwitcherContainer.style.width = "20px";
+    this.cameraSwitcherContainer.style.height = "20px";
+    this.cameraSwitcherContainer.style.cursor = "pointer";
+    this.cameraSwitcherContainer.style.alignItems = "center";
+    this.cameraSwitcherContainer.style.justifyContent = "center";
+    const cameraIcon = document.createElement("div");
+    cameraIcon.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+        <path d="M18 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/>
+        <path d="m12 12 4-2.4"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    `;
+    this.cameraSwitcherContainer.addEventListener("mouseenter", () => {
+      this.cameraSwitcherContainer.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+    });
+    this.cameraSwitcherContainer.addEventListener("mouseleave", () => {
+      this.cameraSwitcherContainer.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
+    });
+    this.cameraSwitcherContainer.title = "Switch Camera (Perspective/Orthographic)";
+    this.cameraSwitcherContainer.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.toggleCamera();
+    });
+    this.cameraSwitcherContainer.appendChild(cameraIcon);
+    container.appendChild(this.cameraSwitcherContainer);
   }
   setFOV(fov2) {
     if (this.activeCamera === this.perspectiveCamera) {
@@ -46097,6 +46408,12 @@ class Load3d {
     this.controls.object = this.activeCamera;
     this.controls.target.copy(target);
     this.controls.update();
+    this.viewHelper.dispose();
+    this.viewHelper = new ViewHelper(
+      this.activeCamera,
+      this.viewHelperContainer
+    );
+    this.viewHelper.center = this.controls.target;
     this.handleResize();
   }
   getCurrentCameraType() {
@@ -46127,8 +46444,14 @@ class Load3d {
   startAnimation() {
     const animate = /* @__PURE__ */ __name(() => {
       this.animationFrameId = requestAnimationFrame(animate);
+      const delta = this.clock.getDelta();
+      if (this.viewHelper.animating) {
+        this.viewHelper.update(delta);
+      }
+      this.renderer.clear();
       this.controls.update();
       this.renderer.render(this.scene, this.activeCamera);
+      this.viewHelper.render(this.renderer);
     }, "animate");
     animate();
   }
@@ -46193,6 +46516,7 @@ class Load3d {
       cancelAnimationFrame(this.animationFrameId);
     }
     this.controls.dispose();
+    this.viewHelper.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();
     this.scene.clear();
@@ -46372,9 +46696,11 @@ class Load3d {
           this.orthographicCamera.bottom = -frustumSize / 2;
           this.orthographicCamera.updateProjectionMatrix();
         }
+        this.renderer.clear();
         this.renderer.render(this.scene, this.activeCamera);
         const sceneData = this.renderer.domElement.toDataURL("image/png");
         this.renderer.setClearColor(0, 0);
+        this.renderer.clear();
         this.renderer.render(this.scene, this.activeCamera);
         const maskData = this.renderer.domElement.toDataURL("image/png");
         this.renderer.setClearColor(originalClearColor, originalClearAlpha);
@@ -46394,38 +46720,6 @@ class Load3d {
       flatShading: false,
       side: DoubleSide
     });
-  }
-  setViewPosition(position) {
-    if (!this.currentModel) {
-      return;
-    }
-    const box = new Box3();
-    let center = new Vector3();
-    let size = new Vector3();
-    if (this.currentModel) {
-      box.setFromObject(this.currentModel);
-      box.getCenter(center);
-      box.getSize(size);
-    }
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const distance = maxDim * 2;
-    switch (position) {
-      case "front":
-        this.activeCamera.position.set(0, 0, distance);
-        break;
-      case "top":
-        this.activeCamera.position.set(0, distance, 0);
-        break;
-      case "right":
-        this.activeCamera.position.set(distance, 0, 0);
-        break;
-      case "isometric":
-        this.activeCamera.position.set(distance, distance, distance);
-        break;
-    }
-    this.activeCamera.lookAt(center);
-    this.controls.target.copy(center);
-    this.controls.update();
   }
   setBackgroundColor(color) {
     this.renderer.setClearColor(new Color(color));
@@ -46536,15 +46830,23 @@ class Load3dAnimation extends Load3d {
       }
     });
   }
-  animate = /* @__PURE__ */ __name(() => {
-    requestAnimationFrame(this.animate);
-    if (this.currentAnimation && this.isAnimationPlaying) {
+  startAnimation() {
+    const animate = /* @__PURE__ */ __name(() => {
+      this.animationFrameId = requestAnimationFrame(animate);
       const delta = this.clock.getDelta();
-      this.currentAnimation.update(delta);
-    }
-    this.controls.update();
-    this.renderer.render(this.scene, this.activeCamera);
-  }, "animate");
+      if (this.currentAnimation && this.isAnimationPlaying) {
+        this.currentAnimation.update(delta);
+      }
+      this.controls.update();
+      this.renderer.clear();
+      this.renderer.render(this.scene, this.activeCamera);
+      if (this.viewHelper.animating) {
+        this.viewHelper.update(delta);
+      }
+      this.viewHelper.render(this.renderer);
+    }, "animate");
+    animate();
+  }
 }
 function splitFilePath$1(path) {
   const folder_separator = path.lastIndexOf("/");
@@ -46577,7 +46879,7 @@ const load3dCanvasCSSCLASS = `display: flex;
     width: 100% !important;
     height: 100% !important;`;
 const containerToLoad3D = /* @__PURE__ */ new Map();
-function configureLoad3D(load3d, loadFolder, modelWidget, showGrid, cameraType, view, material, bgColor, lightIntensity, upDirection, fov2, cameraState, postModelUpdateFunc) {
+function configureLoad3D(load3d, loadFolder, modelWidget, material, bgColor, lightIntensity, upDirection, fov2, cameraState, postModelUpdateFunc) {
   const createModelUpdateHandler = /* @__PURE__ */ __name(() => {
     let isFirstLoad = true;
     return async (value) => {
@@ -46611,17 +46913,6 @@ function configureLoad3D(load3d, loadFolder, modelWidget, showGrid, cameraType, 
     onModelWidgetUpdate(modelWidget.value);
   }
   modelWidget.callback = onModelWidgetUpdate;
-  load3d.toggleGrid(showGrid.value);
-  showGrid.callback = (value) => {
-    load3d.toggleGrid(value);
-  };
-  load3d.toggleCamera(cameraType.value);
-  cameraType.callback = (value) => {
-    load3d.toggleCamera(value);
-  };
-  view.callback = (value) => {
-    load3d.setViewPosition(value);
-  };
   material.callback = (value) => {
     load3d.setMaterialMode(value);
   };
@@ -46741,11 +47032,6 @@ app.registerExtension({
     const modelWidget = node.widgets.find(
       (w2) => w2.name === "model_file"
     );
-    const showGrid = node.widgets.find((w2) => w2.name === "show_grid");
-    const cameraType = node.widgets.find(
-      (w2) => w2.name === "camera_type"
-    );
-    const view = node.widgets.find((w2) => w2.name === "view");
     const material = node.widgets.find((w2) => w2.name === "material");
     const bgColor = node.widgets.find((w2) => w2.name === "bg_color");
     const lightIntensity = node.widgets.find(
@@ -46769,9 +47055,6 @@ app.registerExtension({
       load3d,
       "input",
       modelWidget,
-      showGrid,
-      cameraType,
-      view,
       material,
       bgColor,
       lightIntensity,
@@ -46939,11 +47222,6 @@ app.registerExtension({
     const modelWidget = node.widgets.find(
       (w2) => w2.name === "model_file"
     );
-    const showGrid = node.widgets.find((w2) => w2.name === "show_grid");
-    const cameraType = node.widgets.find(
-      (w2) => w2.name === "camera_type"
-    );
-    const view = node.widgets.find((w2) => w2.name === "view");
     const material = node.widgets.find((w2) => w2.name === "material");
     const bgColor = node.widgets.find((w2) => w2.name === "bg_color");
     const lightIntensity = node.widgets.find(
@@ -46976,9 +47254,6 @@ app.registerExtension({
       load3d,
       "input",
       modelWidget,
-      showGrid,
-      cameraType,
-      view,
       material,
       bgColor,
       lightIntensity,
@@ -47001,6 +47276,7 @@ app.registerExtension({
     const h = node.widgets.find((w2) => w2.name === "height");
     sceneWidget.serializeValue = async () => {
       node.properties["Camera Info"] = JSON.stringify(load3d.getCameraState());
+      load3d.toggleAnimation(false);
       const { scene: imageData, mask: maskData } = await load3d.captureScene(
         w.value,
         h.value
@@ -47081,11 +47357,6 @@ app.registerExtension({
     const modelWidget = node.widgets.find(
       (w) => w.name === "model_file"
     );
-    const showGrid = node.widgets.find((w) => w.name === "show_grid");
-    const cameraType = node.widgets.find(
-      (w) => w.name === "camera_type"
-    );
-    const view = node.widgets.find((w) => w.name === "view");
     const material = node.widgets.find((w) => w.name === "material");
     const bgColor = node.widgets.find((w) => w.name === "bg_color");
     const lightIntensity = node.widgets.find(
@@ -47109,9 +47380,6 @@ app.registerExtension({
         load3d,
         "output",
         modelWidget,
-        showGrid,
-        cameraType,
-        view,
         material,
         bgColor,
         lightIntensity,
@@ -48299,15 +48567,15 @@ var styles = `
   }
   #maskEditor_toolPanel {
     height: 100%;
-    width: var(--sidebar-width);
+    width: 4rem;
     z-index: 8888;
     background: var(--comfy-menu-bg);
     display: flex;
     flex-direction: column;
   }
   .maskEditor_toolPanelContainer {
-    width: var(--sidebar-width);
-    height: var(--sidebar-width);
+    width: 4rem;
+    height: 4rem;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -48368,7 +48636,7 @@ var styles = `
     margin-bottom: 5px;
   }
   #maskEditor_pointerZone {
-    width: calc(100% - var(--sidebar-width) - 220px);
+    width: calc(100% - 4rem - 220px);
     height: 100%;
   }
   #maskEditor_uiContainer {
@@ -48740,8 +49008,8 @@ var styles = `
   }
 
   .maskEditor_toolPanelZoomIndicator {
-    width: var(--sidebar-width);
-    height: var(--sidebar-width);
+    width: 4rem;
+    height: 4rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -48800,6 +49068,31 @@ var ColorComparisonMethod = /* @__PURE__ */ ((ColorComparisonMethod2) => {
   ColorComparisonMethod2["LAB"] = "lab";
   return ColorComparisonMethod2;
 })(ColorComparisonMethod || {});
+const saveBrushToCache = lodashExports.debounce(function(key, brush) {
+  try {
+    const brushString = JSON.stringify(brush);
+    setStorageValue(key, brushString);
+  } catch (error) {
+    console.error("Failed to save brush to cache:", error);
+  }
+}, 300);
+function loadBrushFromCache(key) {
+  try {
+    const brushString = getStorageValue(key);
+    if (brushString) {
+      const brush = JSON.parse(brushString);
+      console.log("Loaded brush from cache:", brush);
+      return brush;
+    } else {
+      console.log("No brush found in cache.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Failed to load brush from cache:", error);
+    return null;
+  }
+}
+__name(loadBrushFromCache, "loadBrushFromCache");
 class MaskEditorDialog extends ComfyDialog {
   static {
     __name(this, "MaskEditorDialog");
@@ -49065,7 +49358,7 @@ class MaskEditorDialog extends ComfyDialog {
     }).then((response) => {
       if (!response.ok) {
         console.log("Failed to upload mask:", response);
-        this.uploadMask(filepath, formData, 2);
+        this.uploadMask(filepath, formData, retries - 1);
       }
     }).catch((error) => {
       console.error("Error:", error);
@@ -49664,13 +49957,18 @@ class BrushTool {
     this.brushAdjustmentSpeed = app.extensionManager.setting.get(
       "Comfy.MaskEditor.BrushAdjustmentSpeed"
     );
-    this.brushSettings = {
-      size: 10,
-      opacity: 100,
-      hardness: 1,
-      type: "arc"
-      /* Arc */
-    };
+    const cachedBrushSettings = loadBrushFromCache("maskeditor_brush_settings");
+    if (cachedBrushSettings) {
+      this.brushSettings = cachedBrushSettings;
+    } else {
+      this.brushSettings = {
+        type: "arc",
+        size: 10,
+        opacity: 0.7,
+        hardness: 1,
+        smoothingPrecision: 10
+      };
+    }
     this.maskBlendMode = "black";
   }
   createListeners() {
@@ -49731,6 +50029,10 @@ class BrushTool {
     this.messageBroker.createPullTopic(
       "brushType",
       async () => this.brushSettings.type
+    );
+    this.messageBroker.createPullTopic(
+      "brushSmoothingPrecision",
+      async () => this.brushSettings.smoothingPrecision
     );
     this.messageBroker.createPullTopic(
       "maskBlendMode",
@@ -49840,7 +50142,7 @@ class BrushTool {
       dy = points[i + 1].y - points[i].y;
       totalLength += Math.sqrt(dx * dx + dy * dy);
     }
-    const distanceBetweenPoints = this.brushSettings.size / this.smoothingPrecision * 6;
+    const distanceBetweenPoints = this.brushSettings.size / this.brushSettings.smoothingPrecision * 6;
     const stepNr = Math.ceil(totalLength / distanceBetweenPoints);
     let interpolatedPoints = points;
     if (stepNr > 0) {
@@ -49871,7 +50173,7 @@ class BrushTool {
     const brush_size = await this.messageBroker.pull("brushSize");
     const distance = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
     const steps = Math.ceil(
-      distance / (brush_size / this.smoothingPrecision * 4)
+      distance / (brush_size / this.brushSettings.smoothingPrecision * 4)
     );
     const interpolatedOpacity = 1 / (1 + Math.exp(-6 * (this.brushSettings.opacity - 0.5))) - 1 / (1 + Math.exp(3));
     this.init_shape(compositionOp);
@@ -50123,18 +50425,23 @@ class BrushTool {
   }
   setBrushSize(size) {
     this.brushSettings.size = size;
+    saveBrushToCache("maskeditor_brush_settings", this.brushSettings);
   }
   setBrushOpacity(opacity) {
     this.brushSettings.opacity = opacity;
+    saveBrushToCache("maskeditor_brush_settings", this.brushSettings);
   }
   setBrushHardness(hardness) {
     this.brushSettings.hardness = hardness;
+    saveBrushToCache("maskeditor_brush_settings", this.brushSettings);
   }
   setBrushType(type) {
     this.brushSettings.type = type;
+    saveBrushToCache("maskeditor_brush_settings", this.brushSettings);
   }
   setBrushSmoothingPrecision(precision) {
-    this.smoothingPrecision = precision;
+    this.brushSettings.smoothingPrecision = precision;
+    saveBrushToCache("maskeditor_brush_settings", this.brushSettings);
   }
 }
 class UIManager {
@@ -50340,7 +50647,6 @@ class UIManager {
     const circle_shape = document.createElement("div");
     circle_shape.id = "maskEditor_sidePanelBrushShapeCircle";
     circle_shape.classList.add(shapeColor);
-    circle_shape.style.background = "var(--p-button-text-primary-color)";
     circle_shape.addEventListener("click", () => {
       this.messageBroker.publish(
         "setBrushShape",
@@ -50354,7 +50660,6 @@ class UIManager {
     const square_shape = document.createElement("div");
     square_shape.id = "maskEditor_sidePanelBrushShapeSquare";
     square_shape.classList.add(shapeColor);
-    square_shape.style.background = "";
     square_shape.addEventListener("click", () => {
       this.messageBroker.publish(
         "setBrushShape",
@@ -50365,6 +50670,13 @@ class UIManager {
       square_shape.style.background = "var(--p-button-text-primary-color)";
       circle_shape.style.background = "";
     });
+    if ((await this.messageBroker.pull("brushSettings")).type === "arc") {
+      circle_shape.style.background = "var(--p-button-text-primary-color)";
+      square_shape.style.background = "";
+    } else {
+      circle_shape.style.background = "";
+      square_shape.style.background = "var(--p-button-text-primary-color)";
+    }
     brush_shape_container.appendChild(circle_shape);
     brush_shape_container.appendChild(square_shape);
     brush_shape_outer_container.appendChild(brush_shape_title);
@@ -50374,7 +50686,7 @@ class UIManager {
       1,
       100,
       1,
-      10,
+      (await this.messageBroker.pull("brushSettings")).size,
       (event, value) => {
         this.messageBroker.publish("setBrushSize", parseInt(value));
         this.updateBrushPreview();
@@ -50386,7 +50698,7 @@ class UIManager {
       0,
       1,
       0.01,
-      0.7,
+      (await this.messageBroker.pull("brushSettings")).opacity,
       (event, value) => {
         this.messageBroker.publish("setBrushOpacity", parseFloat(value));
         this.updateBrushPreview();
@@ -50398,7 +50710,7 @@ class UIManager {
       0,
       1,
       0.01,
-      1,
+      (await this.messageBroker.pull("brushSettings")).hardness,
       (event, value) => {
         this.messageBroker.publish("setBrushHardness", parseFloat(value));
         this.updateBrushPreview();
@@ -50410,7 +50722,7 @@ class UIManager {
       1,
       100,
       1,
-      10,
+      (await this.messageBroker.pull("brushSettings")).smoothingPrecision,
       (event, value) => {
         this.messageBroker.publish(
           "setBrushSmoothingPrecision",
@@ -50418,7 +50730,30 @@ class UIManager {
         );
       }
     );
+    const resetBrushSettingsButton = document.createElement("button");
+    resetBrushSettingsButton.id = "resetBrushSettingsButton";
+    resetBrushSettingsButton.innerText = "Reset to Default";
+    resetBrushSettingsButton.addEventListener("click", () => {
+      this.messageBroker.publish(
+        "setBrushShape",
+        "arc"
+        /* Arc */
+      );
+      this.messageBroker.publish("setBrushSize", 10);
+      this.messageBroker.publish("setBrushOpacity", 0.7);
+      this.messageBroker.publish("setBrushHardness", 1);
+      this.messageBroker.publish("setBrushSmoothingPrecision", 10);
+      circle_shape.style.background = "var(--p-button-text-primary-color)";
+      square_shape.style.background = "";
+      thicknesSliderObj.slider.value = "10";
+      opacitySliderObj.slider.value = "0.7";
+      hardnessSliderObj.slider.value = "1";
+      brushSmoothingPrecisionSliderObj.slider.value = "10";
+      this.setBrushBorderRadius();
+      this.updateBrushPreview();
+    });
     brush_settings_container.appendChild(brush_settings_title);
+    brush_settings_container.appendChild(resetBrushSettingsButton);
     brush_settings_container.appendChild(brush_shape_outer_container);
     brush_settings_container.appendChild(thicknesSliderObj.container);
     brush_settings_container.appendChild(opacitySliderObj.container);
@@ -53211,4 +53546,4 @@ app.registerExtension({
     });
   }
 });
-//# sourceMappingURL=index-Bordpmzt.js.map
+//# sourceMappingURL=index-je62U6DH.js.map
