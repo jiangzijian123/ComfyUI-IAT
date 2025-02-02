@@ -1,6 +1,6 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
-import { da as ComfyDialog, db as $el, dc as ComfyApp, h as app, M as LiteGraph, aF as LGraphCanvas, dd as useExtensionService, de as processDynamicPrompt, b4 as isElectron, b5 as electronAPI, b as useWorkflowStore, bu as checkMirrorReachable, b7 as useDialogService, bc as t, df as DraggableList, aS as useToastStore, $ as LGraphNode, dg as applyTextReplacements, dh as ComfyWidgets, di as addValueControlWidgets, P as useNodeDefStore, dj as serialise, dk as deserialiseAndCreate, aH as api, a as useSettingStore, Z as LGraphGroup, W as nextTick, b0 as lodashExports, aK as setStorageValue, aI as getStorageValue } from "./index-CmVtQCAR.js";
+import { da as ComfyDialog, db as $el, dc as ComfyApp, h as app, M as LiteGraph, aF as LGraphCanvas, dd as useExtensionService, de as processDynamicPrompt, b4 as isElectron, b5 as electronAPI, b as useWorkflowStore, bu as checkMirrorReachable, b7 as useDialogService, bc as t, df as DraggableList, aS as useToastStore, $ as LGraphNode, dg as applyTextReplacements, dh as ComfyWidgets, di as addValueControlWidgets, P as useNodeDefStore, dj as serialise, dk as deserialiseAndCreate, aH as api, a as useSettingStore, Z as LGraphGroup, W as nextTick, b0 as lodashExports, aK as setStorageValue, aI as getStorageValue } from "./index-4Hb32CNk.js";
 import { P as PYTHON_MIRROR } from "./uvMirrors-B-HKMf6X.js";
 class ClipspaceDialog extends ComfyDialog {
   static {
@@ -2194,22 +2194,14 @@ class GroupNodeConfig {
     let name = customConfig?.name ?? node.inputs?.find((inp) => inp.name === inputName)?.label ?? inputName;
     let key = name;
     let prefix = "";
-    seenInputs[key] = (seenInputs[key] ?? 0) + 1;
-    if (node.type === "PrimitiveNode" && node.title || seenInputs[name] > 1) {
+    if (node.type === "PrimitiveNode" && node.title || name in seenInputs) {
       prefix = `${node.title ?? node.type} `;
       key = name = `${prefix}${inputName}`;
-      seenInputs[name] = seenInputs[name] ?? 0;
-      let finalName;
-      if (seenInputs[name] > 0) {
-        prefix = `${node.title ?? node.type} `;
-        finalName = `${prefix} ${seenInputs[name] + 1} ${inputName}`;
-      } else {
-        prefix = `${node.title ?? node.type} `;
-        finalName = `${prefix}${inputName}`;
+      if (name in seenInputs) {
+        name = `${prefix}${seenInputs[name]} ${inputName}`;
       }
-      seenInputs[name]++;
-      this.nodeDef.input.required[finalName] = config;
     }
+    seenInputs[key] = (seenInputs[key] ?? 1) + 1;
     if (inputName === "seed" || inputName === "noise_seed") {
       if (!extra) extra = {};
       extra.control_after_generate = `${prefix}control_after_generate`;
@@ -2383,20 +2375,23 @@ class GroupNodeConfig {
       };
       this.nodeDef.output.push(def.output[outputId]);
       this.nodeDef.output_is_list.push(def.output_is_list[outputId]);
-      let label = customConfig?.name ?? // If no custom name, check if the definition provides an output name
-      def.output_name?.[outputId] ?? // If neither exist, fallback to the raw output type (e.g., "FLOAT", "INT")
-      def.output[outputId];
+      let label = customConfig?.name;
       if (!label) {
-        const output = node.outputs.find((o) => o.name);
-        label = output?.label ?? "UnnamedOutput";
+        label = def.output_name?.[outputId] ?? def.output[outputId];
+        const output = node.outputs.find((o) => o.name === label);
+        if (output?.label) {
+          label = output.label;
+        }
       }
       let name = label;
-      const prefix = `${node.title ?? node.type} `;
-      name = `${prefix}${label}`;
-      if (seenOutputs[name]) {
-        name = `${prefix} ${seenOutputs[name] + 1} ${label}`;
+      if (name in seenOutputs) {
+        const prefix = `${node.title ?? node.type} `;
+        name = `${prefix}${label}`;
+        if (name in seenOutputs) {
+          name = `${prefix}${node.index} ${label}`;
+        }
       }
-      seenOutputs[name] = (seenOutputs[name] ?? 0) + 1;
+      seenOutputs[name] = 1;
       this.nodeDef.output_name.push(name);
     }
   }
@@ -53849,4 +53844,4 @@ app.registerExtension({
     });
   }
 });
-//# sourceMappingURL=index-BPn8eYlx.js.map
+//# sourceMappingURL=index-B4tExwG7.js.map
