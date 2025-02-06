@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./GraphView-CUSGEqGS.js","./index-D4CAJ2MK.js","./index-D6zf5KAf.js","./keybindingService-BTNdTpfl.js","./serverConfigStore-BYbZcbWj.js","./GraphView-CVCdiww1.css","./UserSelectView-DeJDnrF0.js","./BaseViewTemplate-v6omkdXg.js","./ServerStartView-yzYZ8gms.js","./ServerStartView-CJiwVDQY.css","./InstallView-DTDlVr0Z.js","./index-hkkV7N7e.js","./uvMirrors-B-HKMf6X.js","./InstallView-DbJ2cGfL.css","./WelcomeView-DkwLdayn.js","./WelcomeView-Brz3-luE.css","./NotSupportedView-PDDrAb9U.js","./NotSupportedView-RFx6eCkN.css","./DownloadGitView-3STu4yxt.js","./ManualConfigurationView-DueOvLuK.js","./ManualConfigurationView-CsirlNfV.css","./MetricsConsentView-DTQYUF4Z.js","./DesktopStartView-coDnSXEF.js","./MaintenanceView-B5Gl0Rrl.js","./index-nJubvliG.js","./MaintenanceView-Bj5_Vr6o.css","./KeybindingPanel-C0Nt6GXU.js","./KeybindingPanel-DvrUYZ4S.css","./ExtensionPanel-GE0aOkbr.js","./ServerConfigPanel-DnGhsuUV.js","./index-B4tExwG7.js","./index-BRhY6FpL.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./GraphView-D9ZzDQZV.js","./index-DKIv7atk.js","./index-DXE47DZl.js","./keybindingService-DEgCutrm.js","./serverConfigStore-Kb5DJVFt.js","./GraphView-CVCdiww1.css","./UserSelectView-wxa07xPk.js","./BaseViewTemplate-Cz111_1A.js","./ServerStartView-BpH4TXPO.js","./ServerStartView-CJiwVDQY.css","./InstallView-CVZcZZXJ.js","./index-BNlqgrYT.js","./uvMirrors-B-HKMf6X.js","./InstallView-DbJ2cGfL.css","./WelcomeView-BrXELNIm.js","./WelcomeView-Brz3-luE.css","./NotSupportedView-BUpntA4x.js","./NotSupportedView-RFx6eCkN.css","./DownloadGitView-DVXUne-M.js","./ManualConfigurationView-Cz0_f_T-.js","./ManualConfigurationView-CsirlNfV.css","./MetricsConsentView-B5NlgqrS.js","./DesktopStartView-FKlxS2Lt.js","./MaintenanceView-Df7CHNWW.js","./index-BapOFhAR.js","./MaintenanceView-Bj5_Vr6o.css","./KeybindingPanel-CeHhC2F4.js","./KeybindingPanel-DvrUYZ4S.css","./ExtensionPanel-iPOrhDVM.js","./ServerConfigPanel-B1lI5M9c.js","./index-BYzwFNH3.js","./index-BRhY6FpL.css"])))=>i.map(i=>d[i]);
 var __defProp2 = Object.defineProperty;
 var __name = (target2, value4) => __defProp2(target2, "name", { value: value4, configurable: true });
 (/* @__PURE__ */ __name(function polyfill2() {
@@ -73523,7 +73523,7 @@ const router = createRouter({
         {
           path: "",
           name: "GraphView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./GraphView-CUSGEqGS.js"), true ? __vite__mapDeps([0,1,2,3,4,5]) : void 0, import.meta.url), "component"),
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./GraphView-D9ZzDQZV.js"), true ? __vite__mapDeps([0,1,2,3,4,5]) : void 0, import.meta.url), "component"),
           beforeEnter: /* @__PURE__ */ __name(async (to, from2, next2) => {
             const userStore = useUserStore();
             await userStore.initialize();
@@ -73537,60 +73537,60 @@ const router = createRouter({
         {
           path: "user-select",
           name: "UserSelectView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./UserSelectView-DeJDnrF0.js"), true ? __vite__mapDeps([6,7]) : void 0, import.meta.url), "component")
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./UserSelectView-wxa07xPk.js"), true ? __vite__mapDeps([6,7]) : void 0, import.meta.url), "component")
         },
         {
           path: "server-start",
           name: "ServerStartView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./ServerStartView-yzYZ8gms.js"), true ? __vite__mapDeps([8,7,9]) : void 0, import.meta.url), "component"),
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./ServerStartView-BpH4TXPO.js"), true ? __vite__mapDeps([8,7,9]) : void 0, import.meta.url), "component"),
           beforeEnter: guardElectronAccess
         },
         {
           path: "install",
           name: "InstallView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./InstallView-DTDlVr0Z.js"), true ? __vite__mapDeps([10,11,12,7,13]) : void 0, import.meta.url), "component"),
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./InstallView-CVZcZZXJ.js"), true ? __vite__mapDeps([10,11,12,7,13]) : void 0, import.meta.url), "component"),
           beforeEnter: guardElectronAccess
         },
         {
           path: "welcome",
           name: "WelcomeView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./WelcomeView-DkwLdayn.js"), true ? __vite__mapDeps([14,7,15]) : void 0, import.meta.url), "component"),
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./WelcomeView-BrXELNIm.js"), true ? __vite__mapDeps([14,7,15]) : void 0, import.meta.url), "component"),
           beforeEnter: guardElectronAccess
         },
         {
           path: "not-supported",
           name: "NotSupportedView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./NotSupportedView-PDDrAb9U.js"), true ? __vite__mapDeps([16,7,17]) : void 0, import.meta.url), "component"),
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./NotSupportedView-BUpntA4x.js"), true ? __vite__mapDeps([16,7,17]) : void 0, import.meta.url), "component"),
           beforeEnter: guardElectronAccess
         },
         {
           path: "download-git",
           name: "DownloadGitView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./DownloadGitView-3STu4yxt.js"), true ? __vite__mapDeps([18,7]) : void 0, import.meta.url), "component"),
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./DownloadGitView-DVXUne-M.js"), true ? __vite__mapDeps([18,7]) : void 0, import.meta.url), "component"),
           beforeEnter: guardElectronAccess
         },
         {
           path: "manual-configuration",
           name: "ManualConfigurationView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./ManualConfigurationView-DueOvLuK.js"), true ? __vite__mapDeps([19,7,20]) : void 0, import.meta.url), "component"),
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./ManualConfigurationView-Cz0_f_T-.js"), true ? __vite__mapDeps([19,7,20]) : void 0, import.meta.url), "component"),
           beforeEnter: guardElectronAccess
         },
         {
           path: "/metrics-consent",
           name: "MetricsConsentView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./MetricsConsentView-DTQYUF4Z.js"), true ? __vite__mapDeps([21,7]) : void 0, import.meta.url), "component"),
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./MetricsConsentView-B5NlgqrS.js"), true ? __vite__mapDeps([21,7]) : void 0, import.meta.url), "component"),
           beforeEnter: guardElectronAccess
         },
         {
           path: "desktop-start",
           name: "DesktopStartView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./DesktopStartView-coDnSXEF.js"), true ? __vite__mapDeps([22,7]) : void 0, import.meta.url), "component"),
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./DesktopStartView-FKlxS2Lt.js"), true ? __vite__mapDeps([22,7]) : void 0, import.meta.url), "component"),
           beforeEnter: guardElectronAccess
         },
         {
           path: "maintenance",
           name: "MaintenanceView",
-          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./MaintenanceView-B5Gl0Rrl.js"), true ? __vite__mapDeps([23,1,2,24,11,7,25]) : void 0, import.meta.url), "component"),
+          component: /* @__PURE__ */ __name(() => __vitePreload(() => import("./MaintenanceView-Df7CHNWW.js"), true ? __vite__mapDeps([23,1,2,24,11,7,25]) : void 0, import.meta.url), "component"),
           beforeEnter: guardElectronAccess
         }
       ]
@@ -85608,7 +85608,7 @@ const _sfc_main$$ = /* @__PURE__ */ defineComponent({
 });
 const config$1 = {
   app_title: "ComfyUI",
-  app_version: "1.8.13"
+  app_version: "1.8.14"
 };
 /*!
   * shared v9.13.1
@@ -153413,7 +153413,7 @@ const useSystemStatsStore = /* @__PURE__ */ defineStore("systemStats", () => {
   };
 });
 const useAboutPanelStore = /* @__PURE__ */ defineStore("aboutPanel", () => {
-  const frontendVersion = "1.8.13";
+  const frontendVersion = "1.8.14";
   const extensionStore = useExtensionStore();
   const systemStatsStore = useSystemStatsStore();
   const coreVersion = computed(
@@ -158831,13 +158831,13 @@ const _sfc_main$x = /* @__PURE__ */ defineComponent({
   setup(__props) {
     const props = __props;
     const KeybindingPanel = /* @__PURE__ */ defineAsyncComponent(
-      () => __vitePreload(() => import("./KeybindingPanel-C0Nt6GXU.js"), true ? __vite__mapDeps([26,24,2,3,27]) : void 0, import.meta.url)
+      () => __vitePreload(() => import("./KeybindingPanel-CeHhC2F4.js"), true ? __vite__mapDeps([26,24,2,3,27]) : void 0, import.meta.url)
     );
     const ExtensionPanel = /* @__PURE__ */ defineAsyncComponent(
-      () => __vitePreload(() => import("./ExtensionPanel-GE0aOkbr.js"), true ? __vite__mapDeps([28,24,2]) : void 0, import.meta.url)
+      () => __vitePreload(() => import("./ExtensionPanel-iPOrhDVM.js"), true ? __vite__mapDeps([28,24,2]) : void 0, import.meta.url)
     );
     const ServerConfigPanel = /* @__PURE__ */ defineAsyncComponent(
-      () => __vitePreload(() => import("./ServerConfigPanel-DnGhsuUV.js"), true ? __vite__mapDeps([29,4]) : void 0, import.meta.url)
+      () => __vitePreload(() => import("./ServerConfigPanel-B1lI5M9c.js"), true ? __vite__mapDeps([29,4]) : void 0, import.meta.url)
     );
     const aboutPanelNode = {
       key: "about",
@@ -199422,7 +199422,7 @@ const useExtensionService = /* @__PURE__ */ __name(() => {
       settingStore.get("Comfy.Extension.Disabled")
     );
     const extensions = await api.getExtensions();
-    await __vitePreload(() => import("./index-B4tExwG7.js"), true ? __vite__mapDeps([30,12,31]) : void 0, import.meta.url);
+    await __vitePreload(() => import("./index-BYzwFNH3.js"), true ? __vite__mapDeps([30,12,31]) : void 0, import.meta.url);
     extensionStore.captureCoreExtensions();
     await Promise.all(
       extensions.filter((extension) => !extension.includes("extensions/core")).map(async (ext) => {
@@ -207745,7 +207745,7 @@ class ComfyApp {
       if (e2.target instanceof HTMLTextAreaElement && e2.target.type === "textarea" || e2.target instanceof HTMLInputElement && e2.target.type === "text") {
         return;
       }
-      const isTargetInGraph = e2.target.classList.contains("litegraph") || e2.target.classList.contains("graph-canvas-container");
+      const isTargetInGraph = e2.target.classList.contains("litegraph") || e2.target.classList.contains("graph-canvas-container") || e2.target.id === "graph-canvas";
       if (isTargetInGraph && this.canvas.selected_nodes) {
         this.canvas.copyToClipboard();
         e2.clipboardData.setData("text", " ");
@@ -219745,7 +219745,7 @@ init$3({
   app,
   dsn: "https://e2d0c0bd392ffdce48e856c2a055f437@o4507954455314432.ingest.us.sentry.io/4508621568475136",
   enabled: true,
-  release: "1.8.13",
+  release: "1.8.14",
   integrations: [],
   autoSessionTracking: false,
   defaultIntegrations: false,
@@ -220051,4 +220051,4 @@ export {
   createBlock as y,
   withCtx as z
 };
-//# sourceMappingURL=index-4Hb32CNk.js.map
+//# sourceMappingURL=index-DqqhYDnY.js.map

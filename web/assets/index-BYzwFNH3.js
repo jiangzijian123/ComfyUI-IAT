@@ -1,6 +1,6 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
-import { da as ComfyDialog, db as $el, dc as ComfyApp, h as app, M as LiteGraph, aF as LGraphCanvas, dd as useExtensionService, de as processDynamicPrompt, b4 as isElectron, b5 as electronAPI, b as useWorkflowStore, bu as checkMirrorReachable, b7 as useDialogService, bc as t, df as DraggableList, aS as useToastStore, $ as LGraphNode, dg as applyTextReplacements, dh as ComfyWidgets, di as addValueControlWidgets, P as useNodeDefStore, dj as serialise, dk as deserialiseAndCreate, aH as api, a as useSettingStore, Z as LGraphGroup, W as nextTick, b0 as lodashExports, aK as setStorageValue, aI as getStorageValue } from "./index-4Hb32CNk.js";
+import { da as ComfyDialog, db as $el, dc as ComfyApp, h as app, M as LiteGraph, aF as LGraphCanvas, dd as useExtensionService, de as processDynamicPrompt, b4 as isElectron, b5 as electronAPI, b as useWorkflowStore, bu as checkMirrorReachable, b7 as useDialogService, bc as t, df as DraggableList, aS as useToastStore, $ as LGraphNode, dg as applyTextReplacements, dh as ComfyWidgets, di as addValueControlWidgets, P as useNodeDefStore, dj as serialise, dk as deserialiseAndCreate, aH as api, a as useSettingStore, Z as LGraphGroup, W as nextTick, b0 as lodashExports, aK as setStorageValue, aI as getStorageValue } from "./index-DqqhYDnY.js";
 import { P as PYTHON_MIRROR } from "./uvMirrors-B-HKMf6X.js";
 class ClipspaceDialog extends ComfyDialog {
   static {
@@ -53844,4 +53844,4 @@ app.registerExtension({
     });
   }
 });
-//# sourceMappingURL=index-B4tExwG7.js.map
+//# sourceMappingURL=index-BYzwFNH3.js.map
