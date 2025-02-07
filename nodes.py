@@ -1628,6 +1628,37 @@ class SaveImage:
 
         return { "ui": { "images": results } }
 
+
+class ChooseBestMUSIQ:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "images":("DICT",),
+                "scores": (("*",{})),
+                "mode": (["raw value", "tensor shape"],),
+            },
+        }
+
+    @classmethod
+    def VALIDATE_INPUTS(s, input_types):
+        return True
+
+    RETURN_TYPES = ()
+    FUNCTION = "execute"
+    OUTPUT_NODE = True
+    CATEGORY = "image"
+
+    def execute(self, images, scores, mode):
+        best_idx = np.argmax(scores)
+        text = f'The best MUSIQ is pic {best_idx}, score = {scores[best_idx]} among {str(scores)}'
+        best_img = [images[best_idx]]
+        return {"ui": {"images": best_img,"text":text}}
+
+
 class PreviewImage(SaveImage):
     def __init__(self):
         self.output_dir = folder_paths.get_temp_directory()
@@ -1998,6 +2029,7 @@ NODE_CLASS_MAPPINGS = {
     "ConditioningZeroOut": ConditioningZeroOut,
     "ConditioningSetTimestepRange": ConditioningSetTimestepRange,
     "LoraLoaderModelOnly": LoraLoaderModelOnly,
+    "ChooseBestMUSIQ":ChooseBestMUSIQ,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -2064,6 +2096,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     # _for_testing
     "VAEDecodeTiled": "VAE Decode (Tiled)",
     "VAEEncodeTiled": "VAE Encode (Tiled)",
+    "ChooseBestMUSIQ": "Choose Best MUSIQ",
 }
 
 EXTENSION_WEB_DIRS = {}
