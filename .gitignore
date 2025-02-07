@@ -21,3 +21,4 @@ venv/
 *.log
 web_custom_versions/
 .DS_Store
+musiq/musiq_ckpts/*
