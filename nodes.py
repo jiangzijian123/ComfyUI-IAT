@@ -1660,6 +1660,7 @@ class SaveImageMusiq:
         filename_prefix += self.prefix_append
         full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
         results = list()
+        musiq_scores = list()
         for (batch_number, image) in enumerate(images):
             i = 255. * image.cpu().numpy()
             img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
@@ -1680,9 +1681,16 @@ class SaveImageMusiq:
                 "subfolder": subfolder,
                 "type": self.type
             })
+            if len(results)==len(images) and results[0]["type"] == "output":
+                musiq_scores = get_MUSIQ(results)
+                if musiq_scores and not isinstance(musiq_scores[0],float):
+                    musiq_scores = [o.item() for o in musiq_scores]
             counter += 1
 
-        return { "ui": { "images": results } }
+        text= str(musiq_scores)
+        print(results)
+        return { "ui": { "images": results},'result':(results,musiq_scores)}
+
 
 
 class ChooseBestMUSIQ:
