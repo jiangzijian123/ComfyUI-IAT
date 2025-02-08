@@ -45,6 +45,21 @@ def interrupt_processing(value=True):
     comfy.model_management.interrupt_current_processing(value)
 
 MAX_RESOLUTION=16384
+project_root = "musiq/musiq"
+sys.path.append(project_root)
+from run_predict_image import predict_api #type: ignore
+# predict_api('comfyui_screenshot.png')
+
+def get_MUSIQ(results:list):
+    scores = []
+    for res in results:
+        t = res['type']
+        filename = res['filename']
+        s = predict_api(os.path.join(t,filename))
+        if not isinstance(s,float): s = s.item()
+        scores.append(round(s,4))
+    # print(results,scores,results[np.argmax(scores)])
+    return scores
 
 class CLIPTextEncode(ComfyNodeABC):
     @classmethod
